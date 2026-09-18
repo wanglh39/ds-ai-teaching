@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.python-version
+dist/
+build/
+
+# uv
+uv.lock
+
+# C
+*.o
+*.obj
+*.exe
+*.out
+*.a
+*.so
+*.dll
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 项目临时
+*.tmp
+*.log

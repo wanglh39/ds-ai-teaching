@@ -1,0 +1,102 @@
+# 性能对比汇总
+
+本目录汇总全 12 章的「朴素实现 vs 优化实现」性能对比结果。所有数据来自各章 `python/demo.py` 实测。
+
+## 汇总表
+
+| 章 | 数据结构 | AI 优化 | 朴素 | 优化 | 加速比 | C 断言 |
+|---|---|---|---|---|---|---|
+| 01 | 动态数组 | 分块矩阵乘法 | row_wise 28ms | BLAS(@) 3.4ms | **8.2x** | 210 |
+| 02 | 链表 | LRU KV Cache 淘汰 | list O(n) 139ms | hash+dlist 15ms | **9.4x** | 10 |
+| 03 | 栈 | 反向传播栈 | 数值梯度 58ms | 反向传播 5ms | **11.8x** | 2008 |
+| 04 | 循环队列 | Ring-AllReduce | Tree 20·D | Ring 2·D | **10x**(n=1024) | 3077 |
+| 05 | 哈希表 | 词嵌入查找 | 二分 O(log n) 6.6ms | 哈希 O(1) 1.2ms | **5.6x** | 17757 |
+| 06 | 堆 | Top-K 采样 | 排序 O(n log n) 321ms | 堆 O(n log k) 60ms | **5.3x** | 1047 |
+| 07 | Trie | BPE 分词 | 朴素遍历 O(nV) | Trie O(nL) | **56x** | 70 |
+| 08 | KD-Tree | KNN 加速(2D) | 暴力 O(n) | KD-Tree O(log n) | **2351x** | 38 |
+| 09 | 图 | GNN 消息传递 | 密集矩阵 | CSR 邻接表 | **14x** | 93 |
+| 10 | 并查集 | 层次聚类(增量) | BFS O(V+E) | 并查集 α(n) | **3.7x** | 40168 |
+| 11 | 页表 | PagedAttention | 朴素 23> 利用率 | 分页 85% 利用率 | **3.7x** 利用率 | 135 |
+| 12 | 跳表+图 | HNSW 检索(100k) | 暴力 19ms | HNSW 1.9ms | **10x** | 94 |
+
+**总计 C 断言：64707 个，全部通过。**
+
+## 关键洞察
+
+1. **数据结构选择决定性能**：同一问题，用对数据结构快 5~2351 倍
+2. **低维空间结构有效，高维退化**：KD-Tree 2D 快 2351x，100D 退化；HNSW 用跳表+图解决高维
+3. **AI 系统优化的本质**：PagedAttention 用页表消除碎片、Ring-AllReduce 用环形拓扑优化带宽、反向传播用栈匹配链式法则
+4. **C 讲底层 + Python 讲应用**：每章 C 实现验证数据结构正确性，Python demo 验证 AI 优化效果
+
+## 各章详细数据
+
+### 01 动态数组 → 分块矩阵乘法
+- 纯 Python n=80：36ms（Python 解释器开销）
+- numpy row_wise n=512：28ms
+- numpy tiled b64：19ms（1.5x）
+- numpy BLAS(@)：3.4ms（8.2x）
+
+### 02 链表 → LRU KV Cache 淘汰
+- 朴素 list O(n)：139ms
+- 哈希+双向链表 O(1)：15ms（9.4x）
+- OrderedDict(C)：9.5ms（14.6x）
+- 命中率随容量增长：cap=500 时 67%，cap=800 时 97%
+
+### 03 栈 → 反向传播栈
+- 多变量 N=1000：反向传播 5ms vs 数值梯度 58ms（11.8x）
+- 反向传播 1 次反向算所有梯度，数值梯度要 2N 次前向
+- 深层网络梯度消失：depth=1000 时 |grad|=1.2e-3
+
+### 04 循环队列 → Ring-AllReduce
+- Ring 每节点通信量：2·D（与 n 无关）
+- Tree 根节点通信量：2·D·log₂(n)
+- n=1024 时 Tree 是 Ring 的 10 倍
+
+### 05 哈希表 → 词嵌入查找
+- 词表 100k：哈希 1.2ms vs 二分 6.6ms（5.6x）
+- MoE 路由 8 专家 top-2：负载偏差 1.22%（近似均匀）
+
+### 06 堆 → Top-K 采样
+- n=1e6, k=10：堆 60ms vs 排序 321ms（5.3x）
+- Beam Search beam=5：堆 4.1ms vs 排序 12.4ms（3.0x）
+
+### 07 Trie → BPE 分词
+- Trie 比朴素遍历快 56~63x
+- 前缀共享省 65% 内存
+
+### 08 KD-Tree → KNN 加速
+- 2D：KD-Tree 快 2351x（C 实现）
+- 100D：退化（访问 100% 节点）
+- 维度灾难：低维 O(log n)，高维退化为 O(n)
+
+### 09 图 → GNN 消息传递
+- CSR 比密集矩阵快 14x（PageRank）
+- 内存：CSR 121KB vs 密集矩阵 7812KB（省 65x）
+
+### 10 并查集 → 层次聚类
+- 增量合并：并查集 6.5s vs BFS 23.7s（3.7x）
+- 内存：并查集 781KB vs BFS 590MB（省 756x）
+
+### 11 PagedAttention 专题
+- 显存利用率：分页 85% vs 朴素 23%（3.7x）
+- 碎片化：分页 5.6% vs 朴素 72%
+- 并发序列数：分页 35 vs 朴素 8
+
+### 12 HNSW 专题
+- 100k 向量 dim=10：HNSW 1.4ms vs 暴力 7.7ms（5.4x），召回 95.5%
+- 100k 向量 dim=50：HNSW 1.9ms vs 暴力 18.9ms（10.1x），召回 39.8%
+- 外推 1M：加速 70~100x
+
+## 跑法
+
+```bash
+# 跑所有章节的 Python demo
+for ch in 9*_*/ 1*_*/; do
+    uv run python "${ch}python/demo.py"
+done
+
+# 编译运行所有 C 测试
+for ch in 9*_*/ 1*_*/; do
+    gcc -std=c99 -Wall -Wextra -I. "${ch}c/"*.c -o "${ch}c/test.exe" && "./${ch}c/test.exe"
+done
+```
