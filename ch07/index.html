@@ -1,0 +1,2749 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="从底层实现到生产级应用——数据结构在 AI 系统优化与应用工程中的真实作用">
+      
+      
+        <meta name="author" content="wanglh39">
+      
+      
+        <link rel="canonical" href="https://wanglh39.github.io/ds-ai-teaching/ch07/">
+      
+      
+        <link rel="prev" href="../ch06/">
+      
+      
+        <link rel="next" href="../ch08/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>07 Trie - 数据结构 × AI 优化</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+SC:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans SC";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#07-trie" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href=".." title="数据结构 × AI 优化" class="md-header__button md-logo" aria-label="数据结构 × AI 优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            数据结构 × AI 优化
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              07 Trie
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换至暗色模式"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换至暗色模式" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换至亮色模式"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换至亮色模式" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/wanglh39/ds-ai-teaching" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wanglh39/ds-ai-teaching
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  首页
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../intro/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  项目介绍
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../ch01/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  视角 A·系统优化
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../ch13/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  视角 B·应用工程
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../benchmarks/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  性能汇总
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="数据结构 × AI 优化" class="md-nav__button md-logo" aria-label="数据结构 × AI 优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    数据结构 × AI 优化
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/wanglh39/ds-ai-teaching" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wanglh39/ds-ai-teaching
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    首页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    项目介绍
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    项目介绍
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    设计思路
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../map/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    章节映射
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dual_view/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    双视角说明
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cross_index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    交叉索引
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    视角 A·系统优化
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    视角 A·系统优化
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 动态数组
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch02/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 链表
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch03/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 栈
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch04/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 循环队列
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch05/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05 哈希表
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch06/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 堆
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    07 Trie
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    07 Trie
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要回答的问题
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        状态
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原理
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch08/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    08 KD-Tree
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch09/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    09 图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch10/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10 并查集
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch11/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11 页表/分块内存
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch12/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12 跳表+图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    视角 B·应用工程
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    视角 B·应用工程
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch13/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13 多智能体编排
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch14/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    14 任务调度与批处理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch15/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    15 上下文工程与记忆
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch16/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    16 RAG 与知识检索
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch17/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    17 数据管道与流式处理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch18/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    18 模型部署与推理服务
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch19/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    19 状态机与工作流
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch20/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    20 模型压缩
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    性能汇总
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要回答的问题
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        状态
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原理
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="07-trie">第 07 章 · Trie<a class="headerlink" href="#07-trie" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>数据结构：Trie（前缀树）
+AI 优化：BPE 分词（最长前缀匹配）</p>
+</blockquote>
+<h2 id="_1">本章要回答的问题<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>BPE 分词为什么用 Trie 而不是哈希表？</li>
+<li>Trie 怎么实现最长前缀匹配？</li>
+<li>前缀共享省了多少内存？</li>
+</ul>
+<h2 id="_2">目录<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>07_trie/
+├── c/                   # Trie 的 C 实现
+├── python/              # BPE 分词 demo
+├── docs/
+│   ├── principle.md
+│   └── ai_application.md
+└── figures/
+</code></pre></div>
+<h2 id="_3">状态<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p>🚧 待填充</p>
+<hr />
+<h2 id="_4">原理<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<h1 id="trie">Trie（前缀树 / 字典树）原理<a class="headerlink" href="#trie" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>本文档讲清「Trie 是什么、前缀共享怎么省内存、插入 / 查找 / 前缀检查 / 最长前缀匹配、与哈希表对比、C 实现逐行讲解、复杂度」。AI 应用（BPE 分词）见 <code>ai_application.md</code>。</p>
+</blockquote>
+<h2 id="1-trie">1. Trie 的定义<a class="headerlink" href="#1-trie" title="Permanent link">&para;</a></h2>
+<p><strong>Trie</strong>（读作 "try"），又称<strong>前缀树</strong>或<strong>字典树</strong>，是一种用于高效存储和查找<strong>字符串集合</strong>的树形结构。它的核心思想是：<strong>共享公共前缀</strong>。</p>
+<div class="highlight"><pre><span></span><code>词表 = { "a", "app", "apple", "application", "ban", "banana" }
+
+Trie 结构:
+            (root)
+           /      \
+          a        b
+          |        |
+          *an      an
+         /  \      |
+       app  appl  *ication... 
+        |    |
+        *   ication
+       apple   |
+        |      *
+        *
+</code></pre></div>
+<p>更精确的画法（<code>*</code> 表示该节点是一个完整词的结尾）：</p>
+<div class="highlight"><pre><span></span><code>                 root
+                /    \
+               a      b
+               |      |
+               *      an
+              / \      |
+            pp  ppl   *
+            |    |
+            *   ication
+           / \    |
+         le   *   *
+          |
+          *
+</code></pre></div>
+<p>关键观察：
+- <code>"app"</code>、<code>"apple"</code>、<code>"application"</code> 共享前缀 <code>"app"</code>，这条路径在树里<strong>只存一次</strong>
+- 每个节点不代表一个完整词，而是代表<strong>从根到该节点路径上的字符串</strong>
+- <code>is_end</code> 标志标记「从根到这个节点的路径是一个完整词」，区分 <code>"app"</code>（词）和 <code>"appl"</code>（不是词，只是前缀）</p>
+<table>
+<thead>
+<tr>
+<th>数据结构</th>
+<th>精确查找</th>
+<th>前缀检查</th>
+<th>最长前缀匹配</th>
+<th>空间</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>哈希表</td>
+<td>$O(L)$</td>
+<td>$O(L)$（遍历所有词）</td>
+<td>$O(V \cdot L)$</td>
+<td>$O(\text{总字符数})$</td>
+</tr>
+<tr>
+<td><strong>Trie</strong></td>
+<td><strong>$O(L)$</strong></td>
+<td><strong>$O(L)$</strong></td>
+<td><strong>$O(L)$</strong></td>
+<td><strong>$O(\text{不同前缀数})$</strong></td>
+</tr>
+<tr>
+<td>排序数组 + 二分</td>
+<td>$O(L \log V)$</td>
+<td>$O(L \log V)$</td>
+<td>难</td>
+<td>$O(\text{总字符数})$</td>
+</tr>
+</tbody>
+</table>
+<p>其中 $L$ 是字符串长度，$V$ 是词表大小。Trie 的杀手锏是<strong>最长前缀匹配 $O(L)$</strong>——沿树走一遍即可，而哈希表要么 $O(V)$ 遍历所有词，要么 $O(L^2)$ 试所有前缀切子串。</p>
+<h2 id="2-vs-trie">2. 前缀共享 vs 独立存储：Trie 与哈希表的根本区别<a class="headerlink" href="#2-vs-trie" title="Permanent link">&para;</a></h2>
+<h3 id="21">2.1 哈希表：每个词独立存储<a class="headerlink" href="#21" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>哈希表存 { "app", "apple", "application", "ban", "banana" }:
+
+bucket[...] = {
+    "app"          → 3 字符
+    "apple"        → 5 字符
+    "application"  → 11 字符
+    "ban"          → 3 字符
+    "banana"       → 6 字符
+}
+总字符 = 3 + 5 + 11 + 3 + 6 = 28
+</code></pre></div>
+<p>每个词独立存一整串，<code>"app"</code> 的 <code>a-p-p</code> 和 <code>"apple"</code> 的 <code>a-p-p-l-e</code> 里的 <code>a-p-p</code> <strong>重复存了</strong>。</p>
+<h3 id="22-trie">2.2 Trie：公共前缀只存一次<a class="headerlink" href="#22-trie" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>Trie 存同样 5 个词:
+
+         root
+        /     \
+       a       b
+       |       |
+       p       a
+       |       |
+       p*      n*
+      / \       \
+     l   i       a
+     |   |       |
+     e*  c       n*
+         |       |
+         a       a
+         |       |
+         t       *
+         |
+         i
+         |
+         o
+         |
+         n*
+</code></pre></div>
+<p>数节点（不含 root）：<code>a, p, p, l, e, i, c, a, t, i, o, n, b, a, n, a, n, a</code> = 18 个节点。</p>
+<table>
+<thead>
+<tr>
+<th>存储</th>
+<th>节点 / 字符数</th>
+<th>节省</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>哈希表（独立）</td>
+<td>28</td>
+<td>基准</td>
+</tr>
+<tr>
+<td>Trie（共享）</td>
+<td>18</td>
+<td>10（35.7%）</td>
+</tr>
+</tbody>
+</table>
+<p><code>"app"</code>、<code>"apple"</code>、<code>"application"</code> 共享 <code>a→p→p</code> 这 3 个节点，不重复存。词表越大、前缀重合越多，节省越显著。</p>
+<h3 id="23-bpe">2.3 实测：BPE 词表的前缀共享节省<a class="headerlink" href="#23-bpe" title="Permanent link">&para;</a></h3>
+<p>本目录 Python demo 用真实 BPE 算法从语料训练词表，实测：</p>
+<div class="highlight"><pre><span></span><code>词表大小 326（small）: 总字符 1338, Trie 节点 482, 节省 856 (64.0%)
+词表大小 447（mid）  : 总字符 1980, Trie 节点 702, 节省 1278 (64.5%)
+</code></pre></div>
+<p><strong>Trie 比独立存储省约 65% 的节点</strong>。这是因为自然语言子词的前缀重合度很高（<code>the</code>、<code>there</code>、<code>theory</code>、<code>theorem</code> 共享 <code>the</code>；<code>tion</code>、<code>ation</code>、<code>ition</code> 共享 <code>tion</code>）。</p>
+<h3 id="24">2.4 为什么哈希表做不了高效的前缀操作<a class="headerlink" href="#24" title="Permanent link">&para;</a></h3>
+<p>哈希表的查找语义是<strong>精确匹配</strong>：<code>"apple" in hash_table</code> 是 $O(L)$（算哈希 + 比对）。但：</p>
+<ul>
+<li><strong>前缀检查</strong> <code>starts_with("app")</code>：哈希表没有原生的前缀查询。要么遍历所有词看谁以 <code>"app"</code> 开头 $O(V \cdot L)$，要么额外存所有前缀（空间爆炸）。</li>
+<li><strong>最长前缀匹配</strong>：给定 <code>"applesauce"</code>，找词表里最长的、是它前缀的词。哈希表要遍历所有词 $O(V \cdot L)$，或从长到短切子串试 $O(L^2)$。</li>
+</ul>
+<p>Trie 天然支持这些：沿树走即可，$O(L)$。</p>
+<h2 id="3">3. 节点结构<a class="headerlink" href="#3" title="Permanent link">&para;</a></h2>
+<h3 id="31">3.1 子节点表示<a class="headerlink" href="#31" title="Permanent link">&para;</a></h3>
+<p>本实现假设字母表是小写字母 <code>a-z</code>（26 个），用<strong>定长数组</strong>存子节点：</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#define TRIE_ALPHA_SIZE 26</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">TrieNode</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">TrieNode</span><span class="w"> </span><span class="o">*</span><span class="n">children</span><span class="p">[</span><span class="n">TRIE_ALPHA_SIZE</span><span class="p">];</span><span class="w">  </span><span class="c1">// 26 个子节点指针</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">is_end</span><span class="p">;</span><span class="w">                                 </span><span class="c1">// 从根到本节点是否构成一个完整词</span>
+<span class="p">}</span><span class="w"> </span><span class="n">TrieNode</span><span class="p">;</span>
+</code></pre></div>
+<ul>
+<li><code>children[i]</code> 指向下一个字符是 <code>'a' + i</code> 的子节点，<code>NULL</code> 表示没有</li>
+<li><code>is_end</code> 标志：区分「前缀」和「完整词」。<code>"app"</code> 是词（<code>is_end=true</code>），<code>"appl"</code> 只是前缀（<code>is_end=false</code>）</li>
+</ul>
+<p><strong>为什么用 26 数组而不是哈希表 / 链表存子节点？</strong>
+1. <strong>$O(1)$ 寻址</strong>：<code>children[c - 'a']</code> 一次数组访问，比哈希表查快
+2. <strong>缓存友好</strong>：连续内存，prefetcher 友好
+3. <strong>字母表小</strong>：26 个指针 = 208 字节（64 位），可接受
+4. <strong>简单</strong>：无哈希冲突、无链表遍历</p>
+<p><strong>代价</strong>：字母表大时（如 Unicode）浪费空间——每个节点 26 个指针，大部分是 <code>NULL</code>。生产级对大字母表用<strong>哈希表存子节点</strong>或<strong>压缩 Trie（基数树 / Radix Tree）</strong>。</p>
+<h3 id="32-trie">3.2 Trie 结构<a class="headerlink" href="#32-trie" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">TrieNode</span><span class="w"> </span><span class="o">*</span><span class="n">root</span><span class="p">;</span><span class="w">       </span><span class="c1">// 根节点（空串对应的位置）</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">word_count</span><span class="p">;</span><span class="w">    </span><span class="c1">// 已插入的词数（去重）</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">node_count</span><span class="p">;</span><span class="w">    </span><span class="c1">// 总节点数（含 root，用于算空间）</span>
+<span class="p">}</span><span class="w"> </span><span class="n">Trie</span><span class="p">;</span>
+</code></pre></div>
+<p><code>word_count</code> 在重复插入同一词时不增加（<code>is_end</code> 已为 true）。<code>node_count</code> 用于和「独立存储总字符数」对比，量化前缀共享的节省。</p>
+<h3 id="33">3.3 字符映射<a class="headerlink" href="#33" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">char_index</span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="sc">'a'</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="sc">'z'</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span><span class="w">  </span><span class="c1">// 非小写字母非法</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="sc">'a'</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>返回 <code>0..25</code> 对应 <code>a..z</code>，非小写字母返回 <code>-1</code>（插入 / 查找时视为非法字符）。本实现只支持小写字母，大写、数字、空格会被拒绝。</p>
+<h2 id="4-insert">4. 插入：insert<a class="headerlink" href="#4-insert" title="Permanent link">&para;</a></h2>
+<h3 id="41">4.1 算法<a class="headerlink" href="#41" title="Permanent link">&para;</a></h3>
+<p>从根开始，逐字符沿树走，走不通就建新节点，最后标记 <code>is_end</code>。</p>
+<div class="highlight"><pre><span></span><code><span class="kt">bool</span><span class="w"> </span><span class="nf">trie_insert</span><span class="p">(</span><span class="n">Trie</span><span class="w"> </span><span class="o">*</span><span class="n">t</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">word</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">word</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">word</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="sc">'\0'</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w">   </span><span class="c1">// 拒绝空串</span>
+<span class="w">    </span><span class="n">TrieNode</span><span class="w"> </span><span class="o">*</span><span class="n">cur</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t</span><span class="o">-&gt;</span><span class="n">root</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">word</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="sc">'\0'</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">char_index</span><span class="p">(</span><span class="n">word</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">idx</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w">                </span><span class="c1">// 非法字符</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">cur</span><span class="o">-&gt;</span><span class="n">children</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span><span class="w"> </span><span class="p">{</span><span class="w">                </span><span class="c1">// 子节点不存在 → 新建</span>
+<span class="w">            </span><span class="n">cur</span><span class="o">-&gt;</span><span class="n">children</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">node_new</span><span class="p">();</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">cur</span><span class="o">-&gt;</span><span class="n">children</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">            </span><span class="n">t</span><span class="o">-&gt;</span><span class="n">node_count</span><span class="o">++</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="n">cur</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cur</span><span class="o">-&gt;</span><span class="n">children</span><span class="p">[</span><span class="n">idx</span><span class="p">];</span><span class="w">                 </span><span class="c1">// 往下走</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">cur</span><span class="o">-&gt;</span><span class="n">is_end</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">                           </span><span class="c1">// 首次插入这个词</span>
+<span class="w">        </span><span class="n">cur</span><span class="o">-&gt;</span><span class="n">is_end</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">        </span><span class="n">t</span><span class="o">-&gt;</span><span class="n">word_count</span><span class="o">++</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="42">4.2 插入示例<a class="headerlink" href="#42" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>插入 "app" 到空 Trie:
+
+1. cur = root, i=0, char='a', idx=0
+   children[0] 为 NULL → 新建节点 A, cur = A
+2. i=1, char='p', idx=15
+   A.children[15] 为 NULL → 新建节点 P1, cur = P1
+3. i=2, char='p', idx=15
+   P1.children[15] 为 NULL → 新建节点 P2, cur = P2
+4. 循环结束, P2.is_end = true, word_count = 1
+
+树: root → a → p → p*
+
+插入 "apple" (复用 "app" 前缀):
+
+1-3. 同上，走到 P2（已存在，不新建）
+4. i=3, char='l', P2.children[11] 为 NULL → 新建 L, cur = L
+5. i=4, char='e', L.children[4] 为 NULL → 新建 E, cur = E
+6. E.is_end = true, word_count = 2
+
+树: root → a → p → p* → l → e*
+                    (app)    (apple)
+
+只新建了 2 个节点（l, e），"app" 的 3 个节点复用。
+</code></pre></div>
+<h3 id="43">4.3 重复插入<a class="headerlink" href="#43" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>再次 insert "apple":
+1-5. 沿树走到 E（节点都已存在，不新建）
+6. E.is_end 已经是 true → 不增加 word_count
+返回 true
+</code></pre></div>
+<p>重复插入同一词不改变树，<code>word_count</code> 不增。这让 <code>word_count</code> 始终等于<strong>不同词的数量</strong>。</p>
+<h2 id="5-search">5. 精确查找：search<a class="headerlink" href="#5-search" title="Permanent link">&para;</a></h2>
+<h3 id="51">5.1 算法<a class="headerlink" href="#51" title="Permanent link">&para;</a></h3>
+<p>沿树走，走通了且最后节点 <code>is_end</code> 为 true 才算找到。</p>
+<div class="highlight"><pre><span></span><code><span class="kt">bool</span><span class="w"> </span><span class="nf">trie_search</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Trie</span><span class="w"> </span><span class="o">*</span><span class="n">t</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">word</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">word</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">    </span><span class="n">TrieNode</span><span class="w"> </span><span class="o">*</span><span class="n">cur</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t</span><span class="o">-&gt;</span><span class="n">root</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">word</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="sc">'\0'</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">char_index</span><span class="p">(</span><span class="n">word</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">idx</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">        </span><span class="n">cur</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cur</span><span class="o">-&gt;</span><span class="n">children</span><span class="p">[</span><span class="n">idx</span><span class="p">];</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">cur</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w">                   </span><span class="c1">// 走不通 → 没这个词</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">cur</span><span class="o">-&gt;</span><span class="n">is_end</span><span class="p">;</span><span class="w">                           </span><span class="c1">// 走通了，看是不是完整词</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="52-search-vs-starts_with">5.2 search vs starts_with 的区别<a class="headerlink" href="#52-search-vs-starts_with" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>词表 = { "app", "apple" }
+
+search("app")    → 走 a→p→p, is_end=true  → true   ✓ 是词
+search("appl")   → 走 a→p→p→l, is_end=false → false  ✗ 不是词（只是前缀）
+search("apple")  → 走 a→p→p→l→e, is_end=true → true  ✓ 是词
+search("appx")   → 走 a→p→p, x 子节点 NULL  → false  ✗ 走不通
+
+starts_with("app")   → 走通 → true   ✓ 有词以 app 开头
+starts_with("appl")  → 走通 → true   ✓ 有词以 appl 开头（apple）
+starts_with("appx")  → 走不通 → false ✗ 没词以 appx 开头
+</code></pre></div>
+<ul>
+<li><code>search</code> 要求<strong>精确是词</strong>：走通 <strong>且</strong> <code>is_end</code></li>
+<li><code>starts_with</code> 只要求<strong>前缀存在</strong>：走通即可（不管 <code>is_end</code>）</li>
+</ul>
+<p>这个区别是 Trie 比哈希表强的关键：哈希表只能做 <code>search</code>，做不了高效的 <code>starts_with</code>。</p>
+<h2 id="6-starts_with">6. 前缀检查：starts_with<a class="headerlink" href="#6-starts_with" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="kt">bool</span><span class="w"> </span><span class="nf">trie_starts_with</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Trie</span><span class="w"> </span><span class="o">*</span><span class="n">t</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">prefix</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">prefix</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">    </span><span class="n">TrieNode</span><span class="w"> </span><span class="o">*</span><span class="n">cur</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t</span><span class="o">-&gt;</span><span class="n">root</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">prefix</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="sc">'\0'</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">char_index</span><span class="p">(</span><span class="n">prefix</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">idx</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">        </span><span class="n">cur</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cur</span><span class="o">-&gt;</span><span class="n">children</span><span class="p">[</span><span class="n">idx</span><span class="p">];</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">cur</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w">                                  </span><span class="c1">// 走通即可，不看 is_end</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>和 <code>search</code> 唯一区别：最后 <code>return true</code> 而非 <code>return cur-&gt;is_end</code>。只要前缀路径存在就返回 true。</p>
+<p><strong>空串前缀</strong>：<code>starts_with("")</code> 循环不执行，直接返回 <code>true</code>——空串是任何串的前缀，这是数学上的正确语义。</p>
+<h2 id="7-longest_prefix">7. 最长前缀匹配：longest_prefix<a class="headerlink" href="#7-longest_prefix" title="Permanent link">&para;</a></h2>
+<p>这是 Trie 在 AI（BPE 分词）里的核心操作：给定一个字符串 $s$，找词表里<strong>最长的、是 $s$ 前缀的词</strong>。</p>
+<h3 id="71">7.1 算法<a class="headerlink" href="#71" title="Permanent link">&para;</a></h3>
+<p>从位置 0 开始沿 Trie 走，<strong>边走边记录最后一个 <code>is_end</code> 的位置</strong>，走到不能走为止。</p>
+<div class="highlight"><pre><span></span><code><span class="kt">size_t</span><span class="w"> </span><span class="nf">trie_longest_prefix</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Trie</span><span class="w"> </span><span class="o">*</span><span class="n">t</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">out_cap</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">s</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">!</span><span class="n">t</span><span class="o">-&gt;</span><span class="n">root</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">TrieNode</span><span class="w"> </span><span class="o">*</span><span class="n">cur</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t</span><span class="o">-&gt;</span><span class="n">root</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">last_end</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">                          </span><span class="c1">// 最后一个 is_end 的长度</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(;</span><span class="w"> </span><span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="sc">'\0'</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">char_index</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">idx</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">break</span><span class="p">;</span>
+<span class="w">        </span><span class="n">cur</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cur</span><span class="o">-&gt;</span><span class="n">children</span><span class="p">[</span><span class="n">idx</span><span class="p">];</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">cur</span><span class="p">)</span><span class="w"> </span><span class="k">break</span><span class="p">;</span><span class="w">                          </span><span class="c1">// 走不通，停</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">cur</span><span class="o">-&gt;</span><span class="n">is_end</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">last_end</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">                     </span><span class="c1">// 记录这个位置是完整词</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">out</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">last_end</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">last_end</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">out_cap</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">memcpy</span><span class="p">(</span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">last_end</span><span class="p">);</span><span class="w">                 </span><span class="c1">// 拷贝最长前缀到 out</span>
+<span class="w">        </span><span class="n">out</span><span class="p">[</span><span class="n">last_end</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sc">'\0'</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">last_end</span><span class="p">;</span><span class="w">                              </span><span class="c1">// 返回最长前缀长度</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="72">7.2 示例<a class="headerlink" href="#72" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>词表 = { "a", "app", "apple", "the", "there" }
+
+longest_prefix("applesauce"):
+  i=0 'a' → 走到 A, is_end=true  → last_end=1
+  i=1 'p' → 走到 P1, is_end=false
+  i=2 'p' → 走到 P2, is_end=true  → last_end=3   ("app")
+  i=3 'l' → 走到 L, is_end=false
+  i=4 'e' → 走到 E, is_end=true   → last_end=5   ("apple")
+  i=5 's' → E.children['s'] 为 NULL → break
+  返回 last_end=5, out="apple"
+
+longest_prefix("application"):
+  ...走到 P2 时 last_end=3 ("app")
+  继续走 l→i→... 但 "appli..." 路径上没有 is_end=true 的节点（"application" 不在词表）
+  返回 last_end=3, out="app"
+
+longest_prefix("xyz"):
+  i=0 'x' → root.children['x'] 为 NULL → break
+  返回 last_end=0（无匹配）
+</code></pre></div>
+<h3 id="73-ol-ol2-ov">7.3 为什么是 O(L) 而不是 O(L²) 或 O(V)<a class="headerlink" href="#73-ol-ol2-ov" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>沿 Trie 走一遍</strong>：每个字符一次数组访问，最多走 $\min(L_s, L_{\max})$ 步（$L_s$ 输入串长，$L_{\max}$ 词表最长词）</li>
+<li><strong>不切子串</strong>：不像哈希表法要 <code>s[0:1], s[0:2], ...</code> 逐个试，Trie 边走边匹配</li>
+<li><strong>不遍历词表</strong>：不像朴素法要试词表里每个词，Trie 的路径自动筛选出所有前缀</li>
+</ul>
+<p>对比：
+| 方法 | 最长前缀匹配复杂度 | 说明 |
+|---|---|---|
+| 朴素哈希（遍历所有词） | $O(V \cdot L)$ | 每个词试一次 <code>startswith</code> |
+| 切子串哈希（按长度试） | $O(L^2)$ | 切 $L$ 个子串，每个哈希查 $O(L)$ |
+| <strong>Trie</strong> | <strong>$O(L)$</strong> | <strong>沿树走一遍</strong> |</p>
+<p>$V = 50000$（大词表）、$L = 15$（最长子词）时，Trie 比朴素哈希快 $V/L \approx 3333$ 倍。这正是 BPE 分词用 Trie 的根本原因。</p>
+<h2 id="8">8. 空间分析：前缀共享省了多少<a class="headerlink" href="#8" title="Permanent link">&para;</a></h2>
+<h3 id="81">8.1 节点数 = 不同前缀数<a class="headerlink" href="#81" title="Permanent link">&para;</a></h3>
+<p>Trie 的节点数等于<strong>所有词的所有不同前缀的数量</strong>（含空串对应的 root）。</p>
+<div class="highlight"><pre><span></span><code>词表 = { "a", "ab", "abc" }
+所有前缀: "", "a", "ab", "abc" → 4 个节点
+
+词表 = { "abc", "abd" }
+所有前缀: "", "a", "ab", "abc", "abd" → 5 个节点
+"ab" 共享，不重复
+</code></pre></div>
+<h3 id="82">8.2 与独立存储对比<a class="headerlink" href="#82" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>存储</th>
+<th>空间</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>哈希表（每词独立）</td>
+<td>$\sum_{w \in \text{vocab}}</td>
+</tr>
+<tr>
+<td>Trie（前缀共享）</td>
+<td>$</td>
+</tr>
+</tbody>
+</table>
+<p><strong>最坏情况</strong>（无前缀共享，如 <code>"a", "b", "c", ...</code>）：Trie 节点数 = 总字符数，和哈希表一样。
+<strong>最好情况</strong>（全是同一前缀，如 <code>"a", "aa", "aaa", ...</code>）：Trie 节点数 = 最长词长度，远小于总字符数。</p>
+<p>自然语言子词的前缀重合度高，接近最好情况。本目录实测 BPE 词表节省约 65%。</p>
+<h3 id="83">8.3 本实现的实测<a class="headerlink" href="#83" title="Permanent link">&para;</a></h3>
+<p>C 测试里插入 100000 个 8 字符随机词，节点数 518279：</p>
+<div class="highlight"><pre><span></span><code>trie size = 100000, nodes = 518279
+</code></pre></div>
+<p>随机词前缀重合度低，节点数约为 $100000 \times 8 \times \text{某系数}$，共享少。而真实 BPE 词表（有大量 <code>the, there, theory</code> 类前缀重合）共享显著，实测节省 65%。</p>
+<h2 id="9-c">9. C 实现逐行讲解<a class="headerlink" href="#9-c" title="Permanent link">&para;</a></h2>
+<h3 id="91">9.1 节点创建<a class="headerlink" href="#91" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="n">TrieNode</span><span class="w"> </span><span class="o">*</span><span class="nf">node_new</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">TrieNode</span><span class="w"> </span><span class="o">*</span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">TrieNode</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">calloc</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">TrieNode</span><span class="p">));</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">n</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>calloc</code> 而非 <code>malloc</code>：<code>calloc</code> 把内存清零，<code>children[26]</code> 全是 <code>NULL</code>、<code>is_end</code> 是 <code>false</code>，省去手动初始化。</p>
+<h3 id="92">9.2 递归释放<a class="headerlink" href="#92" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">node_free</span><span class="p">(</span><span class="n">TrieNode</span><span class="w"> </span><span class="o">*</span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">TRIE_ALPHA_SIZE</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">node_free</span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">children</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span><span class="w">    </span><span class="c1">// 递归释放每个子节点</span>
+<span class="w">        </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">children</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">free</span><span class="p">(</span><span class="n">n</span><span class="p">);</span><span class="w">                          </span><span class="c1">// 释放自己</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>后序遍历：先释放所有子树，再释放自己。Trie 是树（无环），递归安全。深度 = 最长词长度，不会栈溢出（除非词长几百万）。</p>
+<h3 id="93-init-free">9.3 init / free<a class="headerlink" href="#93-init-free" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">trie_init</span><span class="p">(</span><span class="n">Trie</span><span class="w"> </span><span class="o">*</span><span class="n">t</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">t</span><span class="o">-&gt;</span><span class="n">root</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">node_new</span><span class="p">();</span><span class="w">             </span><span class="c1">// 创建 root（代表空串）</span>
+<span class="w">    </span><span class="n">t</span><span class="o">-&gt;</span><span class="n">word_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">t</span><span class="o">-&gt;</span><span class="n">node_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">                </span><span class="c1">// root 算 1 个节点</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">trie_free</span><span class="p">(</span><span class="n">Trie</span><span class="w"> </span><span class="o">*</span><span class="n">t</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">node_free</span><span class="p">(</span><span class="n">t</span><span class="o">-&gt;</span><span class="n">root</span><span class="p">);</span>
+<span class="w">    </span><span class="n">t</span><span class="o">-&gt;</span><span class="n">root</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="w">    </span><span class="n">t</span><span class="o">-&gt;</span><span class="n">word_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">t</span><span class="o">-&gt;</span><span class="n">node_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>init</code> 预创建 root，代表空串位置。<code>node_count</code> 初始为 1（root）。</p>
+<h3 id="94-insert">9.4 insert 逐行<a class="headerlink" href="#94-insert" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">bool</span><span class="w"> </span><span class="nf">trie_insert</span><span class="p">(</span><span class="n">Trie</span><span class="w"> </span><span class="o">*</span><span class="n">t</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">word</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">word</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">word</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="sc">'\0'</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w">   </span><span class="c1">// (1) 拒绝 NULL 和空串</span>
+<span class="w">    </span><span class="n">TrieNode</span><span class="w"> </span><span class="o">*</span><span class="n">cur</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t</span><span class="o">-&gt;</span><span class="n">root</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">word</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="sc">'\0'</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">char_index</span><span class="p">(</span><span class="n">word</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span><span class="w">            </span><span class="c1">// (2) 字符映射 0..25</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">idx</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w">                </span><span class="c1">// (3) 非法字符，拒绝</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">cur</span><span class="o">-&gt;</span><span class="n">children</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span><span class="w"> </span><span class="p">{</span><span class="w">                </span><span class="c1">// (4) 子节点不存在</span>
+<span class="w">            </span><span class="n">cur</span><span class="o">-&gt;</span><span class="n">children</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">node_new</span><span class="p">();</span><span class="w">      </span><span class="c1">//     新建</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">cur</span><span class="o">-&gt;</span><span class="n">children</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="c1">//     OOM</span>
+<span class="w">            </span><span class="n">t</span><span class="o">-&gt;</span><span class="n">node_count</span><span class="o">++</span><span class="p">;</span><span class="w">                      </span><span class="c1">// (5) 节点计数</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="n">cur</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cur</span><span class="o">-&gt;</span><span class="n">children</span><span class="p">[</span><span class="n">idx</span><span class="p">];</span><span class="w">                 </span><span class="c1">// (6) 往下走</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">cur</span><span class="o">-&gt;</span><span class="n">is_end</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">                           </span><span class="c1">// (7) 首次插入这个词</span>
+<span class="w">        </span><span class="n">cur</span><span class="o">-&gt;</span><span class="n">is_end</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">        </span><span class="n">t</span><span class="o">-&gt;</span><span class="n">word_count</span><span class="o">++</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>关键点：
+- <strong>(1)</strong> 拒绝空串：空串插入会让 root 的 <code>is_end=true</code>，语义混乱（空串是所有串的前缀）。明确拒绝更清晰。
+- <strong>(4)</strong> 懒建节点：只在走不通时才新建，已有前缀直接复用——这是前缀共享的实现。
+- <strong>(7)</strong> 去重：重复插入不增 <code>word_count</code>，让计数始终是不同词数。</p>
+<h3 id="95-search">9.5 search 逐行<a class="headerlink" href="#95-search" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">bool</span><span class="w"> </span><span class="nf">trie_search</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Trie</span><span class="w"> </span><span class="o">*</span><span class="n">t</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">word</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">word</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">    </span><span class="n">TrieNode</span><span class="w"> </span><span class="o">*</span><span class="n">cur</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t</span><span class="o">-&gt;</span><span class="n">root</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">word</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="sc">'\0'</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">char_index</span><span class="p">(</span><span class="n">word</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">idx</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">        </span><span class="n">cur</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cur</span><span class="o">-&gt;</span><span class="n">children</span><span class="p">[</span><span class="n">idx</span><span class="p">];</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">cur</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w">                   </span><span class="c1">// 走不通，词不存在</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">cur</span><span class="o">-&gt;</span><span class="n">is_end</span><span class="p">;</span><span class="w">                           </span><span class="c1">// 走通了，看是不是完整词</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>和 insert 的区别：不新建节点，走不通直接返回 false。最后看 <code>is_end</code> 区分词与前缀。</p>
+<h3 id="96-longest_prefix">9.6 longest_prefix 逐行<a class="headerlink" href="#96-longest_prefix" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">size_t</span><span class="w"> </span><span class="nf">trie_longest_prefix</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Trie</span><span class="w"> </span><span class="o">*</span><span class="n">t</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">out_cap</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">s</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">!</span><span class="n">t</span><span class="o">-&gt;</span><span class="n">root</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">TrieNode</span><span class="w"> </span><span class="o">*</span><span class="n">cur</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t</span><span class="o">-&gt;</span><span class="n">root</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">last_end</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">                          </span><span class="c1">// 记录最后 is_end 的长度</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(;</span><span class="w"> </span><span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="sc">'\0'</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">char_index</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">idx</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">break</span><span class="p">;</span><span class="w">                       </span><span class="c1">// 非法字符，停</span>
+<span class="w">        </span><span class="n">cur</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cur</span><span class="o">-&gt;</span><span class="n">children</span><span class="p">[</span><span class="n">idx</span><span class="p">];</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">cur</span><span class="p">)</span><span class="w"> </span><span class="k">break</span><span class="p">;</span><span class="w">                          </span><span class="c1">// 走不通，停</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">cur</span><span class="o">-&gt;</span><span class="n">is_end</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">last_end</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">                     </span><span class="c1">// 更新最长匹配位置</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">out</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">last_end</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">last_end</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">out_cap</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">memcpy</span><span class="p">(</span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">last_end</span><span class="p">);</span><span class="w">                 </span><span class="c1">// 拷贝结果</span>
+<span class="w">        </span><span class="n">out</span><span class="p">[</span><span class="n">last_end</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sc">'\0'</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">last_end</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>关键：<strong><code>last_end</code> 在循环里不断更新</strong>，每次遇到 <code>is_end</code> 就记下当前位置。循环结束后 <code>last_end</code> 就是最后一个 <code>is_end</code> 的位置 = 最长前缀长度。<code>break</code> 而非 <code>return</code>：走不通时仍要用之前记录的 <code>last_end</code>（可能有更短的前缀匹配）。</p>
+<h2 id="10">10. 复杂度分析<a class="headerlink" href="#10" title="Permanent link">&para;</a></h2>
+<h3 id="101">10.1 各操作复杂度<a class="headerlink" href="#101" title="Permanent link">&para;</a></h3>
+<p>设 $L$ 为字符串长度，$\Sigma$ 为字母表大小（本实现 26）。</p>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>时间</th>
+<th>空间</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>init</td>
+<td>$O(1)$</td>
+<td>$O(1)$</td>
+<td>创建 root</td>
+</tr>
+<tr>
+<td>insert</td>
+<td>$O(L)$</td>
+<td>$O(L)$ 最坏</td>
+<td>每字符 $O(1)$，可能建 $L$ 个新节点</td>
+</tr>
+<tr>
+<td>search</td>
+<td>$O(L)$</td>
+<td>$O(1)$</td>
+<td>沿树走</td>
+</tr>
+<tr>
+<td>starts_with</td>
+<td>$O(L)$</td>
+<td>$O(1)$</td>
+<td>沿树走</td>
+</tr>
+<tr>
+<td>longest_prefix</td>
+<td>$O(L)$</td>
+<td>$O(1)$</td>
+<td>沿树走 + 记录</td>
+</tr>
+<tr>
+<td>free</td>
+<td>$O(N)$</td>
+<td>$O(N)$ 栈</td>
+<td>$N$ = 节点数，递归释放</td>
+</tr>
+</tbody>
+</table>
+<p><strong>所有核心操作都是 $O(L)$</strong>，与词表大小 $V$ 无关。这是 Trie 的核心优势：查找代价只取决于查询串长度，不随词表增长。</p>
+<h3 id="102">10.2 空间复杂度<a class="headerlink" href="#102" title="Permanent link">&para;</a></h3>
+<p>$$\text{节点数} = |{ \text{所有词的所有不同前缀} }| \le \sum_{w \in \text{vocab}} |w|$$</p>
+<p>最坏（无共享）等于总字符数，最好（全共享）等于最长词长度。每节点 $|\Sigma|$ 个指针 + 1 个 bool = $26 \times 8 + 1 = 209$ 字节（64 位，有对齐）。</p>
+<h3 id="103">10.3 与哈希表对比<a class="headerlink" href="#103" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>Trie</th>
+<th>哈希表</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>insert</td>
+<td>$O(L)$</td>
+<td>$O(L)$（算哈希 + 存串）</td>
+</tr>
+<tr>
+<td>search（精确）</td>
+<td>$O(L)$</td>
+<td>$O(L)$（算哈希 + 比对）</td>
+</tr>
+<tr>
+<td>starts_with（前缀）</td>
+<td>$O(L)$</td>
+<td>$O(V \cdot L)$ 或不支持</td>
+</tr>
+<tr>
+<td>longest_prefix</td>
+<td>$O(L)$</td>
+<td>$O(V \cdot L)$ 或 $O(L^2)$</td>
+</tr>
+<tr>
+<td>空间</td>
+<td>$O(\text{不同前缀})$</td>
+<td>$O(\text{总字符})$</td>
+</tr>
+</tbody>
+</table>
+<p><strong>精确查找两者同阶</strong>，但<strong>前缀类操作 Trie 完胜</strong>。BPE 分词要的就是最长前缀匹配，所以用 Trie。</p>
+<h2 id="11">11. 与其他结构对比<a class="headerlink" href="#11" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>Trie</th>
+<th>哈希表</th>
+<th>排序数组</th>
+<th>BST / 平衡树</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>精确查找</td>
+<td>$O(L)$</td>
+<td>$O(L)$</td>
+<td>$O(L \log V)$</td>
+<td>$O(L \log V)$</td>
+</tr>
+<tr>
+<td>前缀查找</td>
+<td>$O(L)$</td>
+<td>$O(V \cdot L)$</td>
+<td>$O(L \log V)$</td>
+<td>$O(V \cdot L)$</td>
+</tr>
+<tr>
+<td>最长前缀匹配</td>
+<td>$O(L)$</td>
+<td>$O(V \cdot L)$</td>
+<td>难</td>
+<td>难</td>
+</tr>
+<tr>
+<td>范围查询（字典序）</td>
+<td>$O(L + K)$</td>
+<td>不支持</td>
+<td>$O(\log V + K)$</td>
+<td>$O(\log V + K)$</td>
+</tr>
+<tr>
+<td>空间</td>
+<td>$O(\text{前缀数})$</td>
+<td>$O(\text{总字符})$</td>
+<td>$O(\text{总字符})$</td>
+<td>$O(\text{总字符})$</td>
+</tr>
+<tr>
+<td>前缀共享</td>
+<td>是</td>
+<td>否</td>
+<td>否</td>
+<td>否</td>
+</tr>
+</tbody>
+</table>
+<p><strong>选 Trie</strong>：需要前缀操作（前缀检查、最长前缀匹配、自动补全、字典序遍历），且前缀重合度高。
+<strong>选哈希表</strong>：只需精确查找，不要前缀操作。
+<strong>选排序数组</strong>：一次排序后多次二分，不动态插入。</p>
+<h2 id="12">12. 变体与改进方向<a class="headerlink" href="#12" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>压缩 Trie（基数树 / Radix Tree）</strong>：把单字符路径压缩成字符串边，省中间节点。如 <code>"application"</code> 不必逐字符建 11 个节点，一条边存 <code>"application"</code>。路由表（Linux radix tree）、IP 路由查找用这个。</li>
+<li><strong>Ternary Search Tree（TST）</strong>：每个节点只存一个字符 + 三个指针（左、中、右），空间更省（无空指针），适合字母表大时。</li>
+<li><strong>DAWG（有向无环词图）</strong>：合并相同子树，比 Trie 更省空间，但只读（不支持动态插入）。拼写检查用。</li>
+<li><strong>哈希子节点</strong>：字母表大时（如 Unicode CJK），<code>children</code> 用哈希表而非定长数组，空间 $O(\text{实际子节点数})$ 而非 $O(|\Sigma|)$。本目录 Python demo 的 <code>TrieNode.children: dict</code> 就是这种。</li>
+<li><strong>双数组 Trie（Double-Array Trie）</strong>：用两个一维数组编码 Trie，极致缓存友好，查速接近数组访问。Aho-Corasick、生产级分词器用。</li>
+<li><strong>AC 自动机</strong>：Trie + 失败指针，多模式串一次匹配 $O(L)$。敏感词过滤、DNA 序列匹配用。</li>
+</ol>
+<h2 id="13">13. 本实现的局限<a class="headerlink" href="#13" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>只支持小写字母 a-z</strong>：<code>char_index</code> 拒绝非小写。生产级需支持 Unicode（用哈希子节点或 UTF-8 字节 Trie）。</li>
+<li><strong>定长 26 数组</strong>：字母表大时浪费。中文 / Unicode 场景每节点 26 个指针大部分空。</li>
+<li><strong>递归释放</strong>：超长词可能栈溢出（实际词长有限，问题不大）。可改迭代 + 显式栈。</li>
+<li><strong>无删除</strong>：本实现没有 <code>delete</code>。删除需回收节点（子节点全空才 free）并清 <code>is_end</code>。</li>
+<li><strong>无持久化</strong>：不能保存 / 加载。生产级需序列化（如双数组 Trie 可直接 mmap）。</li>
+<li><strong>指针开销</strong>：每节点 26 个指针 = 208 字节，存小词表时哈希表更省。</li>
+</ol>
+<p>这些是教学实现的合理取舍。生产级 Trie（如 HuggingFace <code>tokenizers</code> 的内部结构）用双数组或压缩 Trie，兼顾速度和空间。</p>
+<h2 id="14">14. 小结<a class="headerlink" href="#14" title="Permanent link">&para;</a></h2>
+<p>Trie 的核心三件套：
+1. <strong>前缀共享</strong>：公共前缀只存一次，省内存（实测 BPE 词表省 65%）
+2. <strong>沿树走即匹配</strong>：insert / search / starts_with / longest_prefix 都是 $O(L)$，与词表大小无关
+3. <strong>is_end 标志</strong>：区分「前缀」和「完整词」，让一棵树同时支持精确查找和前缀查找</p>
+<p>理解了这三点，就理解了 Trie。它比哈希表强在<strong>前缀类操作</strong>——最长前缀匹配 $O(L)$ vs 哈希表 $O(V \cdot L)$，这正是 BPE 分词、自动补全、路由查找选 Trie 的根本原因。</p>
+<p>下一章 <code>ai_application.md</code> 讲 Trie 怎么在 AI 里做 BPE 分词（最长前缀匹配）。</p>
+<hr />
+<h2 id="ai">AI 应用<a class="headerlink" href="#ai" title="Permanent link">&para;</a></h2>
+<h1 id="trie-ai-bpe">Trie 的 AI 应用：BPE 分词（最长前缀匹配）<a class="headerlink" href="#trie-ai-bpe" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>本文档讲清「Trie 在 AI 里干什么」。原理见 <code>principle.md</code>。核心应用：BPE（Byte Pair Encoding）分词——所有现代 LLM（GPT、LLaMA、BERT）的 tokenization 第一步，用 Trie 做最长前缀匹配。</p>
+</blockquote>
+<h2 id="1-tokenizationai">1. 什么是 tokenization：AI 处理文本的第一步<a class="headerlink" href="#1-tokenizationai" title="Permanent link">&para;</a></h2>
+<h3 id="11-tokenization">1.1 为什么需要 tokenization<a class="headerlink" href="#11-tokenization" title="Permanent link">&para;</a></h3>
+<p>神经网络不能直接处理字符串，只能处理数字。<strong>tokenization</strong> 就是把文本切成一个个离散单元（<strong>token</strong>），每个 token 映射到一个整数 ID：</p>
+<div class="highlight"><pre><span></span><code>文本: "tokenization is the first step"
+      ↓ tokenization
+tokens: ["tokenization", "is", "the", "first", "step"]
+      ↓ 词表查 ID
+IDs:   [12976, 318, 262, 1142, 786]
+      ↓ 送入模型
+</code></pre></div>
+<p>tokenization 是所有 LLM 的<strong>第一步</strong>，发生在训练和推理的最前端。它的质量直接决定：
+- <strong>词表大小</strong> $V$：影响 embedding 表大小和输出层维度
+- <strong>序列长度</strong>：切得越细序列越长，attention 是 $O(n^2)$，越长越慢
+- <strong>OOV（未登录词）处理</strong>：词表没有的词怎么办</p>
+<h3 id="12-tokenization">1.2 三种 tokenization 粒度<a class="headerlink" href="#12-tokenization" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>粒度</th>
+<th>示例</th>
+<th>词表大小</th>
+<th>OOV</th>
+<th>问题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>字符级</td>
+<td><code>t o k e n</code></td>
+<td>~100</td>
+<td>无</td>
+<td>序列太长，语义稀疏</td>
+</tr>
+<tr>
+<td>词级</td>
+<td><code>tokenization</code></td>
+<td>~100万</td>
+<td>严重</td>
+<td>词表爆炸，新词全是 OOV</td>
+</tr>
+<tr>
+<td><strong>子词级</strong></td>
+<td><code>token ization</code></td>
+<td>~3万-13万</td>
+<td>几乎无</td>
+<td><strong>折中，现代 LLM 标准</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>子词分词</strong>（subword tokenization）在字符和词之间折中：常见词整体保留，罕见词切成更小的子词单元。<code>"tokenization"</code> 可能切成 <code>["token", "ization"]</code>，两个都是词表里的子词。</p>
+<div class="highlight"><pre><span></span><code>词级:   "unhappiness" → ["unhappiness"] (可能 OOV)
+字符级: "unhappiness" → ["u","n","h","a","p","p","i","n","e","s","s"] (太长)
+子词级: "unhappiness" → ["un", "happiness"] (都在词表，无 OOV，长度 2)
+</code></pre></div>
+<h3 id="13-bpe">1.3 BPE：最流行的子词分词算法<a class="headerlink" href="#13-bpe" title="Permanent link">&para;</a></h3>
+<p><strong>BPE</strong>（Byte Pair Encoding，字节对编码）是 GPT、GPT-2、GPT-3、GPT-4、LLaMA、BERT 系列用的分词算法。核心思想：<strong>从字符开始，反复合并最高频的相邻字符对，直到词表达到目标大小</strong>。</p>
+<div class="highlight"><pre><span></span><code>BPE 训练（学词表）:
+1. 初始词表 = 语料里所有单字符 {a, b, c, ..., t, h, e, ...}
+2. 统计语料里所有相邻字符对频率: (t,h):500, (h,e):480, (e,_):400, ...
+3. 合并最高频 pair: 把 "th" 当成一个新子词加入词表
+4. 在语料里把所有 "t h" 替换成 "th"
+5. 重复 2-4，直到词表达到目标大小（如 50000）
+
+BPE 推理（分词新文本）:
+对文本每个位置，用词表里最长的匹配子词切分（最长前缀匹配）
+</code></pre></div>
+<p><strong>训练阶段</strong>学出词表（一组子词），<strong>推理阶段</strong>用这个词表切新文本。推理的核心操作就是<strong>最长前缀匹配</strong>——这正是 Trie 的拿手好戏。</p>
+<h2 id="2-bpe">2. BPE 推理：最长前缀匹配<a class="headerlink" href="#2-bpe" title="Permanent link">&para;</a></h2>
+<h3 id="21_1">2.1 分词算法<a class="headerlink" href="#21_1" title="Permanent link">&para;</a></h3>
+<p>给定词表 $V$（一组子词）和输入文本 $s$，BPE 分词（最长匹配贪心版）：</p>
+<div class="highlight"><pre><span></span><code>i = 0
+while i &lt; len(s):
+    找词表里最长的、是 s[i:] 前缀的子词 w
+    输出 w 作为 token
+    i += len(w)
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>词表 = { "t", "h", "e", "th", "the", "re", "n", "d", "and", "ing", ... }
+输入 = "thereand"
+
+i=0: s[0:]="thereand", 最长前缀匹配 → "the" (3字符)
+     tokens=["the"], i=3
+i=3: s[3:]="reand", 最长前缀匹配 → "re" (2字符)
+     tokens=["the","re"], i=5
+i=5: s[5:]="and", 最长前缀匹配 → "and" (3字符)
+     tokens=["the","re","and"], i=8
+结束: ["the","re","and"]
+</code></pre></div>
+<p>每个位置的核心操作：<strong>从词表里找最长的、匹配当前位置开头的子词</strong>。</p>
+<h3 id="22-trie_1">2.2 用 Trie 实现最长前缀匹配<a class="headerlink" href="#22-trie_1" title="Permanent link">&para;</a></h3>
+<p>把词表里所有子词插入 Trie，每个子词结尾标 <code>is_end</code>。分词时从位置 $i$ 开始沿 Trie 走，记录最后一个 <code>is_end</code> 的位置，走到不能走为止：</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">trie_bpe_tokenize</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">trie</span><span class="p">):</span>
+    <span class="n">tokens</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">:</span>
+        <span class="n">cur</span> <span class="o">=</span> <span class="n">trie</span><span class="o">.</span><span class="n">root</span>
+        <span class="n">last_end</span> <span class="o">=</span> <span class="n">i</span>          <span class="c1"># 记录最长匹配位置</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">i</span>
+        <span class="k">while</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">n</span> <span class="ow">and</span> <span class="n">text</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="ow">in</span> <span class="n">cur</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="n">cur</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">text</span><span class="p">[</span><span class="n">j</span><span class="p">]]</span>
+            <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">cur</span><span class="o">.</span><span class="n">is_end</span><span class="p">:</span>
+                <span class="n">last_end</span> <span class="o">=</span> <span class="n">j</span>  <span class="c1"># 这个位置是完整子词，更新</span>
+        <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">last_end</span><span class="p">])</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">last_end</span>
+    <span class="k">return</span> <span class="n">tokens</span>
+</code></pre></div>
+<p><strong>沿 Trie 走一遍 = 检查所有前缀</strong>：Trie 的路径天然编码了所有以当前位置开头的前缀，走一遍就知道哪些在词表里，取最长的。复杂度 $O(L)$，$L$ = 最长子词长度。</p>
+<h3 id="23-trie-bpe">2.3 为什么 Trie 是 BPE 的天然选择<a class="headerlink" href="#23-trie-bpe" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>BPE 推理需求</th>
+<th>Trie 怎么满足</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>每个位置找最长匹配子词</td>
+<td><code>longest_prefix</code> $O(L)$，沿树走一遍</td>
+</tr>
+<tr>
+<td>词表大（3万-13万）</td>
+<td>查找 $O(L)$ 与词表大小无关</td>
+</tr>
+<tr>
+<td>子词前缀重合多（<code>the</code>/<code>there</code>/<code>theory</code>）</td>
+<td>前缀共享省内存</td>
+</tr>
+<tr>
+<td>每次推理调几百万次</td>
+<td>单次 $O(L)$ 极快，无切子串开销</td>
+</tr>
+</tbody>
+</table>
+<p><strong>核心：BPE 分词 = 反复最长前缀匹配，Trie 的 longest_prefix 是 $O(L)$，而哈希表是 $O(V)$ 或 $O(L^2)$。</strong></p>
+<h2 id="3_1">3. 为什么不用哈希表：朴素法的问题<a class="headerlink" href="#3_1" title="Permanent link">&para;</a></h2>
+<h3 id="31-on-cdot-v">3.1 朴素法一：遍历所有子词 $O(n \cdot V)$<a class="headerlink" href="#31-on-cdot-v" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">naive_bpe_tokenize</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">vocab_set</span><span class="p">):</span>
+    <span class="n">tokens</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+        <span class="n">best_len</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">best_word</span> <span class="o">=</span> <span class="s2">""</span>
+        <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">vocab_set</span><span class="p">:</span>                    <span class="c1"># 遍历词表所有子词</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">word</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">best_len</span> <span class="ow">and</span> <span class="n">text</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+                <span class="n">best_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
+                <span class="n">best_word</span> <span class="o">=</span> <span class="n">word</span>
+        <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">best_word</span><span class="p">)</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="n">best_len</span>
+    <span class="k">return</span> <span class="n">tokens</span>
+</code></pre></div>
+<p>每个位置遍历词表所有 $V$ 个子词，每个做 <code>startswith</code> $O(L)$。总复杂度 $O(n \cdot V \cdot L)$，$n$ = 文本长度。</p>
+<p><strong>问题</strong>：$V = 50000$（LLaMA 词表）、$n = 10000$ 字符时，$5 \times 10^8$ 次 <code>startswith</code>，Python 里要几十秒到几分钟。完全不可行。</p>
+<h3 id="32-on-cdot-l2">3.2 朴素法二：切子串按长度试 $O(n \cdot L^2)$<a class="headerlink" href="#32-on-cdot-l2" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">hash_bpe_tokenize</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">buckets</span><span class="p">,</span> <span class="n">max_len</span><span class="p">):</span>
+    <span class="n">tokens</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+        <span class="n">best_len</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_len</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>           <span class="c1"># 从最长往短试</span>
+            <span class="k">if</span> <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">l</span><span class="p">]</span> <span class="ow">in</span> <span class="n">buckets</span><span class="p">[</span><span class="n">l</span><span class="p">]:</span>          <span class="c1"># 切子串 + 哈希查</span>
+                <span class="n">best_len</span> <span class="o">=</span> <span class="n">l</span>
+                <span class="k">break</span>
+        <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">best_len</span><span class="p">])</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="n">best_len</span>
+    <span class="k">return</span> <span class="n">tokens</span>
+</code></pre></div>
+<p>把词表按子词长度分桶，每个位置从最长 $L$ 往短试，切 <code>text[i:i+l]</code> 查对应桶。总复杂度 $O(n \cdot L^2)$（切 $L$ 次子串，每次 $O(L)$）或 $O(n \cdot L)$（如果切片 $O(1)$ 视图 + 哈希 $O(L)$）。</p>
+<p><strong>问题</strong>：
+1. <strong>每个位置切 $L$ 次子串</strong>：<code>text[i:i+l]</code> 每次分配新字符串对象，开销大
+2. <strong>$L$ 次哈希查</strong>：每次哈希要重算子串哈希 $O(l)$
+3. <strong>无前缀共享</strong>：<code>"the"</code> 和 <code>"there"</code> 在哈希表里独立存，<code>"the"</code> 的 <code>t-h-e</code> 重复
+4. <strong>重复扫描</strong>：试 <code>text[i:i+5]</code> 和 <code>text[i:i+4]</code> 时，前 4 个字符被扫描了两遍</p>
+<h3 id="33-trie">3.3 Trie 怎么避免这些问题<a class="headerlink" href="#33-trie" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">trie_bpe_tokenize</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">trie</span><span class="p">):</span>
+    <span class="c1"># ...</span>
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">:</span>
+        <span class="n">cur</span> <span class="o">=</span> <span class="n">trie</span><span class="o">.</span><span class="n">root</span>
+        <span class="n">last_end</span> <span class="o">=</span> <span class="n">i</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">i</span>
+        <span class="k">while</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">n</span> <span class="ow">and</span> <span class="n">text</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="ow">in</span> <span class="n">cur</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>   <span class="c1"># 沿树走，不切子串</span>
+            <span class="n">cur</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">text</span><span class="p">[</span><span class="n">j</span><span class="p">]]</span>
+            <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">cur</span><span class="o">.</span><span class="n">is_end</span><span class="p">:</span>
+                <span class="n">last_end</span> <span class="o">=</span> <span class="n">j</span>
+        <span class="c1"># ...</span>
+</code></pre></div>
+<ol>
+<li><strong>不切子串</strong>：逐字符沿 <code>children</code> 字典走，只访问单个字符，不分配新字符串</li>
+<li><strong>一次遍历检查所有前缀</strong>：沿 Trie 走的路径自动覆盖所有以 $i$ 开头的前缀，走一遍就找到最长匹配</li>
+<li><strong>前缀共享</strong>：<code>"the"</code> 和 <code>"there"</code> 共享 <code>t→h→e</code> 路径，内存只存一次</li>
+<li><strong>无重复扫描</strong>：每个字符只访问一次，沿树走 $O(L)$</li>
+</ol>
+<p><strong>同是 $O(n \cdot L)$，Trie 比切子串哈希快 5 倍</strong>（本目录实测），因为不切子串 + 前缀共享 + 单次遍历的常数优势。</p>
+<h3 id="34">3.4 三种方法复杂度对比<a class="headerlink" href="#34" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>复杂度</th>
+<th>$n=50000, V=447, L=15$</th>
+<th>实测</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>朴素遍历所有子词</td>
+<td>$O(n \cdot V \cdot L)$</td>
+<td>$\sim 3.4 \times 10^8$</td>
+<td>~280 ms（小规模外推）</td>
+</tr>
+<tr>
+<td>切子串哈希（分桶）</td>
+<td>$O(n \cdot L^2)$ 或 $O(n \cdot L)$</td>
+<td>$\sim 7.5 \times 10^5$</td>
+<td>48 ms</td>
+</tr>
+<tr>
+<td><strong>Trie 最长匹配</strong></td>
+<td><strong>$O(n \cdot L)$</strong></td>
+<td>$\sim 7.5 \times 10^5$</td>
+<td><strong>9 ms</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Trie 比朴素快 60x，比分桶哈希快 5x。</p>
+<h2 id="4-demo">4. demo 结果解读<a class="headerlink" href="#4-demo" title="Permanent link">&para;</a></h2>
+<p>运行 <code>python 07_trie/python/demo.py</code> 的关键输出。</p>
+<h3 id="41-bpe">4.1 BPE 词表训练<a class="headerlink" href="#41-bpe" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>词表大小: small=326 (max_len=12), mid=447 (max_len=15), large=447 (max_len=15)
+</code></pre></div>
+<p>用真实 BPE 算法（统计高频 pair 合并）从语料训练：
+- <code>small</code>：300 次合并，词表 326 个子词，最长 12 字符
+- <code>mid</code> / <code>large</code>：800 / 2000 次合并，语料有限后合并饱和，词表 447 个子词，最长 15 字符</p>
+<p>子词示例（分词结果）：
+<div class="highlight"><pre><span></span><code>text = "tokenizationisthefirststepandthetriehelpswithlongestprefixmatching"
+trie = ['tokenization', 'is', 'the', 'first', 'step', 'and', 'the', 'trie',
+        'h', 'el', 'p', 's', 'with', 'longest', 'prefix', 'matching']
+</code></pre></div></p>
+<p><code>"tokenization"</code> 作为整体子词在词表里（BPE 学到的），<code>"helps"</code> 不在词表切成 <code>["h","el","p","s"]</code>。三种方法结果完全一致，验证正确性。</p>
+<h3 id="42_1">4.2 内存对比：前缀共享<a class="headerlink" href="#42_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>small: 词表=326, 总字符=1338, Trie 节点=482,   节省 856 (64.0%)
+mid:   词表=447, 总字符=1980, Trie 节点=702,   节省 1278 (64.5%)
+</code></pre></div>
+<p><strong>Trie 比独立存储省 65% 内存</strong>。原因：BPE 子词前缀重合度高——<code>the</code>/<code>there</code>/<code>therefore</code> 共享 <code>the</code>，<code>tion</code>/<code>ation</code>/<code>ition</code> 共享 <code>tion</code>，<code>ing</code>/<code>thing</code>/<code>thing</code> 共享 <code>ing</code>。哈希表把这些重复前缀各存一份，Trie 只存一份。</p>
+<h3 id="43-onv">4.3 性能对比（含朴素 O(nV)）<a class="headerlink" href="#43-onv" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>|vocab|=326, text_len=2000, max_len=12
+实现                     均值(ms)      标准差(ms)        加速比
+trie O(nL)             0.4480       0.0128      63.47x
+hash-bucket O(nL)       2.3651       0.2002      12.02x
+naive O(nV)           28.4326       1.7209       1.00x
+→ Trie 比朴素快 63.5x（O(nL) vs O(nV)，L=12 vs V=326）
+
+|vocab|=326, text_len=5000, max_len=12
+trie O(nL)             1.2212       0.2593      56.23x
+hash-bucket O(nL)       5.2277       0.4808      13.14x
+naive O(nV)           68.6746       2.8182       1.00x
+→ Trie 比朴素快 56.2x
+</code></pre></div>
+<p>读法（2000 字符，326 子词词表）：
+- <strong>Trie</strong>：0.45 ms，$O(n \cdot L)$
+- <strong>分桶哈希</strong>：2.4 ms，$O(n \cdot L)$ 但切子串 + 多次哈希
+- <strong>朴素遍历</strong>：28.4 ms，$O(n \cdot V)$</p>
+<p><strong>Trie 比朴素快 63 倍</strong>。理论比值 $V/L = 326/12 \approx 27$，实测 63 倍更高——因为朴素法每次 <code>startswith</code> 还要逐字符比对，而 Trie 是直接字典查 <code>children[ch]</code>，常数更小。</p>
+<p><strong>文本越长优势稳定</strong>：5000 字符时 56x，和 2000 字符的 63x 接近，说明是线性增长（$O(n)$ 主导），比值由 $V/L$ 决定。</p>
+<h3 id="44-trie-vs-onl">4.4 Trie vs 分桶哈希（同阶 O(nL)）<a class="headerlink" href="#44-trie-vs-onl" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>|vocab|=447 (mid), text_len=50000, max_len=15
+trie O(nL)             8.8802 ms    5.56x
+hash-bucket O(nL)     49.3911 ms    1.00x
+→ Trie 比 hash-bucket 快 5.56x（同阶 O(nL)，前缀共享 + 单次遍历优势）
+</code></pre></div>
+<p>两者<strong>同是 $O(n \cdot L)$</strong>，但 Trie 快 5.5 倍。原因：
+1. <strong>不切子串</strong>：Trie 逐字符走 <code>children</code> 字典，哈希法每个位置切 $L$ 次 <code>text[i:i+l]</code>，每次分配新字符串
+2. <strong>一次遍历</strong>：Trie 走一遍检查所有前缀，哈希法从长到短试，前缀字符被重复扫描
+3. <strong>字典查 vs 哈希查</strong>：<code>children[ch]</code> 是一次 dict 查（$O(1)$），<code>text[i:i+l] in bucket</code> 要先切片再算哈希再查</p>
+<p><strong>结论</strong>：即使把哈希表优化到同阶 $O(n \cdot L)$（分桶），Trie 仍因不切子串 + 单次遍历快 5 倍。这是为什么生产级分词器选 Trie 而非哈希表。</p>
+<h3 id="45">4.5 关键数字总结<a class="headerlink" href="#45" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>词表=447, text_len=50000:
+  Trie 最长匹配     : 9.294 ms  (O(n*L), L=15)
+  hash-bucket 匹配  : 47.988 ms (O(n*L), 切子串+哈希查)
+  hash/Trie = 5.16x
+  前缀共享节省 64.5% 内存（节点 702 &lt; 总字符 1980）
+  朴素 O(n*V) 在此规模约需 0.3 s（外推，太慢不实测）
+</code></pre></div>
+<h2 id="5-trie">5. 生产级实现：从教学 Trie 到工业分词器<a class="headerlink" href="#5-trie" title="Permanent link">&para;</a></h2>
+<h3 id="51-huggingface-tokenizers">5.1 HuggingFace tokenizers<a class="headerlink" href="#51-huggingface-tokenizers" title="Permanent link">&para;</a></h3>
+<p>HuggingFace 的 <code>tokenizers</code> 库（Rust 实现，Python 绑定）是 LLM tokenization 的事实标准：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">tokenizers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tokenizer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tokenizers.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">BPE</span>
+
+<span class="n">tokenizer</span> <span class="o">=</span> <span class="n">Tokenizer</span><span class="p">(</span><span class="n">BPE</span><span class="p">(</span><span class="n">vocab</span><span class="p">,</span> <span class="n">merges</span><span class="p">))</span>
+<span class="n">encoding</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">"tokenization is the first step"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">encoding</span><span class="o">.</span><span class="n">tokens</span><span class="p">)</span>  <span class="c1"># ['tokenization', 'is', 'the', 'first', 'step']</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">encoding</span><span class="o">.</span><span class="n">ids</span><span class="p">)</span>     <span class="c1"># [12976, 318, 262, 1142, 786]</span>
+</code></pre></div>
+<p>内部用<strong>双数组 Trie（Double-Array Trie）</strong>存词表：
+- 两个一维数组 <code>base[]</code> 和 <code>check[]</code> 编码整棵 Trie
+- 查找是一次数组访问：<code>next = base[cur] + c; if check[next] == cur: cur = next</code>
+- 极致缓存友好（连续内存），比指针 Trie 快几倍
+- 构建后只读，适合词表固定的推理场景</p>
+<h3 id="52-sentencepiece">5.2 SentencePiece<a class="headerlink" href="#52-sentencepiece" title="Permanent link">&para;</a></h3>
+<p>Google 的 <strong>SentencePiece</strong>（LLaMA、T5 用）支持 BPE 和 Unigram 两种模型：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">sentencepiece</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">spm</span>
+<span class="n">sp</span> <span class="o">=</span> <span class="n">spm</span><span class="o">.</span><span class="n">SentencePieceProcessor</span><span class="p">(</span><span class="n">model_file</span><span class="o">=</span><span class="s2">"tokenizer.model"</span><span class="p">)</span>
+<span class="n">ids</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">"tokenization is the first step"</span><span class="p">)</span>
+<span class="n">tokens</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">id_to_piece</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>  <span class="c1"># ['▁token', 'ization', '▁is', ...]</span>
+</code></pre></div>
+<p>特点：
+- <strong>语言无关</strong>：把文本当 Unicode 字节流，不依赖空格分词（<code>▁</code> 代表空格）
+- <strong>Unigram 模型</strong>：用概率 + 前向 DP 找最优切分（比 BPE 贪心更优），DP 里用 Trie 加速子词查
+- <strong>BPE 模型</strong>：最长前缀匹配，用 Trie</p>
+<h3 id="53-gpt-4-tiktoken">5.3 GPT-4 的 tiktoken<a class="headerlink" href="#53-gpt-4-tiktoken" title="Permanent link">&para;</a></h3>
+<p>OpenAI 的 <strong>tiktoken</strong>（GPT-3.5 / GPT-4 用）是 BPE 的优化实现：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">tiktoken</span>
+<span class="n">enc</span> <span class="o">=</span> <span class="n">tiktoken</span><span class="o">.</span><span class="n">get_encoding</span><span class="p">(</span><span class="s2">"cl100k_base"</span><span class="p">)</span>
+<span class="n">ids</span> <span class="o">=</span> <span class="n">enc</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">"tokenization is the first step"</span><span class="p">)</span>
+<span class="c1"># [12976, 318, 262, 1142, 786]</span>
+</code></pre></div>
+<p>特点：
+- <strong>正则预切分</strong>：先用正则把文本切成块（数字、字母、空格、标点），每块独立 BPE
+- <strong>BPE 合并查表</strong>：用 <strong>hash + rank</strong> 而非 Trie——按合并优先级（rank）贪心合并相邻对
+- <strong>Rust / C 实现</strong>：极致优化，每秒处理几百万字符</p>
+<p>tiktoken 用哈希 + rank 而非 Trie，是因为它做的是<strong>按合并规则贪心合并</strong>（训练时的 pair 顺序），而非最长前缀匹配。两种 BPE 推理策略：
+- <strong>最长前缀匹配</strong>（本目录 demo）：Trie，$O(n \cdot L)$
+- <strong>按 rank 贪心合并</strong>（tiktoken）：hash + 优先级，$O(n \cdot L)$ 但策略不同</p>
+<h3 id="54-bpe">5.4 两种 BPE 推理策略对比<a class="headerlink" href="#54-bpe" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>做法</th>
+<th>数据结构</th>
+<th>用在</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>最长前缀匹配</strong></td>
+<td>每位置找词表最长匹配子词</td>
+<td><strong>Trie</strong></td>
+<td>SentencePiece BPE、教学</td>
+</tr>
+<tr>
+<td><strong>按 rank 贪心合并</strong></td>
+<td>反复合并 rank 最小的相邻对</td>
+<td>hash + rank 表</td>
+<td>tiktoken (GPT)</td>
+</tr>
+</tbody>
+</table>
+<p>两者结果<strong>不完全一致</strong>（最长匹配是贪心近似，rank 合并是训练复现），但都 $O(n \cdot L)$。最长前缀匹配更直观、Trie 更自然；rank 合并更贴合训练、实现更紧凑。</p>
+<h3 id="55-trie">5.5 为什么生产级仍离不开 Trie 的思想<a class="headerlink" href="#55-trie" title="Permanent link">&para;</a></h3>
+<p>即使 tiktoken 用 hash + rank，<strong>Trie 的前缀共享思想无处不在</strong>：
+1. <strong>双数组 Trie</strong>：HuggingFace tokenizers、Aho-Corasick、中文分词（jieba 词典）都用
+2. <strong>Unigram DP</strong>：SentencePiece Unigram 模型的前向 DP 要枚举所有子词，用 Trie 加速子词枚举
+3. <strong>AC 自动机</strong>：多模式串匹配（敏感词过滤）= Trie + 失败指针
+4. <strong>路由表</strong>：HTTP 路由、IP 路由查找用压缩 Trie（基数树）</p>
+<p><strong>核心思想</strong>：字符串集合的前缀操作（查找、匹配、枚举），Trie 比哈希表更高效，因为前缀共享 + 沿树走。</p>
+<h2 id="6-trie-ai">6. Trie 在 AI 里的其他应用<a class="headerlink" href="#6-trie-ai" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>应用</th>
+<th>Trie 的作用</th>
+<th>为什么用 Trie</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>BPE 分词</strong></td>
+<td>最长前缀匹配子词</td>
+<td>$O(n \cdot L)$，前缀共享省内存</td>
+</tr>
+<tr>
+<td><strong>Unigram 分词</strong></td>
+<td>枚举所有子词候选（DP 用）</td>
+<td>$O(L)$ 枚举当前位置所有子词</td>
+</tr>
+<tr>
+<td><strong>自动补全</strong></td>
+<td>前缀查所有后续词</td>
+<td>$O(L + K)$，K = 补全候选数</td>
+</tr>
+<tr>
+<td><strong>拼写检查 / 修正</strong></td>
+<td>找编辑距离 $\le 1$ 的词</td>
+<td>沿 Trie 走 + 容错分支</td>
+</tr>
+<tr>
+<td><strong>敏感词过滤</strong></td>
+<td>多模式串一次匹配（AC 自动机）</td>
+<td>Trie + 失败指针 $O(n)$</td>
+</tr>
+<tr>
+<td><strong>搜索引擎前缀提示</strong></td>
+<td>输入框联想</td>
+<td>前缀子树遍历，按频率排序</td>
+</tr>
+<tr>
+<td><strong>IP 路由查找</strong></td>
+<td>最长前缀匹配 IP 地址</td>
+<td>压缩 Trie（基数树），网络路由表</td>
+</tr>
+<tr>
+<td><strong>DNA 序列匹配</strong></td>
+<td>基因序列子串查找</td>
+<td>后缀树 / 后缀自动机（Trie 变体）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="61">6.1 自动补全（前缀子树遍历）<a class="headerlink" href="#61" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>用户输入 "app"，Trie 走到 "app" 节点，遍历子树收集所有 is_end 节点:
+→ ["app", "apple", "application", "apply", "appreciate", ...]
+按频率排序返回 top-10
+</code></pre></div>
+<p>哈希表做不了：要遍历所有词看谁以 <code>"app"</code> 开头，$O(V \cdot L)$。Trie 走到 <code>"app"</code> 节点后遍历子树 $O(K)$，$K$ = 匹配数。</p>
+<h3 id="62-ac">6.2 AC 自动机（多模式串匹配）<a class="headerlink" href="#62-ac" title="Permanent link">&para;</a></h3>
+<p>敏感词过滤：一次扫描文本，找出所有命中的敏感词（词表可能几万个）。</p>
+<div class="highlight"><pre><span></span><code>朴素: 对每个敏感词做 KMP，O(文本长 × 敏感词数)
+AC 自动机: 把敏感词建成 Trie + 失败指针，文本扫一遍 O(文本长 + 命中数)
+</code></pre></div>
+<p>AC 自动机 = Trie + KMP 的失败思想，把多模式串匹配从 $O(n \cdot V)$ 降到 $O(n)$。这是 Trie 在 AI 内容审核里的核心应用。</p>
+<h2 id="7-demo">7. 从教学 demo 到生产级：差距与改进<a class="headerlink" href="#7-demo" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>本目录 demo</th>
+<th>生产级</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Trie 实现</td>
+<td>Python dict 子节点</td>
+<td>Rust 双数组 Trie</td>
+</tr>
+<tr>
+<td>字母表</td>
+<td>任意字符（dict）</td>
+<td>UTF-8 字节 / BPE rank</td>
+</tr>
+<tr>
+<td>分词策略</td>
+<td>最长前缀匹配（贪心）</td>
+<td>rank 合并 / Unigram DP</td>
+</tr>
+<tr>
+<td>预处理</td>
+<td>无</td>
+<td>正则预切分（数字/标点/空格）</td>
+</tr>
+<tr>
+<td>词表大小</td>
+<td>447</td>
+<td>32000-128256</td>
+</tr>
+<tr>
+<td>吞吐</td>
+<td>~5 MB/s</td>
+<td>~100 MB/s（tiktoken）</td>
+</tr>
+<tr>
+<td>内存</td>
+<td>Python 对象开销</td>
+<td>mmap 双数组，零拷贝</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教学 demo 聚焦算法本质</strong>：Trie 最长匹配 vs 哈希查找的复杂度差异。生产级在此基础上做：Rust/C 实现、双数组编码、正则预切分、批量并行、mmap 持久化。</p>
+<h2 id="8_1">8. 小结<a class="headerlink" href="#8_1" title="Permanent link">&para;</a></h2>
+<p>BPE 分词为什么用 Trie 而不是哈希表：
+1. <strong>最长前缀匹配 $O(L)$</strong>：Trie 沿树走一遍，哈希表要遍历所有子词 $O(V)$ 或切子串 $O(L^2)$
+2. <strong>前缀共享省内存</strong>：<code>the</code>/<code>there</code>/<code>theory</code> 共享 <code>the</code> 路径，实测 BPE 词表省 65%
+3. <strong>不切子串</strong>：逐字符走 <code>children</code>，不分配新字符串，比分桶哈希快 5 倍</p>
+<p>本目录实测（词表 447，文本 50000 字符）：
+- Trie 最长匹配：9 ms
+- 分桶哈希（同阶 $O(nL)$）：48 ms（慢 5x）
+- 朴素遍历（$O(nV)$）：外推 ~300 ms（慢 60x）</p>
+<p><strong>核心洞察</strong>：BPE 分词 = 反复最长前缀匹配，Trie 的 <code>longest_prefix</code> 是 $O(L)$ 且与词表大小无关，这是 Trie 比哈希表的根本优势。所有现代 LLM 分词器（HuggingFace tokenizers、SentencePiece）的内核都基于 Trie 或其变体（双数组 Trie、AC 自动机），因为子词分词的前缀匹配语义天然适配 Trie。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.indexes", "navigation.tracking", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

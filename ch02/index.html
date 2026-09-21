@@ -1,0 +1,2071 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="从底层实现到生产级应用——数据结构在 AI 系统优化与应用工程中的真实作用">
+      
+      
+        <meta name="author" content="wanglh39">
+      
+      
+        <link rel="canonical" href="https://wanglh39.github.io/ds-ai-teaching/ch02/">
+      
+      
+        <link rel="prev" href="../ch01/">
+      
+      
+        <link rel="next" href="../ch03/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>02 链表 - 数据结构 × AI 优化</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+SC:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans SC";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#02" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href=".." title="数据结构 × AI 优化" class="md-header__button md-logo" aria-label="数据结构 × AI 优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            数据结构 × AI 优化
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              02 链表
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换至暗色模式"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换至暗色模式" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换至亮色模式"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换至亮色模式" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/wanglh39/ds-ai-teaching" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wanglh39/ds-ai-teaching
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  首页
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../intro/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  项目介绍
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../ch01/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  视角 A·系统优化
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../ch13/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  视角 B·应用工程
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../benchmarks/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  性能汇总
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="数据结构 × AI 优化" class="md-nav__button md-logo" aria-label="数据结构 × AI 优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    数据结构 × AI 优化
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/wanglh39/ds-ai-teaching" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wanglh39/ds-ai-teaching
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    首页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    项目介绍
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    项目介绍
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    设计思路
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../map/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    章节映射
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dual_view/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    双视角说明
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cross_index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    交叉索引
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    视角 A·系统优化
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    视角 A·系统优化
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 动态数组
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 链表
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 链表
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要回答的问题
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        状态
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原理
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch03/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 栈
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch04/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 循环队列
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch05/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05 哈希表
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch06/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 堆
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch07/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    07 Trie
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch08/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    08 KD-Tree
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch09/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    09 图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch10/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10 并查集
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch11/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11 页表/分块内存
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch12/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12 跳表+图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    视角 B·应用工程
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    视角 B·应用工程
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch13/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13 多智能体编排
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch14/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    14 任务调度与批处理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch15/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    15 上下文工程与记忆
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch16/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    16 RAG 与知识检索
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch17/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    17 数据管道与流式处理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch18/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    18 模型部署与推理服务
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch19/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    19 状态机与工作流
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch20/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    20 模型压缩
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    性能汇总
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要回答的问题
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        状态
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原理
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="02">第 02 章 · 链表<a class="headerlink" href="#02" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>数据结构：单链表 / 双向链表 / 环形链表
+AI 优化：LRU 缓存 → KV Cache 淘汰策略</p>
+</blockquote>
+<h2 id="_1">本章要回答的问题<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>LRU 缓存为什么用「哈希表 + 双向链表」？</li>
+<li>KV Cache 在长序列推理时怎么淘汰？</li>
+<li>O(1) 淘汰决策是怎么做到的？</li>
+</ul>
+<h2 id="_2">目录<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>02_linked_list/
+├── c/                   # 链表的 C 实现
+├── python/              # LRU + KV Cache 淘汰 demo
+├── docs/
+│   ├── principle.md
+│   └── ai_application.md
+└── figures/
+</code></pre></div>
+<h2 id="_3">状态<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p>🚧 待填充</p>
+<hr />
+<h2 id="_4">原理<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<h1 id="_5">链表原理<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>本文档讲清「链表是什么、为什么需要它、怎么实现、复杂度多少」。AI 应用见 <code>ai_application.md</code>。</p>
+</blockquote>
+<h2 id="1">1. 链表的定义<a class="headerlink" href="#1" title="Permanent link">&para;</a></h2>
+<p>链表是一种线性表，但<strong>元素在内存里不连续</strong>，每个节点通过指针指向下一个节点：</p>
+<div class="highlight"><pre><span></span><code>head → [v1|next] → [v2|next] → [v3|next] → NULL
+</code></pre></div>
+<p>每个节点存两样东西：
+- <code>value</code>：数据
+- <code>next</code>：指向下一个节点的指针</p>
+<p>这是单链表。双向链表再加一个 <code>prev</code> 指针：</p>
+<div class="highlight"><pre><span></span><code>NULL ← [prev|v1|next] ⇄ [prev|v2|next] ⇄ [prev|v3|next] → NULL
+</code></pre></div>
+<h2 id="2">2. 为什么需要链表：数组的短板<a class="headerlink" href="#2" title="Permanent link">&para;</a></h2>
+<p>数组（第 01 章）在<strong>头部插入</strong>和<strong>中间插入</strong>是 $O(n)$，因为要保持连续存放，必须移动后面所有元素：</p>
+<div class="highlight"><pre><span></span><code>插入前: [a, b, c, d, _]
+插入 x 到位置 1: [a, x, b, c, d]  ← b, c, d 都要右移
+</code></pre></div>
+<p>如果频繁在头部/中间插入删除，数组的 $O(n)$ 移累成 $O(n^2)$，不可接受。</p>
+<p>链表的优势正在此：<strong>插入删除只需改指针，$O(1)$</strong>：</p>
+<div class="highlight"><pre><span></span><code>插入前: ... → [a] → [c] → ...
+插入 x: ... → [a] → [x] → [c] → ...  ← 只改 a.next 和 x.next
+</code></pre></div>
+<h2 id="3-on">3. 链表的代价：随机访问 O(n)<a class="headerlink" href="#3-on" title="Permanent link">&para;</a></h2>
+<p>链表的代价是<strong>随机访问变慢</strong>：要找第 $i$ 个元素，必须从头顺着指针走 $i$ 步，$O(n)$。</p>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>数组</th>
+<th>链表</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>A[i]</code> 随机访问</td>
+<td>$O(1)$</td>
+<td>$O(n)$</td>
+</tr>
+<tr>
+<td>头部插入</td>
+<td>$O(n)$</td>
+<td>$O(1)$</td>
+</tr>
+<tr>
+<td>尾部插入</td>
+<td>$O(1)$ 摊还</td>
+<td>$O(1)$（有尾指针）</td>
+</tr>
+<tr>
+<td>已知节点后插入</td>
+<td>$O(n)$</td>
+<td>$O(1)$</td>
+</tr>
+<tr>
+<td>已知节点删除</td>
+<td>$O(n)$</td>
+<td>$O(1)$（双向链表）</td>
+</tr>
+<tr>
+<td>遍历</td>
+<td>缓存友好</td>
+<td>缓存不友好</td>
+</tr>
+</tbody>
+</table>
+<p><strong>核心权衡</strong>：数组用连续内存换 $O(1)$ 访问；链表用指针换 $O(1)$ 插入删除。</p>
+<h2 id="4-vs">4. 单链表 vs 双向链表<a class="headerlink" href="#4-vs" title="Permanent link">&para;</a></h2>
+<h3 id="41">4.1 单链表<a class="headerlink" href="#41" title="Permanent link">&para;</a></h3>
+<p>只有 <code>next</code> 指针：
+- 插入：$O(1)$（已知前驱节点）
+- 删除：$O(n)$（要找前驱，因为要改前驱的 <code>next</code>）
+- 空间：每个节点 1 个指针</p>
+<h3 id="42">4.2 双向链表<a class="headerlink" href="#42" title="Permanent link">&para;</a></h3>
+<p>有 <code>prev</code> 和 <code>next</code>：
+- 插入：$O(1)$
+- 删除：$O(1)$（已知节点，直接改 <code>prev.next</code> 和 <code>next.prev</code>）
+- 空间：每个节点 2 个指针</p>
+<p><strong>LRU 缓存用双向链表</strong>，因为淘汰时要从尾部删节点（$O(1)$），访问后要把节点移到头部（$O(1)$，需要 <code>prev</code> 才能脱链）。</p>
+<h2 id="5-c">5. C 实现逐行讲解<a class="headerlink" href="#5-c" title="Permanent link">&para;</a></h2>
+<h3 id="51">5.1 节点定义<a class="headerlink" href="#51" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">DListNode</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">key</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">value</span><span class="p">;</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">DListNode</span><span class="w"> </span><span class="o">*</span><span class="n">prev</span><span class="p">;</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">DListNode</span><span class="w"> </span><span class="o">*</span><span class="n">next</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="n">DListNode</span><span class="p">;</span>
+</code></pre></div>
+<ul>
+<li><code>key</code>：用于 LRU 的键</li>
+<li><code>value</code>：存储的值</li>
+<li><code>prev</code> / <code>next</code>：双向指针</li>
+</ul>
+<h3 id="52">5.2 链表结构<a class="headerlink" href="#52" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">DListNode</span><span class="w"> </span><span class="o">*</span><span class="n">head</span><span class="p">;</span>
+<span class="w">    </span><span class="n">DListNode</span><span class="w"> </span><span class="o">*</span><span class="n">tail</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">size</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="n">DList</span><span class="p">;</span>
+</code></pre></div>
+<ul>
+<li><code>head</code>：头指针（最近访问）</li>
+<li><code>tail</code>：尾指针（最久未访问，LRU 淘汰对象）</li>
+<li><code>size</code>：节点数</li>
+</ul>
+<h3 id="53">5.3 头部插入<a class="headerlink" href="#53" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">DListNode</span><span class="w"> </span><span class="o">*</span><span class="nf">dl_push_front</span><span class="p">(</span><span class="n">DList</span><span class="w"> </span><span class="o">*</span><span class="n">l</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">DListNode</span><span class="w"> </span><span class="o">*</span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">make_node</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">l</span><span class="o">-&gt;</span><span class="n">head</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">l</span><span class="o">-&gt;</span><span class="n">head</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">l</span><span class="o">-&gt;</span><span class="n">tail</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">n</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">next</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">l</span><span class="o">-&gt;</span><span class="n">head</span><span class="p">;</span>
+<span class="w">        </span><span class="n">l</span><span class="o">-&gt;</span><span class="n">head</span><span class="o">-&gt;</span><span class="n">prev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">n</span><span class="p">;</span>
+<span class="w">        </span><span class="n">l</span><span class="o">-&gt;</span><span class="n">head</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">n</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">l</span><span class="o">-&gt;</span><span class="n">size</span><span class="o">++</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">n</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<ul>
+<li>创建新节点</li>
+<li>空链表：head 和 tail 都指向新节点</li>
+<li>非空：新节点的 next 指向旧 head，旧 head 的 prev 指向新节点，head 更新</li>
+<li>返回节点指针（LRU 需要把它存进哈希表）</li>
+</ul>
+<h3 id="54">5.4 脱链（核心辅助操作）<a class="headerlink" href="#54" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">dl_unlink</span><span class="p">(</span><span class="n">DList</span><span class="w"> </span><span class="o">*</span><span class="n">l</span><span class="p">,</span><span class="w"> </span><span class="n">DListNode</span><span class="w"> </span><span class="o">*</span><span class="n">node</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">prev</span><span class="p">)</span><span class="w"> </span><span class="n">node</span><span class="o">-&gt;</span><span class="n">prev</span><span class="o">-&gt;</span><span class="n">next</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">node</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="n">l</span><span class="o">-&gt;</span><span class="n">head</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">node</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">)</span><span class="w"> </span><span class="n">node</span><span class="o">-&gt;</span><span class="n">next</span><span class="o">-&gt;</span><span class="n">prev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">node</span><span class="o">-&gt;</span><span class="n">prev</span><span class="p">;</span>
+<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="n">l</span><span class="o">-&gt;</span><span class="n">tail</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">node</span><span class="o">-&gt;</span><span class="n">prev</span><span class="p">;</span>
+<span class="w">    </span><span class="n">node</span><span class="o">-&gt;</span><span class="n">prev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="w">    </span><span class="n">node</span><span class="o">-&gt;</span><span class="n">next</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="w">    </span><span class="n">l</span><span class="o">-&gt;</span><span class="n">size</span><span class="o">--</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>把节点从链表里摘出来，但不释放内存：
+- 如果 node 有前驱，前驱的 next 跳过 node
+- 否则 node 是 head，head 后移
+- 同理处理 next 和 tail
+- 清空 node 的指针，size 减 1</p>
+<p><strong>这是 LRU 的核心</strong>：访问一个节点时，先 unlink 再 push_front，就把它移到了头部。</p>
+<h3 id="55">5.5 移到头部<a class="headerlink" href="#55" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">dl_move_to_front</span><span class="p">(</span><span class="n">DList</span><span class="w"> </span><span class="o">*</span><span class="n">l</span><span class="p">,</span><span class="w"> </span><span class="n">DListNode</span><span class="w"> </span><span class="o">*</span><span class="n">node</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">node</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">l</span><span class="o">-&gt;</span><span class="n">head</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+<span class="w">    </span><span class="n">dl_unlink</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="w"> </span><span class="n">node</span><span class="p">);</span>
+<span class="w">    </span><span class="n">node</span><span class="o">-&gt;</span><span class="n">next</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">l</span><span class="o">-&gt;</span><span class="n">head</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">l</span><span class="o">-&gt;</span><span class="n">head</span><span class="p">)</span><span class="w"> </span><span class="n">l</span><span class="o">-&gt;</span><span class="n">head</span><span class="o">-&gt;</span><span class="n">prev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">node</span><span class="p">;</span>
+<span class="w">    </span><span class="n">l</span><span class="o">-&gt;</span><span class="n">head</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">node</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">l</span><span class="o">-&gt;</span><span class="n">tail</span><span class="p">)</span><span class="w"> </span><span class="n">l</span><span class="o">-&gt;</span><span class="n">tail</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">node</span><span class="p">;</span>
+<span class="w">    </span><span class="n">l</span><span class="o">-&gt;</span><span class="n">size</span><span class="o">++</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<ul>
+<li>已经是 head 就不用动</li>
+<li>否则先脱链，再插到头部</li>
+<li>全程 $O(1)$，只改几个指针</li>
+</ul>
+<h2 id="6">6. 链表的缓存不友好<a class="headerlink" href="#6" title="Permanent link">&para;</a></h2>
+<p>链表最大的弱点是<strong>遍历时缓存不友好</strong>：</p>
+<ul>
+<li>数组：元素连续，访问 <code>A[i]</code> 时 <code>A[i+1]</code> 已在缓存</li>
+<li>链表：每个节点的下一个节点在哪完全不确定，几乎每次都 miss</li>
+</ul>
+<p>实测：遍历同样多元素，链表比数组慢 5~10 倍（即使操作数相同）。</p>
+<p><strong>这就是 AI 里几乎不用链表存数据的原因</strong>——AI 要大规模遍历（矩阵、张量），链表的缓存不友好是致命的。</p>
+<p>链表在 AI 里只用于<strong>少量、频繁插入删除</strong>的场景，最典型的就是 LRU 缓存（第 02 章）。</p>
+<h2 id="7">7. 与其他数据结构的关系<a class="headerlink" href="#7" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>数组</strong>（第 01 章）：连续内存，$O(1)$ 访问，但插入删除 $O(n)$</li>
+<li><strong>链表</strong>（本章）：指针连接，$O(1)$ 插入删除，但访问 $O(n)$</li>
+<li><strong>哈希表</strong>（第 05 章）：通常用链表做桶（拉链法）</li>
+<li><strong>跳表</strong>（第 12 章）：多层链表，给链表加索引让它 $O(\log n)$ 访问</li>
+</ul>
+<h2 id="8">8. 小结<a class="headerlink" href="#8" title="Permanent link">&para;</a></h2>
+<p>链表的核心：
+1. <strong>指针连接</strong> → $O(1)$ 插入删除
+2. <strong>不连续</strong> → $O(n)$ 随机访问 + 缓存不友好
+3. <strong>双向链表</strong> → 已知节点 $O(1)$ 删除（LRU 的关键）</p>
+<p>链表不是 AI 的主力数据结构（数组才是），但在 LRU 缓存等「频繁插入删除 + 顺序维护」场景不可替代。</p>
+<p>下一篇 <code>ai_application.md</code> 讲：<strong>LRU 缓存怎么用哈希表 + 双向链表实现 $O(1)$ 淘汰，KV Cache 为什么需要它</strong>。</p>
+<hr />
+<h2 id="ai">AI 应用<a class="headerlink" href="#ai" title="Permanent link">&para;</a></h2>
+<h1 id="lru-kv-cache-ai">LRU 缓存与 KV Cache 淘汰：链表在 AI 里的不可替代场景<a class="headerlink" href="#lru-kv-cache-ai" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>本文档讲清「LRU 缓存为什么必须用哈希表 + 双向链表、KV Cache 在长序列推理时怎么淘汰」。原理见 <code>principle.md</code>。</p>
+</blockquote>
+<h2 id="1-kv-cachellm">1. KV Cache：LLM 推理的显存瓶颈<a class="headerlink" href="#1-kv-cachellm" title="Permanent link">&para;</a></h2>
+<h3 id="11-kv-cache">1.1 什么是 KV Cache<a class="headerlink" href="#11-kv-cache" title="Permanent link">&para;</a></h3>
+<p>Transformer 自回归生成时，每生成一个 token，要计算它对所有历史 token 的注意力。如果不缓存，每步都要重算所有历史 token 的 K 和 V，复杂度 $O(n^2)$。</p>
+<p>KV Cache 把每层的 K 和 V 存起来，新 token 只算自己的 K/V 追加进去：</p>
+<div class="highlight"><pre><span></span><code>第 1 步: K=[k1],            V=[v1]
+第 2 步: K=[k1,k2],         V=[v1,v2]
+第 3 步: K=[k1,k2,k3],      V=[v1,v2,v3]
+...
+第 n 步: K=[k1,...,kn],     V=[v1,...,vn]
+</code></pre></div>
+<p>有了 KV Cache，每步注意力是 $O(n)$（新 token 对所有历史），总复杂度 $O(n^2)$ 但常数小很多。</p>
+<h3 id="12-kv-cache">1.2 KV Cache 的显存问题<a class="headerlink" href="#12-kv-cache" title="Permanent link">&para;</a></h3>
+<p>KV Cache 的大小随序列长度线性增长：</p>
+<p>$$
+\text{KV Cache 大小} = 2 \times n_\text{layers} \times n_\text{heads} \times d_\text{head} \times \text{seq_len} \times \text{batch} \times \text{sizeof(elem)}
+$$</p>
+<p>对 LLaMA-7B（32 层，32 头，128 维，batch=1）：
+- 每个 token 的 KV Cache：$2 \times 32 \times 32 \times 128 \times 2\text{B} = 512\text{KB}$
+- 4096 token：$512\text{KB} \times 4096 = 2\text{GB}$
+- 32768 token：$16\text{GB}$</p>
+<p><strong>KV Cache 是长序列推理的显存瓶颈</strong>。batch 多个请求时，显存更紧张。</p>
+<h3 id="13">1.3 为什么需要淘汰<a class="headerlink" href="#13" title="Permanent link">&para;</a></h3>
+<p>当多个请求共享 GPU 时，显存有限，不能所有请求的 KV Cache 都留着。需要淘汰「暂时不活跃」的请求的 KV Cache，给新请求腾空间。</p>
+<p><strong>淘汰策略</strong>：LRU（Least Recently Used）——淘汰最久没访问的。这就是链表 + 哈希表的用武之地。</p>
+<h2 id="2-lru">2. LRU 缓存：哈希表 + 双向链表<a class="headerlink" href="#2-lru" title="Permanent link">&para;</a></h2>
+<h3 id="21-lru">2.1 LRU 的需求<a class="headerlink" href="#21-lru" title="Permanent link">&para;</a></h3>
+<p>LRU 缓存支持两个操作：
+- <code>get(key)</code>：查 key，如果命中则「标记为最近访问」
+- <code>put(key, value)</code>：存 key，如果容量满则淘汰「最久未访问」</p>
+<p>两个操作都要求 $O(1)$。</p>
+<h3 id="22">2.2 朴素实现的瓶颈<a class="headerlink" href="#22" title="Permanent link">&para;</a></h3>
+<p><strong>朴素方案</strong>：用一个 list 维护访问顺序（最近访问在头），一个 dict 存数据。</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">LRUCacheNaive</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>   <span class="c1"># O(n)！要在 list 里找 key</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+</code></pre></div>
+<p><code>list.remove(key)</code> 是 $O(n)$：要在 list 里线性搜索 key 的位置。每次 get 都 $O(n)$，n 次操作总 $O(n^2)$。</p>
+<p><strong>这就是不用链表的代价</strong>：list 的 <code>remove</code> 要先找位置（$O(n)$），再删（$O(n)$ 移动元素）。</p>
+<h3 id="23-o1">2.3 哈希表 + 双向链表的 O(1) 方案<a class="headerlink" href="#23-o1" title="Permanent link">&para;</a></h3>
+<p><strong>核心思路</strong>：
+- <strong>双向链表</strong>维护访问顺序（头 = 最近，尾 = 最久）
+- <strong>哈希表</strong>存 <code>key -&gt; 链表节点</code>，让找节点 $O(1)$</p>
+<div class="highlight"><pre><span></span><code>哈希表: {1: node1, 2: node2, 3: node3}
+链表:   head → [1] → [2] → [3] → tail
+                          ↑ 最近访问 1，淘汰对象 3
+</code></pre></div>
+<p><code>get(key)</code>：
+1. 哈希表找节点：$O(1)$
+2. 把节点移到链表头部：$O(1)$（双向链表，改几个指针）</p>
+<p><code>put(key, value)</code>：
+1. 如果满，删链表尾节点 + 哈希表对应项：$O(1)$
+2. 新节点插到链表头 + 哈希表：$O(1)$</p>
+<p><strong>全程 $O(1)$</strong>。这就是「哈希表 + 双向链表」的威力。</p>
+<h3 id="24">2.4 为什么必须双向链表<a class="headerlink" href="#24" title="Permanent link">&para;</a></h3>
+<p>单链表不行，因为：
+- 淘汰尾节点时，要把尾节点的前驱的 <code>next</code> 置空，但单链表只有 <code>next</code>，找前驱要 $O(n)$
+- <code>move_to_front</code> 时，要脱链（改前驱的 next），单链表找前驱 $O(n)$</p>
+<p>双向链表的 <code>prev</code> 指针让「找前驱」$O(1)$，这是 LRU 的关键。</p>
+<h2 id="3-demo">3. demo 结果解读<a class="headerlink" href="#3-demo" title="Permanent link">&para;</a></h2>
+<h3 id="31-vocab2000-cap800-accesses30000">3.1 性能对比（vocab=2000, cap=800, accesses=30000）<a class="headerlink" href="#31-vocab2000-cap800-accesses30000" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>实现</th>
+<th>耗时 (ms)</th>
+<th>加速比</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>naive_list O(n)</td>
+<td>138.6</td>
+<td>1.00x</td>
+</tr>
+<tr>
+<td>hash+dlist O(1)</td>
+<td>14.7</td>
+<td>9.41x</td>
+</tr>
+<tr>
+<td>OrderedDict (C)</td>
+<td>9.5</td>
+<td>14.64x</td>
+</tr>
+</tbody>
+</table>
+<p><strong>解读</strong>：
+- <strong>朴素 list</strong>：每次 <code>get</code> 要 <code>order.remove(key)</code>（$O(\text{cap})$），30000 次访问 × $O(800)$ = 24M 次操作，慢
+- <strong>哈希表 + 双向链表</strong>：每次 <code>get</code> 是 $O(1)$，但纯 Python 的链表操作（对象创建、指针赋值）有解释器开销，仍比 C 慢
+- <strong>OrderedDict</strong>：Python 内置，C 实现的哈希表 + 双向链表，最快</p>
+<p><strong>关键</strong>：哈希表 + 双向链表比朴素快 <strong>9.4 倍</strong>，这就是数据结构选择的价值。</p>
+<h3 id="32-vs">3.2 命中率 vs 缓存容量<a class="headerlink" href="#32-vs" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>容量</th>
+<th>命中率</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>50</td>
+<td>7.3%</td>
+</tr>
+<tr>
+<td>100</td>
+<td>14.6%</td>
+</tr>
+<tr>
+<td>200</td>
+<td>28.8%</td>
+</tr>
+<tr>
+<td>500</td>
+<td>67.4%</td>
+</tr>
+<tr>
+<td>800</td>
+<td>97.4%</td>
+</tr>
+<tr>
+<td>1000</td>
+<td>97.4%</td>
+</tr>
+</tbody>
+</table>
+<p><strong>解读</strong>：
+- 容量越大，能缓存越多，命中率越高
+- 当容量接近 vocab（1000）时，命中率饱和（几乎所有 key 都在缓存里）
+- <strong>容量 500 是拐点</strong>：从 28% 跳到 67%，说明访问有局部性，热数据约 500 个</p>
+<h3 id="33-vs">3.3 命中率 vs 访问局部性<a class="headerlink" href="#33-vs" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>局部性</th>
+<th>命中率</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.0（均匀随机）</td>
+<td>19.6%</td>
+</tr>
+<tr>
+<td>0.2</td>
+<td>42.2%</td>
+</tr>
+<tr>
+<td>0.4</td>
+<td>48.6%</td>
+</tr>
+<tr>
+<td>0.6</td>
+<td>65.1%</td>
+</tr>
+<tr>
+<td>0.8</td>
+<td>99.1%</td>
+</tr>
+<tr>
+<td>0.95</td>
+<td>99.8%</td>
+</tr>
+</tbody>
+</table>
+<p><strong>解读</strong>：
+- 局部性 = 访问集中在热数据上的程度
+- 局部性越强，LRU 越有效（热数据一直在缓存里）
+- <strong>LLM 推理的 KV Cache 有强局部性</strong>：当前 batch 的请求频繁访问，其他 batch 的请求暂时不访问</p>
+<h2 id="4-kv-cache">4. KV Cache 淘汰的实际场景<a class="headerlink" href="#4-kv-cache" title="Permanent link">&para;</a></h2>
+<h3 id="41-vllm">4.1 vLLM 的淘汰策略<a class="headerlink" href="#41-vllm" title="Permanent link">&para;</a></h3>
+<p>vLLM 是当前最流行的 LLM 推理框架，它的 KV Cache 管理结合了两种数据结构：</p>
+<ol>
+<li><strong>分页内存</strong>（第 11 章 PagedAttention）：解决碎片化</li>
+<li><strong>LRU 淘汰</strong>：当显存满时，淘汰最久没生成的请求的 KV Cache</li>
+</ol>
+<p>当一个请求暂停生成（如等待用户输入），它的 KV Cache 可以被换出到 CPU 内存，给活跃请求腾空间。请求恢复时再换入。这个「换出/换入」的决策就是 LRU。</p>
+<h3 id="42-lru-kv-cache">4.2 为什么 LRU 适合 KV Cache<a class="headerlink" href="#42-lru-kv-cache" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>时间局部性</strong>：最近生成的 token 很可能再被访问（同一请求的后续 token 要对它算注意力）</li>
+<li><strong>空间局部性</strong>：同一请求的 KV Cache 是连续的，一起访问</li>
+<li><strong>冷热分明</strong>：当前生成的请求是热的，暂停的请求是冷的</li>
+</ul>
+<p>LRU 正好捕捉「时间局部性」：最近访问的留着，最久没访问的淘汰。</p>
+<h3 id="43">4.3 其他淘汰策略对比<a class="headerlink" href="#43" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>决策依据</th>
+<th>适合场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LRU</td>
+<td>最久未访问</td>
+<td>通用，时间局部性强</td>
+</tr>
+<tr>
+<td>LFU</td>
+<td>访问次数最少</td>
+<td>长期频率稳定</td>
+</tr>
+<tr>
+<td>FIFO</td>
+<td>最先进入</td>
+<td>实现简单，但不利用局部性</td>
+</tr>
+<tr>
+<td>ARC</td>
+<td>LRU + LFU 自适应</td>
+<td>综合好但实现复杂</td>
+</tr>
+</tbody>
+</table>
+<p>KV Cache 通常用 LRU，因为推理的时间局部性强（当前请求频繁访问，暂停请求不访问）。</p>
+<h2 id="5">5. 生产级实现考量<a class="headerlink" href="#5" title="Permanent link">&para;</a></h2>
+<h3 id="51-python-ordereddict">5.1 Python OrderedDict<a class="headerlink" href="#51-python-ordereddict" title="Permanent link">&para;</a></h3>
+<p>Python 的 <code>OrderedDict</code> 就是 C 实现的哈希表 + 双向链表：</p>
+<div class="highlight"><pre><span></span><code><span class="n">od</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+<span class="n">od</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+<span class="n">od</span><span class="o">.</span><span class="n">move_to_end</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">last</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># 移到头部</span>
+<span class="n">od</span><span class="o">.</span><span class="n">popitem</span><span class="p">(</span><span class="n">last</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>            <span class="c1"># 弹出尾部（最久未访问）</span>
+</code></pre></div>
+<p>源码在 CPython 的 <code>Objects/odictobject.c</code>，用 C 实现了双向链表，所以比纯 Python 快。</p>
+<h3 id="52-functoolslru_cache">5.2 functools.lru_cache<a class="headerlink" href="#52-functoolslru_cache" title="Permanent link">&para;</a></h3>
+<p>Python 还提供了装饰器版本：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">lru_cache</span>
+
+<span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">128</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fib</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span> <span class="k">return</span> <span class="n">n</span>
+    <span class="k">return</span> <span class="n">fib</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">fib</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+</code></pre></div>
+<p>底层也是哈希表 + 双向链表，C 实现。</p>
+<h3 id="53-c-lru">5.3 C++ 的 LRU<a class="headerlink" href="#53-c-lru" title="Permanent link">&para;</a></h3>
+<p>C++ 标准库没有现成的 LRU，但可以用 <code>unordered_map</code> + <code>list</code>：</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">LRUCache</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">list</span><span class="o">&lt;</span><span class="n">pair</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="kt">int</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">l</span><span class="p">;</span>
+<span class="w">    </span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">list</span><span class="o">&lt;</span><span class="n">pair</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="kt">int</span><span class="o">&gt;&gt;::</span><span class="n">iterator</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">cap</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">get</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">key</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="n">key</span><span class="p">);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">it</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">m</span><span class="p">.</span><span class="n">end</span><span class="p">())</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span>
+<span class="w">        </span><span class="n">l</span><span class="p">.</span><span class="n">splice</span><span class="p">(</span><span class="n">l</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span><span class="w"> </span><span class="n">l</span><span class="p">,</span><span class="w"> </span><span class="n">it</span><span class="o">-&gt;</span><span class="n">second</span><span class="p">);</span><span class="w">  </span><span class="c1">// O(1) 移到头部</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">it</span><span class="o">-&gt;</span><span class="n">second</span><span class="o">-&gt;</span><span class="n">second</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">};</span>
+</code></pre></div>
+<p><code>list::splice</code> 是 $O(1)$ 的指针操作，这正是双向链表的优势。</p>
+<h2 id="6-ai">6. 链表在 AI 里的其他应用<a class="headerlink" href="#6-ai" title="Permanent link">&para;</a></h2>
+<p>除了 LRU，链表在 AI 里还有少量应用：</p>
+<ul>
+<li><strong>自由链表</strong>（内存分配器）：空闲块用链表管理，分配/释放 $O(1)$</li>
+<li><strong>图的邻接表</strong>（第 09 章）：每个顶点的邻居用链表存（但实践中常用 vector）</li>
+<li><strong>梯度累积</strong>：某些框架用链表存历史梯度（但常用数组）</li>
+</ul>
+<p><strong>总体而言，链表在 AI 里是辅助角色</strong>，主力是数组（张量）。但 LRU 这个场景，链表不可替代。</p>
+<h2 id="7_1">7. 与其他章节的关联<a class="headerlink" href="#7_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>数组</strong>（第 01 章）：KV Cache 底层存储用数组（分块），链表只管淘汰顺序</li>
+<li><strong>哈希表</strong>（第 05 章）：LRU 的另一半，$O(1)$ 找节点</li>
+<li><strong>PagedAttention</strong>（第 11 章）：KV Cache 的分页管理，和 LRU 淘汰结合</li>
+</ul>
+<h2 id="8_1">8. 小结<a class="headerlink" href="#8_1" title="Permanent link">&para;</a></h2>
+<p>LRU 缓存的核心：
+1. <strong>KV Cache 是长序列推理的显存瓶颈</strong>，需要淘汰
+2. <strong>朴素 list LRU 是 $O(n)$</strong>，长序列下不可接受
+3. <strong>哈希表 + 双向链表实现 $O(1)$</strong>，快 9~15 倍
+4. <strong>双向链表的 <code>prev</code> 指针</strong>让脱链 $O(1)$，这是关键
+5. <strong>命中率随容量和局部性增长</strong>，LRU 捕捉时间局部性</p>
+<p>链表在 AI 里不是主力，但在 LRU 这个「频繁插入删除 + 顺序维护」场景不可替代。这就是数据结构选择的价值：用对结构，性能差 10 倍。</p>
+<p>下一篇：第 03 章 栈，讲自动微分反向传播栈。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.indexes", "navigation.tracking", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

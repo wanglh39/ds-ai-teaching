@@ -1,0 +1,2481 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="从底层实现到生产级应用——数据结构在 AI 系统优化与应用工程中的真实作用">
+      
+      
+        <meta name="author" content="wanglh39">
+      
+      
+        <link rel="canonical" href="https://wanglh39.github.io/ds-ai-teaching/ch09/">
+      
+      
+        <link rel="prev" href="../ch08/">
+      
+      
+        <link rel="next" href="../ch10/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>09 图 - 数据结构 × AI 优化</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+SC:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans SC";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#09" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href=".." title="数据结构 × AI 优化" class="md-header__button md-logo" aria-label="数据结构 × AI 优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            数据结构 × AI 优化
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              09 图
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换至暗色模式"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换至暗色模式" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换至亮色模式"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换至亮色模式" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/wanglh39/ds-ai-teaching" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wanglh39/ds-ai-teaching
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  首页
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../intro/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  项目介绍
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../ch01/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  视角 A·系统优化
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../ch13/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  视角 B·应用工程
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../benchmarks/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  性能汇总
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="数据结构 × AI 优化" class="md-nav__button md-logo" aria-label="数据结构 × AI 优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    数据结构 × AI 优化
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/wanglh39/ds-ai-teaching" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wanglh39/ds-ai-teaching
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    首页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    项目介绍
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    项目介绍
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    设计思路
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../map/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    章节映射
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dual_view/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    双视角说明
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cross_index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    交叉索引
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    视角 A·系统优化
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    视角 A·系统优化
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 动态数组
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch02/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 链表
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch03/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 栈
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch04/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 循环队列
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch05/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05 哈希表
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch06/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 堆
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch07/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    07 Trie
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch08/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    08 KD-Tree
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    09 图
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    09 图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要回答的问题
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        状态
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原理
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch10/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10 并查集
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch11/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11 页表/分块内存
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch12/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12 跳表+图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    视角 B·应用工程
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    视角 B·应用工程
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch13/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13 多智能体编排
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch14/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    14 任务调度与批处理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch15/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    15 上下文工程与记忆
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch16/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    16 RAG 与知识检索
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch17/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    17 数据管道与流式处理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch18/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    18 模型部署与推理服务
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch19/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    19 状态机与工作流
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch20/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    20 模型压缩
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    性能汇总
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要回答的问题
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        状态
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原理
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="09">第 09 章 · 图<a class="headerlink" href="#09" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>数据结构：图（邻接表 + 邻接矩阵）
+AI 优化：PageRank + GNN 消息传递</p>
+</blockquote>
+<h2 id="_1">本章要回答的问题<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>稀疏图为什么必须用邻接表？</li>
+<li>GNN 消息传递怎么对应到图的边遍历？</li>
+<li>PageRank 的迭代怎么用图结构加速？</li>
+</ul>
+<h2 id="_2">目录<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>09_graph/
+├── c/                   # 图的 C 实现
+├── python/              # PageRank + GNN 消息传递 demo
+├── docs/
+│   ├── principle.md
+│   └── ai_application.md
+└── figures/
+</code></pre></div>
+<h2 id="_3">状态<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p>🚧 待填充</p>
+<hr />
+<h2 id="_4">原理<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<h1 id="graph-vs">图（Graph）原理：邻接表 vs 邻接矩阵<a class="headerlink" href="#graph-vs" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>本文档讲清「图是什么、两种表示（邻接表 vs 邻接矩阵）在空间/查找/遍历上的差异、稀疏图为什么必须用邻接表、C 实现逐行讲解、复杂度」。AI 应用（PageRank + GNN 消息传递）见 <code>ai_application.md</code>。</p>
+</blockquote>
+<h2 id="1">1. 图的定义：关系的数据结构<a class="headerlink" href="#1" title="Permanent link">&para;</a></h2>
+<p><strong>图</strong>（Graph）是表达<strong>实体间关系</strong>的最通用的数据结构。一个图 $G = (V, E)$ 由两部分组成：</p>
+<ul>
+<li><strong>顶点集</strong> $V$（vertices）：n 个实体，如网页、用户、神经元</li>
+<li><strong>边集</strong> $E$（edges）：实体间的关系，每条边连接一对顶点 $(u, v)$</li>
+</ul>
+<div class="highlight"><pre><span></span><code>无向图（朋友关系）:          有向图（网页链接）:
+
+    0 --- 1                    0 → 1
+    | \ /                      ↓   ↓
+    |  2                       2 ← 3
+    | /                        ↑
+    3                          4 → 2
+
+  V = {0,1,2,3,4}             V = {0,1,2,3,4}
+  E = {01,02,12,13,23,24}     E = {0→1, 0→2, 1→3, 3→2, 4→2}
+</code></pre></div>
+<p>图能表达的关系远比线性表、树丰富：树是「每个节点一个父节点」的特殊图，线性表是「每个节点最多一个后继」的更特殊图。社交网络、网页链接、知识图谱、分子结构、神经网络拓扑——都是图。</p>
+<h3 id="11">1.1 两个核心维度：有向性 + 稀疏性<a class="headerlink" href="#11" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>取值</th>
+<th>影响</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>有向性</td>
+<td>有向 / 无向</td>
+<td>无向边 $(u,v)$ 和 $(v,u)$ 是同一条；有向边有方向</td>
+</tr>
+<tr>
+<td>稀疏性</td>
+<td>稀疏 / 稠密</td>
+<td>由边数 $|E|$ 相对 $|V|^2$ 的比例决定</td>
+</tr>
+</tbody>
+</table>
+<p><strong>稀疏图</strong>：$|E| \ll |V|^2$，即大部分顶点对之间没有边。现实中的图几乎都是稀疏的：</p>
+<ul>
+<li>网页图：千亿网页，但每个页面平均只有几十个出链</li>
+<li>社交网络：十亿用户，但每人平均几百个好友（远小于十亿）</li>
+<li>知识图谱：百万实体，每个实体平均几十条关系</li>
+</ul>
+<p><strong>稠密图</strong>：$|E| \approx |V|^2$，大部分顶点对都有边。现实中少见，典型是完全图（所有顶点互连）。</p>
+<p>稀疏性直接决定<strong>用哪种表示</strong>——这正是本文的核心。</p>
+<h2 id="2-vs">2. 两种表示：邻接表 vs 邻接矩阵<a class="headerlink" href="#2-vs" title="Permanent link">&para;</a></h2>
+<p>给定图 $G = (V, E)$，$|V| = n$，两种存储方式：</p>
+<h3 id="21-adjacency-list">2.1 邻接表（Adjacency List）<a class="headerlink" href="#21-adjacency-list" title="Permanent link">&para;</a></h3>
+<p>每个顶点维护一个<strong>链表/动态数组</strong>，存它的所有邻居。</p>
+<div class="highlight"><pre><span></span><code>图:  0---1
+     | \|
+     2---3
+
+邻接表:
+  0 → [1, 2, 3]
+  1 → [0, 3]
+  2 → [0, 3]
+  3 → [0, 1, 2]
+</code></pre></div>
+<p>空间：$O(|V| + |E|)$。每条边在无向图里存两次（$u$ 的表里有 $v$，$v$ 的表里有 $u$），有向图存一次。</p>
+<h3 id="22-adjacency-matrix">2.2 邻接矩阵（Adjacency Matrix）<a class="headerlink" href="#22-adjacency-matrix" title="Permanent link">&para;</a></h3>
+<p>$n \times n$ 的二维数组 $A$，$A[u][v] = 1$ 表示有边 $(u,v)$，$0$ 表示无边。</p>
+<div class="highlight"><pre><span></span><code>图:  0---1
+     | \|
+     2---3
+
+邻接矩阵:
+       0  1  2  3
+    0 [ 0  1  1  1 ]
+    1 [ 1  0  0  1 ]
+    2 [ 1  0  0  1 ]
+    3 [ 1  1  1  0 ]
+</code></pre></div>
+<p>空间：$O(|V|^2)$，不管有没有边都要存。无向图的矩阵是对称的。</p>
+<h3 id="23">2.3 三维对比：空间 / 查找 / 遍历<a class="headerlink" href="#23" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>邻接表</th>
+<th>邻接矩阵</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>空间</strong></td>
+<td>$O(|V|+|E|)$</td>
+<td>$O(|V|^2)$</td>
+<td>稀疏图 $|E| \ll |V|^2$，邻接表省巨量空间</td>
+</tr>
+<tr>
+<td><strong>查边 $(u,v)$ 是否存在</strong></td>
+<td>$O(\deg(u))$</td>
+<td>$O(1)$</td>
+<td>邻接矩阵直接下标；邻接表要扫 $u$ 的邻居链表</td>
+</tr>
+<tr>
+<td><strong>遍历 $u$ 的所有邻居</strong></td>
+<td>$O(\deg(u))$</td>
+<td>$O(|V|)$</td>
+<td>邻接表只碰实际邻居；矩阵要扫整行（含 0）</td>
+</tr>
+<tr>
+<td><strong>加边</strong></td>
+<td>$O(1)$</td>
+<td>$O(1)$</td>
+<td>都快，邻接表 push 到链表尾，矩阵置 1</td>
+</tr>
+<tr>
+<td><strong>遍历所有边</strong></td>
+<td>$O(|V|+|E|)$</td>
+<td>$O(|V|^2)$</td>
+<td>邻接表只碰真实边；矩阵扫所有 $n^2$ 格</td>
+</tr>
+</tbody>
+</table>
+<p>关键洞察：</p>
+<ol>
+<li><strong>邻接矩阵查边快</strong> $O(1)$，但代价是 $O(V^2)$ 空间</li>
+<li><strong>邻接表遍历邻居快</strong> $O(\deg(u))$，只碰实际存在的边——这是 PageRank、GNN 等图算法的核心操作</li>
+<li><strong>稀疏图下邻接表空间完胜</strong>：$|E| = O(V)$ 时，邻接表 $O(V)$，矩阵 $O(V^2)$，差 $V$ 倍</li>
+</ol>
+<h3 id="24">2.4 一个具体数字<a class="headerlink" href="#24" title="Permanent link">&para;</a></h3>
+<p>n=1000 顶点，边数=5000（平均度 10，密度 0.01）：</p>
+<table>
+<thead>
+<tr>
+<th>表示</th>
+<th>内存</th>
+<th>遍历所有边</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>邻接表</td>
+<td>~286 KB</td>
+<td>5000 条边</td>
+</tr>
+<tr>
+<td>邻接矩阵</td>
+<td>~7812 KB</td>
+<td>100 万格（99% 是 0）</td>
+</tr>
+<tr>
+<td>CSR 稀疏矩阵</td>
+<td>~121 KB</td>
+<td>5000 条边</td>
+</tr>
+</tbody>
+</table>
+<p>邻接矩阵用了 <strong>27 倍</strong>内存，遍历时还要扫 100 万格里的 99 万个 0。这就是稀疏图必须用邻接表的根本原因。</p>
+<h2 id="3-vs">3. 稀疏图 vs 稠密图：怎么选<a class="headerlink" href="#3-vs" title="Permanent link">&para;</a></h2>
+<h3 id="31">3.1 选择准则<a class="headerlink" href="#31" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>边数 |E| 相对 |V|²:
+  |E| &lt;&lt; |V|²  → 稀疏 → 邻接表（省空间，遍历只碰真实边）
+  |E| ≈ |V|²   → 稠密 → 邻接矩阵（查边 O(1)，空间不浪费）
+</code></pre></div>
+<p>具体阈值：当 $|E| &gt; |V|^2 / \text{指针大小}$ 时，邻接表的空间优势消失（每条边的指针开销赶上矩阵的一个格）。64 位系统下大约 $|E| &gt; |V|^2 / 8$ 时考虑用矩阵。</p>
+<h3 id="32">3.2 现实中的图几乎都是稀疏的<a class="headerlink" href="#32" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>图</th>
+<th>$|V|$</th>
+<th>平均度 $|E|/|V|$</th>
+<th>密度 $|E|/|V|^2$</th>
+<th>稀疏?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>网页链接</td>
+<td>~$10^{11}$</td>
+<td>~30</td>
+<td>~$10^{-10}$</td>
+<td>极稀疏</td>
+</tr>
+<tr>
+<td>Twitter</td>
+<td>~$3 \times 10^8$</td>
+<td>~100</td>
+<td>~$10^{-7}$</td>
+<td>极稀疏</td>
+</tr>
+<tr>
+<td>蛋白质相互作用</td>
+<td>~$10^4$</td>
+<td>~5</td>
+<td>~$10^{-4}$</td>
+<td>稀疏</td>
+</tr>
+<tr>
+<td>完全图 $K_n$</td>
+<td>$n$</td>
+<td>$n-1$</td>
+<td>~1</td>
+<td>稠密</td>
+</tr>
+</tbody>
+</table>
+<p>所以<strong>图算法的默认选择是邻接表</strong>。邻接矩阵只在稠密图或需要频繁 $O(1)$ 查边时用。</p>
+<h3 id="33-csr">3.3 CSR：邻接表的紧凑数组存储<a class="headerlink" href="#33-csr" title="Permanent link">&para;</a></h3>
+<p>生产级图库（GraphBLAS、GNN 框架）用 <strong>CSR（Compressed Sparse Row）</strong> 格式，本质是邻接表的数组化：</p>
+<div class="highlight"><pre><span></span><code>邻接表:                   CSR:
+  0 → [1, 2, 3]           data    = [1, 2, 3, 0, 3, 0, 3, 0, 1, 2]
+  1 → [0, 3]              indices = [1, 2, 3, 0, 3, 0, 3, 0, 1, 2]
+  2 → [0, 3]              indptr  = [0, 3, 5, 7, 10]
+  3 → [0, 1, 2]
+                           顶点 u 的邻居 = indices[indptr[u]:indptr[u+1]]
+</code></pre></div>
+<p>三个数组：
+- <code>data</code>：所有边的目标顶点，连续存储
+- <code>indices</code>：邻居顶点编号
+- <code>indptr</code>：每行起始位置，长度 $|V|+1$</p>
+<p>CSR 的优势：</p>
+<ol>
+<li><strong>空间最优</strong>：没有链表指针开销，纯数组，$O(|V|+|E|)$ 且常数小</li>
+<li><strong>缓存友好</strong>：连续内存，CPU 缓存命中率高</li>
+<li><strong>C/Fortran 层运算</strong>：scipy.sparse、PyG、DGL 都用 CSR 接 BLAS 级稀疏运算</li>
+</ol>
+<p>本 demo 的 CSR 版（scipy.sparse）在 PageRank 上比 dense 矩阵快 16x，比纯 Python 邻接表快 58x——既省内存又快。</p>
+<h2 id="4-c">4. C 实现逐行讲解<a class="headerlink" href="#4-c" title="Permanent link">&para;</a></h2>
+<p>本实现用邻接表，文件 <code>09_graph/c/graph.h</code> + <code>graph.c</code>。</p>
+<h3 id="41-graphh">4.1 数据结构（graph.h）<a class="headerlink" href="#41-graphh" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">size</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">capacity</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="n">AdjList</span><span class="p">;</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">n_vertices</span><span class="p">;</span>
+<span class="w">    </span><span class="n">AdjList</span><span class="w"> </span><span class="o">*</span><span class="n">adj</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">directed</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="n">Graph</span><span class="p">;</span>
+</code></pre></div>
+<ul>
+<li><code>AdjList</code>：动态数组存邻居顶点号。<code>data</code> 是 int 数组，<code>size</code> 当前长度，<code>capacity</code> 容量</li>
+<li><code>Graph</code>：<code>n_vertices</code> 个 <code>AdjList</code>，每个顶点一个。<code>directed</code> 标记有向/无向</li>
+</ul>
+<p>用动态数组而非链表存邻居，原因：缓存友好、随机访问 $O(1)$、无指针开销。这是现代图库的标配做法。</p>
+<h3 id="42-graphc">4.2 初始化和释放（graph.c）<a class="headerlink" href="#42-graphc" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">graph_init</span><span class="p">(</span><span class="n">Graph</span><span class="w"> </span><span class="o">*</span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">n_vertices</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">directed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">g</span><span class="o">-&gt;</span><span class="n">n_vertices</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">n_vertices</span><span class="p">;</span>
+<span class="w">    </span><span class="n">g</span><span class="o">-&gt;</span><span class="n">directed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">directed</span><span class="p">;</span>
+<span class="w">    </span><span class="n">g</span><span class="o">-&gt;</span><span class="n">adj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">AdjList</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">calloc</span><span class="p">(</span><span class="n">n_vertices</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">AdjList</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">graph_free</span><span class="p">(</span><span class="n">Graph</span><span class="w"> </span><span class="o">*</span><span class="n">g</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">g</span><span class="o">-&gt;</span><span class="n">n_vertices</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">free</span><span class="p">(</span><span class="n">g</span><span class="o">-&gt;</span><span class="n">adj</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">data</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">free</span><span class="p">(</span><span class="n">g</span><span class="o">-&gt;</span><span class="n">adj</span><span class="p">);</span>
+<span class="w">    </span><span class="n">g</span><span class="o">-&gt;</span><span class="n">adj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="w">    </span><span class="n">g</span><span class="o">-&gt;</span><span class="n">n_vertices</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>calloc</code> 把每个 <code>AdjList</code> 的 <code>data/size/capacity</code> 都清零，初始状态所有顶点度数为 0。释放时先释放每个顶点的邻居数组，再释放顶点数组本身。</p>
+<h3 id="43-graph_add_edge">4.3 加边（graph_add_edge）<a class="headerlink" href="#43-graph_add_edge" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">adj_push</span><span class="p">(</span><span class="n">AdjList</span><span class="w"> </span><span class="o">*</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="o">-&gt;</span><span class="n">size</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">a</span><span class="o">-&gt;</span><span class="n">capacity</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">size_t</span><span class="w"> </span><span class="n">new_cap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="o">-&gt;</span><span class="n">capacity</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">a</span><span class="o">-&gt;</span><span class="n">capacity</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="n">new_data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">realloc</span><span class="p">(</span><span class="n">a</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">new_cap</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">));</span>
+<span class="w">        </span><span class="n">a</span><span class="o">-&gt;</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">new_data</span><span class="p">;</span>
+<span class="w">        </span><span class="n">a</span><span class="o">-&gt;</span><span class="n">capacity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">new_cap</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">a</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">a</span><span class="o">-&gt;</span><span class="n">size</span><span class="o">++</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">graph_add_edge</span><span class="p">(</span><span class="n">Graph</span><span class="w"> </span><span class="o">*</span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">adj_push</span><span class="p">(</span><span class="o">&amp;</span><span class="n">g</span><span class="o">-&gt;</span><span class="n">adj</span><span class="p">[</span><span class="n">u</span><span class="p">],</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">g</span><span class="o">-&gt;</span><span class="n">directed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">adj_push</span><span class="p">(</span><span class="o">&amp;</span><span class="n">g</span><span class="o">-&gt;</span><span class="n">adj</span><span class="p">[</span><span class="n">v</span><span class="p">],</span><span class="w"> </span><span class="n">u</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>adj_push</code> 是动态数组的倍增扩容：满了就 <code>realloc</code> 两倍容量。初始容量 4，扩容策略保证均摊 $O(1)$ 加边。</p>
+<p><code>graph_add_edge</code>：无向图加两条（$u \to v$ 和 $v \to u$），有向图只加一条。这是两种图的唯一区别。</p>
+<h3 id="44">4.4 查边和遍历<a class="headerlink" href="#44" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="nf">graph_has_edge</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Graph</span><span class="w"> </span><span class="o">*</span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">adj_contains</span><span class="p">(</span><span class="o">&amp;</span><span class="n">g</span><span class="o">-&gt;</span><span class="n">adj</span><span class="p">[</span><span class="n">u</span><span class="p">],</span><span class="w"> </span><span class="n">v</span><span class="p">);</span><span class="w">  </span><span class="c1">// 扫 u 的邻居链表</span>
+<span class="p">}</span>
+
+<span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="nf">graph_neighbors</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Graph</span><span class="w"> </span><span class="o">*</span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="o">*</span><span class="n">out_count</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="o">*</span><span class="n">out_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">g</span><span class="o">-&gt;</span><span class="n">adj</span><span class="p">[</span><span class="n">u</span><span class="p">].</span><span class="n">size</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">g</span><span class="o">-&gt;</span><span class="n">adj</span><span class="p">[</span><span class="n">u</span><span class="p">].</span><span class="n">data</span><span class="p">;</span><span class="w">  </span><span class="c1">// 返回邻居数组指针 + 长度</span>
+<span class="p">}</span>
+
+<span class="kt">size_t</span><span class="w"> </span><span class="nf">graph_degree</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Graph</span><span class="w"> </span><span class="o">*</span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">u</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">g</span><span class="o">-&gt;</span><span class="n">adj</span><span class="p">[</span><span class="n">u</span><span class="p">].</span><span class="n">size</span><span class="p">;</span><span class="w">  </span><span class="c1">// O(1)</span>
+<span class="p">}</span>
+</code></pre></div>
+<ul>
+<li><code>has_edge</code>：$O(\deg(u))$ 线性扫邻居。如果频繁查边，可对每个邻居数组排序后二分 $O(\log \deg)$，或换哈希表 $O(1)$</li>
+<li><code>neighbors</code>：返回邻居数组指针和长度，调用方直接遍历连续内存，缓存友好</li>
+<li><code>degree</code>：$O(1)$，动态数组的 <code>size</code> 就是度数</li>
+</ul>
+<h3 id="45-testc">4.5 测试（test.c）<a class="headerlink" href="#45-testc" title="Permanent link">&para;</a></h3>
+<p>测试覆盖：</p>
+<ul>
+<li><code>test_init_free</code>：初始化 + 释放，验证初始度数全 0</li>
+<li><code>test_add_edge_undirected</code>：无向图加边，验证双向都有</li>
+<li><code>test_add_edge_directed</code>：有向图加边，验证单向</li>
+<li><code>test_has_edge_nonexistent</code>：查不存在的边返回 0</li>
+<li><code>test_neighbors_traversal</code>：遍历邻居，验证邻居集合正确</li>
+<li><code>test_self_loop</code> / <code>test_self_loop_undirected</code>：自环</li>
+<li><code>test_complete_graph</code>：5 顶点完全图，每顶点度数 4</li>
+<li><code>test_handshake_lemma</code>：握手定理 $\sum \deg = 2|E|$，无向图核心不变量</li>
+<li><code>test_directed_handshake</code>：有向图 $\sum \deg_{\text{out}} = |E|$</li>
+<li><code>test_path_traversal</code>：沿有向路径 0→1→2→3→4→5 走一遍</li>
+<li><code>test_star_graph</code>：星形图，中心度数 5，叶子度数 1</li>
+</ul>
+<p><strong>握手定理</strong>（handshake lemma）是图最基本的不变量：无向图所有顶点度数之和等于边数的两倍。测试用随机图验证这个恒等式，是检查加边实现正确性的强约束。</p>
+<h2 id="5">5. 复杂度<a class="headerlink" href="#5" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>邻接表</th>
+<th>邻接矩阵</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>空间</td>
+<td>$O(|V|+|E|)$</td>
+<td>$O(|V|^2)$</td>
+</tr>
+<tr>
+<td>加边</td>
+<td>$O(1)$</td>
+<td>$O(1)$</td>
+</tr>
+<tr>
+<td>删边</td>
+<td>$O(\deg(u))$</td>
+<td>$O(1)$</td>
+</tr>
+<tr>
+<td>查边 $(u,v)$</td>
+<td>$O(\deg(u))$</td>
+<td>$O(1)$</td>
+</tr>
+<tr>
+<td>顶点 $u$ 的度</td>
+<td>$O(1)$</td>
+<td>$O(|V|)$（数 1）或 $O(1)$（维护）</td>
+</tr>
+<tr>
+<td>遍历 $u$ 的邻居</td>
+<td>$O(\deg(u))$</td>
+<td>$O(|V|)$</td>
+</tr>
+<tr>
+<td>遍历所有边</td>
+<td>$O(|V|+|E|)$</td>
+<td>$O(|V|^2)$</td>
+</tr>
+<tr>
+<td>BFS / DFS</td>
+<td>$O(|V|+|E|)$</td>
+<td>$O(|V|^2)$</td>
+</tr>
+</tbody>
+</table>
+<p><strong>图算法的复杂度几乎都含 $|V|+|E|$ 项</strong>（BFS、DFS、PageRank、GNN 消息传递都是）。邻接表让这些算法达到理论最优 $O(|V|+|E|)$；邻接矩阵让它们退化到 $O(|V|^2)$，稀疏图上白白扫大量 0。</p>
+<h2 id="6-vs">6. 邻接表 vs 邻接矩阵：什么时候用哪个<a class="headerlink" href="#6-vs" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>选谁</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>稀疏图 + 遍历为主</strong>（PageRank、GNN、BFS）</td>
+<td>邻接表</td>
+<td>$O(|V|+|E|)$ 只碰真实边</td>
+</tr>
+<tr>
+<td><strong>稠密图</strong>（$|E| \approx |V|^2$）</td>
+<td>邻接矩阵</td>
+<td>空间不浪费，查边 $O(1)$</td>
+</tr>
+<tr>
+<td><strong>频繁查边</strong>（$(u,v)$ 是否存在）</td>
+<td>邻接矩阵</td>
+<td>$O(1)$ vs $O(\deg)$</td>
+</tr>
+<tr>
+<td><strong>频繁加删边</strong></td>
+<td>邻接表（链表）</td>
+<td>矩阵删边 $O(1)$ 但空间固定 $O(V^2)$</td>
+</tr>
+<tr>
+<td><strong>超大图</strong>（内存受限）</td>
+<td>邻接表 / CSR</td>
+<td>$O(|V|+|E|)$ 空间</td>
+</tr>
+<tr>
+<td><strong>需要矩阵运算</strong>（谱聚类、矩阵幂）</td>
+<td>邻接矩阵</td>
+<td>直接用 BLAS</td>
+</tr>
+</tbody>
+</table>
+<p><strong>AI 场景的默认选择</strong>：图神经网络、PageRank、随机游走——全是稀疏图 + 遍历为主，一律邻接表（或 CSR）。这也是 PyG、DGL 等框架底层的做法。</p>
+<h2 id="7-csr">7. 从邻接表到 CSR：生产级的进化<a class="headerlink" href="#7-csr" title="Permanent link">&para;</a></h2>
+<p>教学版的邻接表（每顶点一个动态数组/链表）有指针开销、缓存不友好。生产级图库用 <strong>CSR</strong> 把邻接表压成三个连续数组：</p>
+<div class="highlight"><pre><span></span><code>邻接表（教学版）:              CSR（生产版）:
+  0 → [1,2,3]  (链表/动态数组)   data   = [1,2,3,0,3,0,3,0,1,2]
+  1 → [0,3]                     indptr  = [0, 3, 5, 7, 10]
+  2 → [0,3]                     
+  3 → [0,1,2]                   顶点 u 的邻居 = data[indptr[u]:indptr[u+1]]
+</code></pre></div>
+<p>CSR 的本质：把邻接表的「每顶点一个独立数组」拍平成「一个大数组 + 偏移表」。好处：</p>
+<ol>
+<li><strong>无指针开销</strong>：纯数组，每条边只存一个 int（4 字节），邻接表的动态数组有 header + capacity 浪费</li>
+<li><strong>缓存友好</strong>：遍历某顶点邻居是连续内存读取，CPU 缓存行命中率高</li>
+<li><strong>接 BLAS</strong>：CSR 是稀疏矩阵的标准格式，scipy.sparse、PyG、DGL 都用 CSR 接 C/Fortran 层稀疏运算</li>
+</ol>
+<p>本 demo 实测（n=1000, 边=5000）：</p>
+<table>
+<thead>
+<tr>
+<th>表示</th>
+<th>内存</th>
+<th>PageRank 50 轮</th>
+<th>GNN 消息传递</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>邻接表（dict + ndarray）</td>
+<td>286 KB</td>
+<td>93 ms</td>
+<td>5.8 ms</td>
+</tr>
+<tr>
+<td>邻接矩阵（dense）</td>
+<td>7812 KB</td>
+<td>23 ms</td>
+<td>1.15 ms</td>
+</tr>
+<tr>
+<td>CSR（scipy.sparse）</td>
+<td>121 KB</td>
+<td>1.6 ms</td>
+<td>0.19 ms</td>
+</tr>
+</tbody>
+</table>
+<p>CSR 内存最小（121 KB）、速度最快（PageRank 1.6ms，GNN 0.19ms）。纯 Python 邻接表虽然逻辑 $O(|V|+|E|)$，但 Python 循环常数太大；dense 矩阵靠 BLAS 向量化快但 $O(V^2)$ 内存；CSR 兼顾两者优势——$O(|V|+|E|)$ 空间 + C 层运算速度。</p>
+<p><strong>结论</strong>：邻接表是稀疏图正确的数据结构，CSR 是它的生产级形态。下一章的 AI 应用会看到 PageRank 和 GNN 都建立在「沿边聚合」上，邻接表/CSR 让聚合只碰真实存在的边。</p>
+<hr />
+<h2 id="ai">AI 应用<a class="headerlink" href="#ai" title="Permanent link">&para;</a></h2>
+<h1 id="ai-pagerank-gnn">图的 AI 应用：PageRank + GNN 消息传递<a class="headerlink" href="#ai-pagerank-gnn" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>本文档讲清「图在 AI 里干什么」。原理见 <code>principle.md</code>。两个核心应用：<strong>PageRank</strong>（网页排名，图上随机游走）和 <strong>GNN 消息传递</strong>（图神经网络，沿边聚合邻居特征）。两者本质都是「沿边聚合」，邻接表让聚合只碰真实存在的边 $O(|V|+|E|)$，邻接矩阵则扫整个 $O(|V|^2)$——稀疏图上差距巨大。</p>
+</blockquote>
+<h2 id="1-pagerank">1. PageRank：图上随机游走<a class="headerlink" href="#1-pagerank" title="Permanent link">&para;</a></h2>
+<p><strong>PageRank</strong> 是 Google 创始人 Larry Page 1998 年提出的网页排名算法，核心思想：<strong>一个网页重要，如果有很多重要网页链接到它</strong>。这是图上随机游走的平稳分布。</p>
+<h3 id="11_1">1.1 从「投票」到迭代<a class="headerlink" href="#11_1" title="Permanent link">&para;</a></h3>
+<p>把网页看成顶点，超链接看成有向边，整个网页图是一个有向图。PageRank 的直觉：</p>
+<ul>
+<li>每个网页把自己的「重要度」均分给所有出链指向的网页</li>
+<li>每个网页的重要度 = 收到的所有贡献之和</li>
+</ul>
+<p>数学上，网页 $v$ 的 PageRank：</p>
+<p>$$PR(v) = \frac{1-d}{n} + d \sum_{u \in \text{in}(v)} \frac{PR(u)}{\deg_{\text{out}}(u)}$$</p>
+<ul>
+<li>$n$：网页总数</li>
+<li>$d$：阻尼系数（通常 0.85），表示用户有 85% 概率沿链接走、15% 概率随机跳到任意页</li>
+<li>$\text{in}(v)$：指向 $v$ 的所有网页</li>
+<li>$\deg_{\text{out}}(u)$：$u$ 的出链数</li>
+</ul>
+<p>$(1-d)/n$ 是「随机跳转」项，保证每个页都有基础分；求和项是「沿链接走」的贡献。</p>
+<h3 id="12">1.2 迭代求解<a class="headerlink" href="#12" title="Permanent link">&para;</a></h3>
+<p>PageRank 是不动点方程，用<strong>幂迭代</strong>求解：</p>
+<div class="highlight"><pre><span></span><code>PR = [1/n, 1/n, ..., 1/n]  # 初始均匀
+repeat iters:
+    new_PR = [(1-d)/n, ...]  # 随机跳转项
+    for each vertex u:
+        share = d * PR[u] / deg_out(u)
+        for each v in out_neighbors(u):  # 沿出边推送
+            new_PR[v] += share
+    PR = new_PR
+</code></pre></div>
+<p>每轮迭代，每个顶点把自己的 PR 值沿出边推给邻居。<strong>核心操作是遍历所有边</strong>——这正是邻接表的强项。</p>
+<h3 id="13-vs">1.3 邻接表版 vs 邻接矩阵版<a class="headerlink" href="#13-vs" title="Permanent link">&para;</a></h3>
+<p><strong>邻接表版</strong>（<code>pagerank_adj</code>）：</p>
+<div class="highlight"><pre><span></span><code><span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="n">share</span> <span class="o">=</span> <span class="n">damping</span> <span class="o">*</span> <span class="n">pr</span><span class="p">[</span><span class="n">u</span><span class="p">]</span> <span class="o">/</span> <span class="n">out_degree</span><span class="p">[</span><span class="n">u</span><span class="p">]</span>
+    <span class="n">new_pr</span><span class="p">[</span><span class="n">adj_array</span><span class="p">[</span><span class="n">u</span><span class="p">]]</span> <span class="o">+=</span> <span class="n">share</span>  <span class="c1"># 只碰 u 的实际出边</span>
+</code></pre></div>
+<p>每轮 $O(|V| + |E|)$：遍历所有顶点 + 所有边。稀疏图 $|E| = O(|V|)$ 时，每轮 $O(|V|)$。</p>
+<p><strong>邻接矩阵版</strong>（<code>pagerank_mat</code>）：</p>
+<div class="highlight"><pre><span></span><code><span class="n">pr</span> <span class="o">=</span> <span class="n">teleport</span> <span class="o">+</span> <span class="n">damping</span> <span class="o">*</span> <span class="p">(</span><span class="n">MT</span> <span class="o">@</span> <span class="n">pr</span><span class="p">)</span>  <span class="c1"># 矩阵-向量乘</span>
+</code></pre></div>
+<p>每轮 $O(|V|^2)$：矩阵-向量乘扫整个 $n \times n$ 矩阵，包括所有 0。BLAS 向量化让常数极小，但渐近是 $O(|V|^2)$。</p>
+<h3 id="14">1.4 实测对比<a class="headerlink" href="#14" title="Permanent link">&para;</a></h3>
+<p>n=1000, 边=5000, 50 轮迭代：</p>
+<table>
+<thead>
+<tr>
+<th>实现</th>
+<th>耗时</th>
+<th>内存</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>邻接表（dict + 循环）</td>
+<td>93 ms</td>
+<td>286 KB</td>
+<td>逻辑 $O(|V|+|E|)$，但 Python 循环常数大</td>
+</tr>
+<tr>
+<td>邻接矩阵（dense + BLAS）</td>
+<td>23 ms</td>
+<td>7812 KB</td>
+<td>$O(|V|^2)$ 但 BLAS 向量化极快</td>
+</tr>
+<tr>
+<td>CSR（scipy.sparse）</td>
+<td>1.6 ms</td>
+<td>121 KB</td>
+<td>$O(|V|+|E|)$ + C 层稀疏运算</td>
+</tr>
+</tbody>
+</table>
+<p>纯 Python 邻接表最慢——不是算法问题，是 Python 解释器开销。CSR 版（邻接表的 C 层紧凑存储）比 dense 矩阵快 14x，同时内存省 65x。这就是「邻接表数据结构是对的，但要用 C/Cython 实现发挥 $O(|V|+|E|)$ 优势」。</p>
+<h3 id="15">1.5 不同稀疏度下的趋势<a class="headerlink" href="#15" title="Permanent link">&para;</a></h3>
+<p>边数从 1k 到 100k（n=1000 固定）：</p>
+<table>
+<thead>
+<tr>
+<th>边数</th>
+<th>密度</th>
+<th>邻接表</th>
+<th>矩阵</th>
+<th>CSR</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1000</td>
+<td>0.002</td>
+<td>33 ms</td>
+<td>15 ms</td>
+<td>0.5 ms</td>
+</tr>
+<tr>
+<td>5000</td>
+<td>0.010</td>
+<td>39 ms</td>
+<td>14 ms</td>
+<td>1.2 ms</td>
+</tr>
+<tr>
+<td>20000</td>
+<td>0.040</td>
+<td>44 ms</td>
+<td>14 ms</td>
+<td>1.7 ms</td>
+</tr>
+<tr>
+<td>50000</td>
+<td>0.100</td>
+<td>40 ms</td>
+<td>14 ms</td>
+<td>6.8 ms</td>
+</tr>
+<tr>
+<td>100000</td>
+<td>0.200</td>
+<td>49 ms</td>
+<td>14 ms</td>
+<td>14.6 ms</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>邻接表/CSR 随边数线性增长</strong>（$O(|V|+|E|)$），稀疏时极快</li>
+<li><strong>矩阵几乎不变</strong>（$O(|V|^2)$），因为不管有没有边都扫整个矩阵</li>
+<li>边数到 100k（密度 0.2）时 CSR 追上矩阵——图越稠密，矩阵的向量化优势越能抵消 $O(V^2)$ 的浪费</li>
+</ul>
+<h2 id="2-gnn">2. GNN 消息传递：沿边聚合特征<a class="headerlink" href="#2-gnn" title="Permanent link">&para;</a></h2>
+<p><strong>图神经网络</strong>（Graph Neural Network, GNN）是处理图结构数据的神经网络。核心机制是<strong>消息传递</strong>（message passing）：每个顶点聚合邻居的特征来更新自己的特征。</p>
+<h3 id="21-gnn">2.1 为什么需要 GNN<a class="headerlink" href="#21-gnn" title="Permanent link">&para;</a></h3>
+<p>传统神经网络（CNN、RNN）处理的是规则结构（网格、序列）。但很多数据天然是图：</p>
+<ul>
+<li>分子：原子是顶点，化学键是边</li>
+<li>社交网络：用户是顶点，关注是边</li>
+<li>知识图谱：实体是顶点，关系是边</li>
+<li>引用网络：论文是顶点，引用是边</li>
+</ul>
+<p>GNN 让神经网络能直接吃图结构数据，在药物发现、推荐系统、社交网络分析等领域是 SOTA。</p>
+<h3 id="22">2.2 消息传递框架<a class="headerlink" href="#22" title="Permanent link">&para;</a></h3>
+<p>每一层 GNN 做两步：</p>
+<div class="highlight"><pre><span></span><code>对每个顶点 v:
+  1. 聚合（Aggregate）：收集邻居特征
+     agg_v = AGGREGATE({h_u : u in neighbors(v)})
+  2. 更新（Update）：结合自己特征和聚合结果
+     h_v' = UPDATE(h_v, agg_v)
+</code></pre></div>
+<p>最简单的版本（GCN 的核心）：</p>
+<p>$$h_v' = h_v + \sum_{u \in \text{neighbors}(v)} h_u$$</p>
+<p>每个顶点的新特征 = 自己 + 邻居特征之和。<strong>核心操作是遍历所有边聚合特征</strong>——和 PageRank 一样，都是「沿边聚合」。</p>
+<h3 id="23-vs">2.3 邻接表版 vs 邻接矩阵版<a class="headerlink" href="#23-vs" title="Permanent link">&para;</a></h3>
+<p><strong>邻接表版</strong>（<code>gnn_message_passing_adj</code>）：</p>
+<div class="highlight"><pre><span></span><code><span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="n">nb</span> <span class="o">=</span> <span class="n">adj_array</span><span class="p">[</span><span class="n">v</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">nb</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+        <span class="n">new_features</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">+=</span> <span class="n">features</span><span class="p">[</span><span class="n">nb</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># 只碰实际邻居</span>
+</code></pre></div>
+<p>每条边访问一次，$O(|V| + |E| \cdot d)$（$d$ 是特征维度）。稀疏图上极快。</p>
+<p><strong>邻接矩阵版</strong>（<code>gnn_message_passing_mat</code>）：</p>
+<div class="highlight"><pre><span></span><code><span class="n">new_features</span> <span class="o">=</span> <span class="n">features</span> <span class="o">+</span> <span class="n">adj_mat</span> <span class="o">@</span> <span class="n">features</span>  <span class="c1"># 矩阵乘</span>
+</code></pre></div>
+<p>$O(|V|^2 \cdot d)$，矩阵乘扫整个 $n \times n$。BLAS gemm 向量化极快，但稀疏图上大量算的是 $0 \times h = 0$ 的无用乘法。</p>
+<h3 id="24_1">2.4 实测对比<a class="headerlink" href="#24_1" title="Permanent link">&para;</a></h3>
+<p>n=1000, 边=5000, 特征维度=32：</p>
+<table>
+<thead>
+<tr>
+<th>实现</th>
+<th>耗时</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>邻接表（dict + 循环）</td>
+<td>5.8 ms</td>
+<td>每顶点一次 numpy fancy index + sum</td>
+</tr>
+<tr>
+<td>邻接矩阵（dense + BLAS）</td>
+<td>1.15 ms</td>
+<td>BLAS gemm，$O(V^2 d)$ 但常数极小</td>
+</tr>
+<tr>
+<td>CSR（scipy.sparse）</td>
+<td>0.19 ms</td>
+<td>稀疏矩阵乘，$O(</td>
+</tr>
+</tbody>
+</table>
+<p>CSR 比密集矩阵快 6x，比纯 Python 邻接表快 30x。GNN 的消息传递本质是稀疏矩阵-矩阵乘 $H' = H + AH$，CSR 让这个乘法只碰非零边。</p>
+<h3 id="25">2.5 消息传递 = 矩阵乘 = 边遍历<a class="headerlink" href="#25" title="Permanent link">&para;</a></h3>
+<p>GNN 消息传递的三种视角，本质同一件事：</p>
+<div class="highlight"><pre><span></span><code>1. 顶点视角（邻接表）:
+   for v: h_v' = h_v + sum(h_u for u in neighbors(v))
+
+2. 边视角（沿边推送）:
+   agg = zeros
+   for edge (u,v): agg[v] += h_u
+   h' = h + agg
+
+3. 矩阵视角（矩阵乘）:
+   h' = h + A @ h
+</code></pre></div>
+<p>邻接表实现「顶点视角」最自然（遍历每个顶点的邻居链表）；CSR 实现「边视角」最紧凑（连续遍历边数组）；密集矩阵实现「矩阵视角」向量化最强但浪费。<strong>三者数学等价，性能差异来自数据结构</strong>。</p>
+<h2 id="3">3. 稀疏图为什么必须用邻接表<a class="headerlink" href="#3" title="Permanent link">&para;</a></h2>
+<h3 id="31-ove-vs-ov2">3.1 空间：$O(|V|+|E|)$ vs $O(|V|^2)$<a class="headerlink" href="#31-ove-vs-ov2" title="Permanent link">&para;</a></h3>
+<p>PageRank 和 GNN 处理的图都是稀疏的：</p>
+<ul>
+<li>网页图：$|V| = 10^{11}$，平均度 30，$|E|/|V|^2 \approx 10^{-10}$</li>
+<li>社交网络：$|V| = 10^9$，平均度 100，$|E|/|V|^2 \approx 10^{-7}$</li>
+</ul>
+<p>邻接矩阵存 $10^{11} \times 10^{11} = 10^{22}$ 个元素——<strong>宇宙里原子数都不到这个量级</strong>。邻接表只存 $O(|V| + |E|) = O(10^{11} \times 30) = 3 \times 10^{12}$，差 $10^{10}$ 倍。</p>
+<p>本 demo n=1000 的小图上，矩阵已经比邻接表多 27 倍内存。真实图上差距是天文数字。</p>
+<h3 id="32-ove-vs-ov2">3.2 性能：$O(|V|+|E|)$ vs $O(|V|^2)$<a class="headerlink" href="#32-ove-vs-ov2" title="Permanent link">&para;</a></h3>
+<p>PageRank 每轮迭代、GNN 每层消息传递，都要遍历所有边一次。</p>
+<ul>
+<li>邻接表：$O(|V| + |E|)$，稀疏图 $|E| = O(|V|)$ 时每轮 $O(|V|)$</li>
+<li>邻接矩阵：$O(|V|^2)$，不管有没有边都扫整个矩阵</li>
+</ul>
+<p>n=1000, $|E|=5000$ 时，邻接表碰 6000 个元素，矩阵碰 100 万个——差 166 倍。虽然 BLAS 向量化让矩阵的常数极小（本 demo 小图上矩阵比纯 Python 邻接表快），但：</p>
+<ol>
+<li><strong>n 一大，$O(|V|^2)$ 主导</strong>：n=10000 时矩阵是 $10^8$ 格，邻接表还是 $O(|E|)$</li>
+<li><strong>内存墙</strong>：矩阵扫 $10^8$ 格受内存带宽限制，CSR 只扫 $|E|$ 格</li>
+<li><strong>CSR 兼顾两者</strong>：$O(|V|+|E|)$ 空间 + C 层运算速度，本 demo 比 dense 快 6-16x</li>
+</ol>
+<h3 id="33-demo">3.3 demo 的诚实结论<a class="headerlink" href="#33-demo" title="Permanent link">&para;</a></h3>
+<p>本 demo 在 n=1000 的小图上，纯 Python 邻接表比 dense 矩阵<strong>慢</strong>（PageRank 93ms vs 23ms）。这不是邻接表算法错了，是两层因素叠加：</p>
+<ol>
+<li><strong>Python 循环常数大</strong>：1000 次 Python for 循环 + numpy fancy index 调用，每次几微秒</li>
+<li><strong>BLAS 矩阵乘常数小</strong>：dense 矩阵-向量乘是 C/Fortran 层连续内存 BLAS，每次几纳秒</li>
+</ol>
+<p>但 CSR 版（同样是 $O(|V|+|E|)$，但用 C 层稀疏运算）比 dense 快 16x。这说明：</p>
+<blockquote>
+<p><strong>邻接表数据结构是对的，但要用 C/Cython 实现才能发挥 $O(|V|+|E|)$ 优势。纯 Python 循环的邻接表只有教学价值，生产用 CSR。</strong></p>
+</blockquote>
+<h2 id="4-demo">4. demo 结果解读<a class="headerlink" href="#4-demo" title="Permanent link">&para;</a></h2>
+<h3 id="41">4.1 内存对比<a class="headerlink" href="#41" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>邻接表内存     ≈    292952 字节 (286.1 KB)
+邻接矩阵内存   =   8000000 字节 (7812.5 KB)
+CSR 稀疏矩阵   =    124004 字节 (121.1 KB)
+比值（矩阵/表） = 27.31x
+比值（矩阵/CSR）= 64.51x
+</code></pre></div>
+<p>n=1000, 边=5000, 密度 0.01。邻接矩阵 8MB，邻接表 286KB，CSR 121KB。矩阵的 99% 是 0，纯浪费。CSR 比邻接表还省——没有动态数组的 header/capacity 开销，纯三个连续数组。</p>
+<h3 id="42-pagerank">4.2 PageRank 性能<a class="headerlink" href="#42-pagerank" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>邻接表 PageRank          93.5698 ms   0.24x
+邻接矩阵 PageRank         22.7981 ms   1.00x
+CSR PageRank              1.6081 ms  14.18x
+</code></pre></div>
+<p>CSR 完胜：比密集矩阵快 14x，比纯 Python 邻接表快 58x。PageRank 每轮遍历所有边，CSR 的连续边数组 + C 层稀疏矩阵乘让这遍历极快。</p>
+<h3 id="43-gnn">4.3 GNN 消息传递性能<a class="headerlink" href="#43-gnn" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>邻接表 GNN                5.8377 ms   0.20x
+邻接矩阵 GNN               1.1544 ms   1.00x
+CSR GNN                   0.1926 ms   5.99x
+</code></pre></div>
+<p>CSR 比密集矩阵快 6x。GNN 消息传递是 $H' = H + AH$（稀疏矩阵-矩阵乘），CSR 让乘法只碰非零边。</p>
+<h3 id="44_1">4.4 正确性验证<a class="headerlink" href="#44_1" title="Permanent link">&para;</a></h3>
+<p>三种实现结果完全一致（max diff &lt; 1e-10），证明邻接表、密集矩阵、CSR 三种表示数学等价，差异纯粹是数据结构 + 实现层。</p>
+<h2 id="5-pyg-dgl">5. 生产级实现：PyG 和 DGL<a class="headerlink" href="#5-pyg-dgl" title="Permanent link">&para;</a></h2>
+<h3 id="51-pytorch-geometric-pyg">5.1 PyTorch Geometric (PyG)<a class="headerlink" href="#51-pytorch-geometric-pyg" title="Permanent link">&para;</a></h3>
+<p>PyG 是 PyTorch 的图神经网络库，底层用 <strong>COO + CSR</strong> 格式存图：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">torch_geometric.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Data</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+
+<span class="c1"># edge_index: COO 格式，[2, num_edges]</span>
+<span class="n">edge_index</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>  <span class="c1"># 边 (0,1),(1,0),(1,2),(2,1)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>  <span class="c1"># 3 顶点，16 维特征</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">Data</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="o">=</span><span class="n">edge_index</span><span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch_geometric.nn</span><span class="w"> </span><span class="kn">import</span> <span class="n">GCNConv</span>
+<span class="n">conv</span> <span class="o">=</span> <span class="n">GCNConv</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span>
+<span class="n">out</span> <span class="o">=</span> <span class="n">conv</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_index</span><span class="p">)</span>  <span class="c1"># 消息传递，底层 CSR 稀疏乘</span>
+</code></pre></div>
+<p>PyG 的 <code>edge_index</code> 是 COO（Coordinate）格式——两个数组分别存边的源和目标。内部转 CSR 做稀疏矩阵乘，就是本 demo CSR 版的工业级实现。</p>
+<h3 id="52-deep-graph-library-dgl">5.2 Deep Graph Library (DGL)<a class="headerlink" href="#52-deep-graph-library-dgl" title="Permanent link">&para;</a></h3>
+<p>DGL 是另一个主流 GNN 框架，支持多种后端（PyTorch、TF、MXNet），底层同样用 CSR：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">dgl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+
+<span class="n">g</span> <span class="o">=</span> <span class="n">dgl</span><span class="o">.</span><span class="n">graph</span><span class="p">(([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>  <span class="c1"># 边</span>
+<span class="n">g</span><span class="o">.</span><span class="n">ndata</span><span class="p">[</span><span class="s1">'h'</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>  <span class="c1"># 顶点特征</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">dgl.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dglnn</span>
+<span class="n">conv</span> <span class="o">=</span> <span class="n">dglnn</span><span class="o">.</span><span class="n">GraphConv</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span>
+<span class="n">out</span> <span class="o">=</span> <span class="n">conv</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">ndata</span><span class="p">[</span><span class="s1">'h'</span><span class="p">])</span>  <span class="c1"># 消息传递</span>
+</code></pre></div>
+<p>DGL 的核心是 <code>g.update_all(message_func, reduce_func)</code>——显式表达「沿边发消息 + 顶点聚合」两步，底层用 CSR 稀疏运算加速。</p>
+<h3 id="53-csr">5.3 为什么生产级都用 CSR<a class="headerlink" href="#53-csr" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>邻接表（dict）</th>
+<th>邻接矩阵（dense）</th>
+<th>CSR</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>空间</td>
+<td>$O(|V|+|E|)$，常数大</td>
+<td>$O(|V|^2)$</td>
+<td>$O(|V|+|E|)$，常数小</td>
+</tr>
+<tr>
+<td>缓存</td>
+<td>差（指针跳转）</td>
+<td>好（连续）</td>
+<td>极好（连续）</td>
+</tr>
+<tr>
+<td>运算层</td>
+<td>Python 循环</td>
+<td>BLAS（C/Fortran）</td>
+<td>稀疏 BLAS（C/Fortran）</td>
+</tr>
+<tr>
+<td>GPU 支持</td>
+<td>无</td>
+<td>有（cuBLAS）</td>
+<td>有（cuSPARSE）</td>
+</tr>
+<tr>
+<td>加删边</td>
+<td>$O(1)$</td>
+<td>$O(1)$</td>
+<td>$O(|E|)$（需重建）</td>
+</tr>
+</tbody>
+</table>
+<p>CSR 唯一劣势是加删边要重建（适合静态图）。GNN 的图通常静态（分子、引用网络），所以 CSR 是最优选择。需要动态加删边的场景用 COO 或专门的动态图结构。</p>
+<h2 id="6-pagerank-gnn">6. 从 PageRank 到 GNN：统一的「沿边聚合」<a class="headerlink" href="#6-pagerank-gnn" title="Permanent link">&para;</a></h2>
+<p>PageRank 和 GNN 消息传递看似不同，本质都是<strong>沿边聚合</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>算法</th>
+<th>聚合什么</th>
+<th>聚合方式</th>
+<th>更新</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PageRank</td>
+<td>邻居的 PR 值</td>
+<td>加权求和 $\sum PR(u)/\deg(u)$</td>
+<td>$PR \leftarrow (1-d)/n + d \cdot \text{agg}$</td>
+</tr>
+<tr>
+<td>GCN</td>
+<td>邻居的特征</td>
+<td>求和 $\sum h_u$</td>
+<td>$h' = h + \text{agg}$</td>
+</tr>
+<tr>
+<td>GraphSAGE</td>
+<td>邻居特征</td>
+<td>采样 + 聚合（mean/max/LSTM）</td>
+<td>$h' = \sigma(W \cdot \text{concat}(h, \text{agg}))$</td>
+</tr>
+<tr>
+<td>GAT</td>
+<td>邻居特征</td>
+<td>注意力加权求和</td>
+<td>$h' = \sum \alpha_{uv} W h_u$</td>
+</tr>
+</tbody>
+</table>
+<p>所有这些算法的核心循环都是：</p>
+<div class="highlight"><pre><span></span><code>for each edge (u, v):
+    agg[v] += something_from(u)  # 沿边推送
+</code></pre></div>
+<p>这个循环用邻接表是 $O(|E|)$，用密集矩阵是 $O(|V|^2)$。<strong>稀疏图上邻接表/CSR 是唯一可行的选择</strong>——这就是本 demo 的核心结论。</p>
+<h2 id="7">7. 总结<a class="headerlink" href="#7" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>答案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>稀疏图为什么必须用邻接表？</td>
+<td>空间 $O(|V|+|E|)$ vs $O(|V|^2)$，稀疏时差 $|V|/\text{avg_deg}$ 倍；遍历只碰真实边</td>
+</tr>
+<tr>
+<td>GNN 消息传递怎么对应到边遍历？</td>
+<td>聚合邻居特征 = 沿边推送消息，每条边访问一次 $O(|E|)$</td>
+</tr>
+<tr>
+<td>邻接表 vs 矩阵内存差多少？</td>
+<td>n=1000 边=5000 时差 27x；真实图（密度 $10^{-7}$）差千万倍</td>
+</tr>
+<tr>
+<td>邻接表 vs 矩阵性能差多少？</td>
+<td>CSR 比密集矩阵快 6-16x（本 demo）；纯 Python 邻接表因循环常数慢</td>
+</tr>
+<tr>
+<td>生产级用什么？</td>
+<td>CSR 稀疏矩阵（PyG、DGL、scipy.sparse），$O(|V|+|E|)$ 空间 + C/CUDA 运算</td>
+</tr>
+</tbody>
+</table>
+<p><strong>一句话</strong>：PageRank 和 GNN 都是「沿边聚合」算法，邻接表/CSR 让聚合只碰真实存在的边 $O(|V|+|E|)$，密集矩阵扫 $O(|V|^2)$ 大量 0。稀疏图上邻接表是唯一选择，CSR 是它的生产级形态。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.indexes", "navigation.tracking", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,2642 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="从底层实现到生产级应用——数据结构在 AI 系统优化与应用工程中的真实作用">
+      
+      
+        <meta name="author" content="wanglh39">
+      
+      
+        <link rel="canonical" href="https://wanglh39.github.io/ds-ai-teaching/ch15/">
+      
+      
+        <link rel="prev" href="../ch14/">
+      
+      
+        <link rel="next" href="../ch16/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>15 上下文工程与记忆 - 数据结构 × AI 优化</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+SC:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans SC";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#15" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href=".." title="数据结构 × AI 优化" class="md-header__button md-logo" aria-label="数据结构 × AI 优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            数据结构 × AI 优化
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              15 上下文工程与记忆
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换至暗色模式"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换至暗色模式" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换至亮色模式"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换至亮色模式" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/wanglh39/ds-ai-teaching" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wanglh39/ds-ai-teaching
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  首页
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../intro/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  项目介绍
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../ch01/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  视角 A·系统优化
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../ch13/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  视角 B·应用工程
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../benchmarks/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  性能汇总
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="数据结构 × AI 优化" class="md-nav__button md-logo" aria-label="数据结构 × AI 优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    数据结构 × AI 优化
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/wanglh39/ds-ai-teaching" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wanglh39/ds-ai-teaching
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    首页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    项目介绍
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    项目介绍
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    设计思路
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../map/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    章节映射
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dual_view/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    双视角说明
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cross_index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    交叉索引
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    视角 A·系统优化
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    视角 A·系统优化
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 动态数组
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch02/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 链表
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch03/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 栈
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch04/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 循环队列
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch05/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05 哈希表
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch06/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 堆
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch07/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    07 Trie
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch08/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    08 KD-Tree
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch09/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    09 图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch10/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10 并查集
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch11/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11 页表/分块内存
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch12/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12 跳表+图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    视角 B·应用工程
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    视角 B·应用工程
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch13/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13 多智能体编排
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch14/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    14 任务调度与批处理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    15 上下文工程与记忆
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    15 上下文工程与记忆
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要回答的问题
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        扩展专题定位
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#demo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        demo 概览
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        跑法
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        状态
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原理
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch16/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    16 RAG 与知识检索
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch17/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    17 数据管道与流式处理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch18/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    18 模型部署与推理服务
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch19/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    19 状态机与工作流
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch20/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    20 模型压缩
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    性能汇总
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要回答的问题
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        扩展专题定位
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#demo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        demo 概览
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        跑法
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        状态
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原理
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="15">第 15 章 · 上下文工程与记忆（扩展专题）<a class="headerlink" href="#15" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>AI 场景：LLM 的 context window 管理、prompt 工程、短期/长期记忆、agent 调用嵌套
+数据结构：LRU + Trie + 哈希 + 环形缓冲 + 栈（5 种协作）</p>
+</blockquote>
+<h2 id="_1">本章要回答的问题<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>context window 的 token 超限时淘汰谁？（LRU）</li>
+<li>多请求共享 system prompt 怎么省 token？（Trie 前缀共享）</li>
+<li>按 key 取长期记忆怎么快？（哈希表 O(1)）</li>
+<li>对话只看最近 N 条怎么高效实现？（环形缓冲滑动窗口）</li>
+<li>agent 调 agent 的嵌套返回怎么匹配？（栈后进先出）</li>
+<li>5 种数据结构如何协奏？</li>
+</ul>
+<h2 id="_2">扩展专题定位<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p>前 12 章是「一个数据结构 → 一个 AI 优化」。第 13 章起是扩展专题：<strong>一个 AI 应用场景 → 多种数据结构协作</strong>。本章展示 LRU、Trie、哈希表、环形缓冲、栈如何协作解决 LLM 上下文工程的全链路问题。</p>
+<h2 id="_3">目录<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>15_context_engineering/
+├── python/
+│   └── demo.py              # LLM 上下文管理 demo（5 种数据结构协作）
+├── docs/
+│   ├── principle.md         # 5 种数据结构原理 + 协作机制
+│   └── ai_application.md    # 上下文工程应用（LangChain/MemGPT/vLLM）
+├── figures/                 # 性能对比图
+└── README.md
+</code></pre></div>
+<h2 id="demo">demo 概览<a class="headerlink" href="#demo" title="Permanent link">&para;</a></h2>
+<p>模拟 LLM 上下文管理系统，5 种数据结构协作：</p>
+<div class="highlight"><pre><span></span><code>用户消息到达
+  ├─→ [环形缓冲] 滑动窗口（保留最近 N 条）
+  ├─→ [哈希表]   记忆检索（按 key 取长期记忆）
+  ├─→ [Trie]     prompt 前缀共享（多轮共享 system prompt）
+  ├─→ [LRU]      context 淘汰（超 token 预算淘汰最久未用）
+  └─→ [栈]       agent 嵌套（后进先出匹配返回）
+</code></pre></div>
+<ul>
+<li><code>ContextLRU</code>：LRU，context window 的 token 预算淘汰</li>
+<li><code>PromptTrie</code>：Trie，prompt 前缀共享（多请求共享 system prompt）</li>
+<li><code>MemoryStore</code>：哈希表，记忆检索（按 key O(1) 取）</li>
+<li><code>DialogRingBuffer</code>：环形缓冲，对话滑动窗口（固定大小，O(1) push）</li>
+<li><code>CallStack</code>：栈，agent 调用嵌套（后进先出匹配返回）</li>
+</ul>
+<p>性能对比：
+1. LRU 淘汰 vs 随机淘汰（命中率 82.5% vs 71.4%，高 11 个百分点）
+2. Trie 前缀共享 vs 无共享（省 90.2% token）
+3. 环形缓冲 vs list+pop(0)（push 快 14x）
+4. 哈希记忆 vs 线性扫描（get 快 270x）</p>
+<h2 id="_4">跑法<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>15_context_engineering/python/demo.py
+</code></pre></div>
+<h2 id="_5">状态<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<p>✅ 已完成</p>
+<hr />
+<h2 id="_6">原理<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<h1 id="lru-trie">上下文工程与记忆的数据结构原理：LRU + Trie + 哈希 + 环形缓冲 + 栈<a class="headerlink" href="#lru-trie" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>本文档讲清「LLM 上下文管理为什么需要 5 种数据结构协作」。AI 应用（context window 管理、prompt 工程、记忆系统、agent 嵌套）见 <code>ai_application.md</code>。前 12 章是「一个数据结构 → 一个 AI 优化」，本章是扩展专题：<strong>一个 AI 应用场景 → 多种数据结构协作</strong>。</p>
+</blockquote>
+<h2 id="0-5">0. 为什么是 5 种数据结构<a class="headerlink" href="#0-5" title="Permanent link">&para;</a></h2>
+<p>LLM 上下文工程（Context Engineering）的核心问题是：<strong>在有限的 context window 里，塞什么、不塞什么、怎么塞、按什么顺序塞</strong>。这一个问题分解出 5 个子问题，每个子问题对应一种数据结构：</p>
+<table>
+<thead>
+<tr>
+<th>子问题</th>
+<th>数据结构</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>token 超限时淘汰谁？</td>
+<td><strong>LRU</strong></td>
+<td>context window 淘汰（保留近期还在用的）</td>
+</tr>
+<tr>
+<td>多请求共享 system prompt 怎么省 token？</td>
+<td><strong>Trie</strong></td>
+<td>prompt 前缀共享（公共前缀只存一次）</td>
+</tr>
+<tr>
+<td>按 key 取记忆怎么快？</td>
+<td><strong>哈希表</strong></td>
+<td>记忆检索 O(1)</td>
+</tr>
+<tr>
+<td>对话只看最近 N 条怎么实现？</td>
+<td><strong>环形缓冲</strong></td>
+<td>滑动窗口 O(1) push，固定内存</td>
+</tr>
+<tr>
+<td>agent 调 agent 怎么匹配返回？</td>
+<td><strong>栈</strong></td>
+<td>后进先出匹配嵌套返回</td>
+</tr>
+</tbody>
+</table>
+<p>这 5 种数据结构不是独立工作，而是<strong>协奏</strong>：用户消息进来 → 环形缓冲保留最近 N 条 → 哈希表按 key 取长期记忆 → Trie 把 system prompt 前缀共享 → LRU 把窗口+记忆+system 拼成 context 并按 token 预算淘汰 → 栈管理 agent 嵌套调用。</p>
+<h2 id="1-lru-context-window">1. LRU 与 context window 淘汰<a class="headerlink" href="#1-lru-context-window" title="Permanent link">&para;</a></h2>
+<h3 id="11-context-window-token">1.1 context window 的 token 上限<a class="headerlink" href="#11-context-window-token" title="Permanent link">&para;</a></h3>
+<p>LLM 的 context window 有 token 上限：</p>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>context window</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GPT-3.5</td>
+<td>16K</td>
+</tr>
+<tr>
+<td>GPT-4</td>
+<td>8K / 32K / 128K</td>
+</tr>
+<tr>
+<td>Claude 3</td>
+<td>200K</td>
+</tr>
+<tr>
+<td>Llama 3</td>
+<td>8K / 128K</td>
+</tr>
+</tbody>
+</table>
+<p>往 context 里塞内容时，总 token 不能超过上限。超了必须淘汰一些旧内容。问题是：<strong>淘汰谁</strong>？</p>
+<h3 id="12-fifo">1.2 为什么不能用 FIFO<a class="headerlink" href="#12-fifo" title="Permanent link">&para;</a></h3>
+<p>FIFO（先入先出）淘汰最早进入 context 的内容。问题：最早进入的不一定是最没用的。</p>
+<div class="highlight"><pre><span></span><code>对话场景：
+  时刻 1: system prompt（1000 token）—— 全程都要用
+  时刻 2: 用户第一条消息（100 token）—— 早过时了
+  时刻 3: 用户第二条消息（100 token）—— 早过时了
+  ...
+  时刻 20: 用户第十九条消息（100 token）
+
+FIFO 淘汰：先把 system prompt 淘汰 → 后续每轮都要重新塞 system prompt
+LRU 淘汰：system prompt 每轮都被引用（最近用），永远不会被淘汰
+</code></pre></div>
+<p>system prompt 是每轮都要用的，FIFO 会把它淘汰掉，导致每轮重新塞，浪费 token。LRU 因为 system prompt 每轮都被访问（<code>last_used</code> 不断更新），永远不会被淘汰。</p>
+<h3 id="13-lru">1.3 LRU：最近最少使用<a class="headerlink" href="#13-lru" title="Permanent link">&para;</a></h3>
+<p><strong>LRU</strong>（Least Recently Used）淘汰策略：当容量超限时，淘汰最久未访问的元素。</p>
+<p>实现用 <code>OrderedDict</code>：按访问顺序维护，head 是最久未用，tail 是最近用。</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ContextLRU</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token_budget</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">:</span> <span class="n">OrderedDict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ContextEntry</span><span class="p">]</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_total_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">put</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">tokens</span><span class="p">):</span>
+        <span class="c1"># 超预算时从 head 往外淘汰</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_total_tokens</span> <span class="o">+</span> <span class="n">tokens</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_token_budget</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">ev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">popitem</span><span class="p">(</span><span class="n">last</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># head = 最久未用</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_total_tokens</span> <span class="o">-=</span> <span class="n">ev</span><span class="o">.</span><span class="n">tokens</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">ContextEntry</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_total_tokens</span> <span class="o">+=</span> <span class="n">tokens</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">move_to_end</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>  <span class="c1"># 命中后移到末尾（最近用）</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">text</span>
+</code></pre></div>
+<p>关键：<code>get</code> 命中后调用 <code>move_to_end(key)</code>，把元素移到末尾（最近用），这样 head 永远是最久未用的。</p>
+<h3 id="14-token-vs">1.4 token 预算淘汰 vs 条目数淘汰<a class="headerlink" href="#14-token-vs" title="Permanent link">&para;</a></h3>
+<p>普通 LRU 淘汰是按<strong>条目数</strong>（如最多 100 条），context window 的 LRU 是按 <strong>token 总数</strong>（如最多 128K token）。区别：</p>
+<ul>
+<li>条目数 LRU：每条大小一样，<code>while len &gt; capacity: pop</code></li>
+<li>token 预算 LRU：每条大小不同（一条消息可能 10 token 也可能 1000 token），<code>while total_tokens + new_tokens &gt; budget: pop</code></li>
+</ul>
+<p>token 预算 LRU 更复杂：单条可能就超预算（如一条 200K token 的消息超过 128K 窗口），要处理这种边界。</p>
+<h3 id="15_1">1.5 复杂度与命中率<a class="headerlink" href="#15_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>LRU</th>
+<th>随机淘汰</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>put</td>
+<td>O(1) 均摊</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>get 命中</td>
+<td>O(1)</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>命中率（有局部性）</td>
+<td>高</td>
+<td>低</td>
+</tr>
+</tbody>
+</table>
+<p>LRU 的优势在<strong>命中率</strong>：当访问有局部性（80% 访问 20% 热点）时，LRU 保留热点，命中率高；随机淘汰可能淘汰热点，命中率低。实测：4000 次操作，85% 访问 5% 热点，LRU 命中率 82.5%，随机 71.4%，LRU 高 11 个百分点。</p>
+<h2 id="2-trie-prompt">2. Trie 与 prompt 前缀共享<a class="headerlink" href="#2-trie-prompt" title="Permanent link">&para;</a></h2>
+<h3 id="21-system-prompt">2.1 多请求共享 system prompt<a class="headerlink" href="#21-system-prompt" title="Permanent link">&para;</a></h3>
+<p>LLM 应用的请求模式：多个请求的 prompt 都以同一段 system prompt 开头：</p>
+<div class="highlight"><pre><span></span><code>req_1: [system_prompt] + [user_1_msg] + [q_1]
+req_2: [system_prompt] + [user_2_msg] + [q_2]
+req_3: [system_prompt] + [user_3_msg] + [q_3]
+</code></pre></div>
+<p>system prompt 可能几千 token（角色设定、工具说明、few-shot 示例）。如果每个请求独立存一份，浪费。用 <strong>Trie</strong> 把公共前缀合并，公共节点只存一次。</p>
+<h3 id="22-trie">2.2 Trie：前缀树<a class="headerlink" href="#22-trie" title="Permanent link">&para;</a></h3>
+<p><strong>Trie</strong>（前缀树）是一种树，每条边标一个字符（或 token），从根到某节点的路径拼成一个字符串（或 token 序列）。公共前缀共享同一条路径。</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PromptTrie</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[{}]</span>  <span class="c1"># 节点 -&gt; children</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_count</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># 各节点的经过 prompt 数</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokens</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">tokens</span><span class="p">:</span>
+            <span class="n">children</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">[</span><span class="n">node</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">tok</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
+                <span class="n">new_node</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="o">.</span><span class="n">append</span><span class="p">({})</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_count</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">children</span><span class="p">[</span><span class="n">tok</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_node</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="n">children</span><span class="p">[</span><span class="n">tok</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_count</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+</code></pre></div>
+<p><code>_count[node]</code> 记录有多少个 prompt 经过该节点。<code>_count &gt;= 2</code> 的节点被多个 prompt 共享，省下的 token 数 = <code>sum(count - 1 for count in _count if count &gt;= 2)</code>。</p>
+<h3 id="23-token">2.3 省多少 token<a class="headerlink" href="#23-token" title="Permanent link">&para;</a></h3>
+<p>假设 N 个请求，每个 prompt = S token system + U token 用户消息：</p>
+<ul>
+<li>无共享：总 token = N × (S + U)</li>
+<li>Trie 共享：总 token = S + N × U（system 只存一次）</li>
+</ul>
+<p>当 S &gt;&gt; U（system prompt 500 token，用户消息 50 token），省的比例 = (N-1)×S / (N×(S+U)) ≈ S/(S+U) ≈ 90%。</p>
+<p>实测：100 请求，system 500 token + 用户 50 token，无共享 55000 token，Trie 共享 5500 token，<strong>省 90.2%</strong>。</p>
+<h3 id="24-trie-prefix-caching">2.4 Trie 在 prefix caching 中的应用<a class="headerlink" href="#24-trie-prefix-caching" title="Permanent link">&para;</a></h3>
+<p>vLLM、SGLang 等推理框架的 <strong>prefix caching</strong>：多个请求共享 system prompt 前缀时，前缀的 KV cache 只算一次。底层就是 Trie 思想——按 token 序列建前缀树，公共前缀的 KV cache 共享。这让多轮对话、多请求 batch 的 prefill 成本大幅下降。</p>
+<h2 id="3">3. 哈希表与记忆检索<a class="headerlink" href="#3" title="Permanent link">&para;</a></h2>
+<h3 id="31-vs">3.1 短期记忆 vs 长期记忆<a class="headerlink" href="#31-vs" title="Permanent link">&para;</a></h3>
+<p>LLM 的记忆分两层：</p>
+<ul>
+<li><strong>短期记忆</strong>：当前对话的最近几轮消息，在 context window 里（环形缓冲管理）</li>
+<li><strong>长期记忆</strong>：跨对话的事实（如"用户喜欢 Python"），存在外部存储，按需检索</li>
+</ul>
+<p>长期记忆的检索方式：</p>
+<table>
+<thead>
+<tr>
+<th>检索方式</th>
+<th>数据结构</th>
+<th>复杂度</th>
+<th>适用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>按 key 精确取</td>
+<td><strong>哈希表</strong></td>
+<td>O(1)</td>
+<td>"用户偏好语言" → "Python"</td>
+</tr>
+<tr>
+<td>按语义相似度</td>
+<td>向量索引（HNSW）</td>
+<td>O(log n)</td>
+<td>"用户喜欢什么" → 相似记忆</td>
+</tr>
+<tr>
+<td>按标签过滤</td>
+<td>倒排索引</td>
+<td>O(1) 找标签</td>
+<td>所有 "preference" 标签的记忆</td>
+</tr>
+</tbody>
+</table>
+<p>本章聚焦<strong>按 key 精确取</strong>的哈希表。语义检索见第 12 章（HNSW）。</p>
+<h3 id="32-o1">3.2 哈希表：O(1) 查找<a class="headerlink" href="#32-o1" title="Permanent link">&para;</a></h3>
+<p><strong>哈希表</strong>（Hash Table）把 key 经哈希函数映射到桶，每个桶存 (key, value)。查找时算 hash(key) 找到桶，再在桶里比对 key。</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MemoryStore</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MemoryItem</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tag_index</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># 标签倒排</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">put</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">importance</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">MemoryItem</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">importance</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_tag_index</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>  <span class="c1"># O(1)</span>
+        <span class="k">return</span> <span class="n">item</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="n">item</span> <span class="k">else</span> <span class="kc">None</span>
+</code></pre></div>
+<p><code>_tag_index</code> 是标签倒排索引：tag → set of keys，让 <code>get_by_tag(tag)</code> 也是 O(1) 找到相关 key 集合。</p>
+<h3 id="33-vs">3.3 哈希表 vs 线性扫描<a class="headerlink" href="#33-vs" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>哈希表</th>
+<th>线性扫描</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>put</td>
+<td>O(1)</td>
+<td>O(1) append</td>
+</tr>
+<tr>
+<td>get</td>
+<td>O(1)</td>
+<td>O(n) 遍历</td>
+</tr>
+<tr>
+<td>remove</td>
+<td>O(1)</td>
+<td>O(n) 找到再删</td>
+</tr>
+</tbody>
+</table>
+<p>记忆条数多时（如 10K 条），哈希表 O(1) 远快于线性扫描 O(n)。实测：5000 条记忆，5000 次 get，哈希表 1.74 ms，线性扫描 470 ms，<strong>快 270x</strong>。</p>
+<h2 id="4">4. 环形缓冲与对话滑动窗口<a class="headerlink" href="#4" title="Permanent link">&para;</a></h2>
+<h3 id="41-n">4.1 对话只看最近 N 条<a class="headerlink" href="#41-n" title="Permanent link">&para;</a></h3>
+<p>LLM 对话通常只看最近 N 条消息（滑动窗口），老消息自动滚出。原因：</p>
+<ul>
+<li><strong>token 限制</strong>：context window 装不下整个对话历史</li>
+<li><strong>相关性</strong>：老消息通常和当前问题无关</li>
+<li><strong>成本</strong>：token 越多推理越慢越贵</li>
+</ul>
+<h3 id="42">4.2 环形缓冲：固定大小数组 + 写指针<a class="headerlink" href="#42" title="Permanent link">&para;</a></h3>
+<p><strong>环形缓冲</strong>（Ring Buffer）用一个固定大小的数组 + 一个写指针实现滑动窗口：</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DialogRingBuffer</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">capacity</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buf</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Message</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">capacity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write_ptr</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># 下一个写入位置</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">push</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">role</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">tokens</span><span class="p">):</span>
+        <span class="c1"># 写到 write_ptr 位置，覆盖最老的</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buf</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_write_ptr</span><span class="p">]</span> <span class="o">=</span> <span class="n">Message</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write_ptr</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_write_ptr</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_capacity</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># 从最老到最新绕一圈</span>
+        <span class="o">...</span>
+</code></pre></div>
+<p><code>push</code> 只写一个位置然后指针前移一格，O(1)，不移动任何元素。满了之后新消息覆盖最老的（write_ptr 转一圈回到最老的位置）。</p>
+<h3 id="43-vs-list-pop0">4.3 环形缓冲 vs list + pop(0)<a class="headerlink" href="#43-vs-list-pop0" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>环形缓冲</th>
+<th>list + pop(0)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>push</td>
+<td>O(1)</td>
+<td>O(n)（满了 pop(0) 前移所有元素）</td>
+</tr>
+<tr>
+<td>内存</td>
+<td>固定</td>
+<td>固定（但每次 pop 前移）</td>
+</tr>
+<tr>
+<td>缓存友好</td>
+<td>是（连续数组）</td>
+<td>是</td>
+</tr>
+</tbody>
+</table>
+<p><code>list.pop(0)</code> 要把后面 n-1 个元素前移一格，O(n)。环形缓冲只改指针，O(1)。实测：100000 次 push，容量 5000，环形缓冲 132 ms，list+pop(0) 1881 ms，<strong>快 14x</strong>。</p>
+<h3 id="44">4.4 环形缓冲在流式场景的优势<a class="headerlink" href="#44" title="Permanent link">&para;</a></h3>
+<p>环形缓冲特别适合<strong>流式写入</strong>场景：消息不断到达，只保留最近 N 条。如：</p>
+<ul>
+<li>聊天对话：保留最近 20 轮</li>
+<li>日志监控：保留最近 1000 条日志</li>
+<li>传感器数据：保留最近 N 个采样</li>
+</ul>
+<p>写指针绕圈转，无需分配新内存，无需移动元素，对实时系统友好。</p>
+<h2 id="5-agent">5. 栈与 agent 调用嵌套<a class="headerlink" href="#5-agent" title="Permanent link">&para;</a></h2>
+<h3 id="51-agent-agent">5.1 agent 调 agent 的嵌套<a class="headerlink" href="#51-agent-agent" title="Permanent link">&para;</a></h3>
+<p>现代 AI agent 可以调用别的 agent，形成嵌套：</p>
+<div class="highlight"><pre><span></span><code>main_agent 接到用户问题
+  → 调用 code_agent 写代码
+    → code_agent 调用 test_agent 跑测试
+    ← test_agent 返回测试结果给 code_agent
+  ← code_agent 返回代码给 main_agent
+main_agent 继续处理
+</code></pre></div>
+<p>返回时必须按<strong>后进先出</strong>：最后调用的 agent 最先返回（test_agent 先返回给 code_agent，code_agent 再返回给 main_agent）。</p>
+<h3 id="52">5.2 栈：后进先出<a class="headerlink" href="#52" title="Permanent link">&para;</a></h3>
+<p><strong>栈</strong>（Stack）是后进先出（LIFO）结构：</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CallStack</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stack</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">AgentCall</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">push</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">caller</span><span class="p">,</span> <span class="n">callee</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">AgentCall</span><span class="p">(</span><span class="n">caller</span><span class="p">,</span> <span class="n">callee</span><span class="p">,</span> <span class="n">task</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>  <span class="c1"># 最后入栈的先出</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">call_chain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">callee</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stack</span><span class="p">]</span>  <span class="c1"># 从外到内</span>
+</code></pre></div>
+<p><code>push</code> 入栈开始新嵌套层，<code>pop</code> 出栈返回到调用者。栈顶永远是当前最内层的 agent。</p>
+<h3 id="53">5.3 为什么不能用队列<a class="headerlink" href="#53" title="Permanent link">&para;</a></h3>
+<p>如果用队列（FIFO）管理调用嵌套，先调用的 agent 先返回：</p>
+<div class="highlight"><pre><span></span><code>错误（队列）：
+  push main_agent → push code_agent → push test_agent
+  pop → main_agent 先返回？？但 main_agent 还在等 code_agent！
+</code></pre></div>
+<p>这违反嵌套语义。嵌套调用的返回顺序必然是后进先出，只有栈正确。</p>
+<h3 id="54">5.4 栈在异常处理中的作用<a class="headerlink" href="#54" title="Permanent link">&para;</a></h3>
+<p>agent 嵌套调用中，内层 agent 抛异常时，栈逐层 <code>pop</code> 触发各层的 fallback：</p>
+<div class="highlight"><pre><span></span><code>test_agent 抛异常
+  → pop test_agent，触发 code_agent 的 fallback（如返回"测试失败"）
+  → code_agent 决定是否继续
+  → 如果 code_agent 也抛异常，pop，触发 main_agent 的 fallback
+</code></pre></div>
+<p>这就是编程语言异常处理的栈展开（stack unwinding）机制，agent 系统复用了这个思路。</p>
+<h2 id="6-5">6. 5 种数据结构如何协作<a class="headerlink" href="#6-5" title="Permanent link">&para;</a></h2>
+<h3 id="61">6.1 完整对话流程<a class="headerlink" href="#61" title="Permanent link">&para;</a></h3>
+<p>一个对话轮的完整流程，5 种数据结构协作：</p>
+<div class="highlight"><pre><span></span><code>用户消息到达
+  │
+  ├─→ [环形缓冲] push 消息，保留最近 N 条（滑动窗口）
+  │
+  ├─→ [哈希表] 按 user_id 取长期记忆（如"用户偏好 Python"）
+  │
+  ├─→ [Trie] 把 system prompt + 窗口消息 + 记忆拼成 prompt 序列
+  │         多轮共享 system prompt 前缀，省 token
+  │
+  ├─→ [LRU] 把 prompt 序列塞进 context window
+  │         超 token 预算时淘汰最久未用的（保留热点）
+  │
+  └─→ [栈] 主 agent 处理，可能调子 agent（push）
+            子 agent 返回时 pop，按后进先出匹配
+</code></pre></div>
+<h3 id="62">6.2 各结构各司其职<a class="headerlink" href="#62" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>数据结构</th>
+<th>解决的问题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>消息到达</td>
+<td>环形缓冲</td>
+<td>保留最近 N 条，老的自动滚出</td>
+</tr>
+<tr>
+<td>取记忆</td>
+<td>哈希表</td>
+<td>按 key O(1) 取长期记忆</td>
+</tr>
+<tr>
+<td>拼 prompt</td>
+<td>Trie</td>
+<td>system prompt 前缀共享，省 token</td>
+</tr>
+<tr>
+<td>塞 context</td>
+<td>LRU</td>
+<td>超 token 预算时淘汰最久未用的</td>
+</tr>
+<tr>
+<td>agent 嵌套</td>
+<td>栈</td>
+<td>后进先出匹配嵌套返回</td>
+</tr>
+</tbody>
+</table>
+<h3 id="63">6.3 为什么不能只用一种<a class="headerlink" href="#63" title="Permanent link">&para;</a></h3>
+<p>有人可能想：只用一个 list 存所有东西不行吗？不行，因为每个子问题的需求不同：</p>
+<ul>
+<li><strong>list 不能 O(1) 淘汰最久未用</strong>（LRU 的核心）</li>
+<li><strong>list 不能 O(1) 按前缀共享</strong>（Trie 的核心）</li>
+<li><strong>list 不能 O(1) 按 key 查找</strong>（哈希表的核心）</li>
+<li><strong>list 的 pop(0) 是 O(n)</strong>（环形缓冲的核心优势）</li>
+<li><strong>list 的 pop() 是 O(1) 但语义是末尾</strong>（栈正好用 list 末尾实现，但概念上是栈）</li>
+</ul>
+<p>5 种数据结构各有不可替代的优势，组合起来才能高效解决上下文工程的全链路问题。</p>
+<h2 id="7">7. 生产级系统的近似实现<a class="headerlink" href="#7" title="Permanent link">&para;</a></h2>
+<h3 id="71-langchain-memory">7.1 LangChain Memory<a class="headerlink" href="#71-langchain-memory" title="Permanent link">&para;</a></h3>
+<p>LangChain 的 Memory 模块用类似机制：</p>
+<ul>
+<li><code>ConversationBufferWindowMemory</code>：环形缓冲（保留最近 K 轮）</li>
+<li><code>ConversationSummaryMemory</code>：摘要记忆（老消息摘要成一段）</li>
+<li><code>ConversationKGMemory</code>：知识图谱记忆（三元组存储，按实体检索）</li>
+<li><code>VectorStoreRetrieverMemory</code>：向量记忆（embedding + 相似度检索）</li>
+</ul>
+<h3 id="72-memgpt-letta">7.2 MemGPT / Letta<a class="headerlink" href="#72-memgpt-letta" title="Permanent link">&para;</a></h3>
+<p>MemGPT（现 Letta）把操作系统的内存管理思想搬到 LLM：</p>
+<ul>
+<li><strong>主 context</strong>（像寄存器）：当前对话窗口，LRU 淘汰</li>
+<li><strong>记忆上下文</strong>（像内存）：存不下的内容，按需 page in</li>
+<li><strong>归档记忆</strong>（像硬盘）：长期存储，向量检索</li>
+</ul>
+<p>LRU 决定什么留在主 context、什么 page out 到记忆、什么归档。</p>
+<h3 id="73-vllm-prefix-caching">7.3 vLLM prefix caching<a class="headerlink" href="#73-vllm-prefix-caching" title="Permanent link">&para;</a></h3>
+<p>vLLM 的 prefix caching 用 Trie 思想：按 token 序列建前缀树，公共前缀的 KV cache 共享。多轮对话、多请求 batch 的 prefill 成本大幅下降。</p>
+<h2 id="8">8. 小结<a class="headerlink" href="#8" title="Permanent link">&para;</a></h2>
+<p>上下文工程是 5 种数据结构的协奏：</p>
+<ul>
+<li><strong>LRU</strong>：context window 淘汰，保留热点，token 不超限</li>
+<li><strong>Trie</strong>：prompt 前缀共享，多请求共享 system prompt，省 90%+ token</li>
+<li><strong>哈希表</strong>：记忆检索，按 key O(1) 取长期记忆</li>
+<li><strong>环形缓冲</strong>：对话滑动窗口，O(1) push，固定内存</li>
+<li><strong>栈</strong>：agent 调用嵌套，后进先出匹配返回</li>
+</ul>
+<p>每种结构解决一个子问题，组合起来高效解决上下文工程的全链路。生产级系统（LangChain Memory、MemGPT、vLLM prefix caching）用不同组合实现类似机制。</p>
+<hr />
+<h2 id="ai">AI 应用<a class="headerlink" href="#ai" title="Permanent link">&para;</a></h2>
+<h1 id="ai-llm-context-window">上下文工程与记忆的 AI 应用：LLM context window 管理<a class="headerlink" href="#ai-llm-context-window" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>本文档讲清「上下文工程与记忆在 AI 里干什么」。原理见 <code>principle.md</code>。核心：LLM 上下文工程要在有限 context window 里塞什么、不塞什么、怎么塞、按什么顺序塞，需要 5 种数据结构协作——LRU 做淘汰、Trie 做前缀共享、哈希做记忆检索、环形缓冲做滑动窗口、栈做 agent 嵌套。</p>
+</blockquote>
+<h2 id="1">1. 上下文工程是什么<a class="headerlink" href="#1" title="Permanent link">&para;</a></h2>
+<h3 id="11-prompt">1.1 从 prompt 工程到上下文工程<a class="headerlink" href="#11-prompt" title="Permanent link">&para;</a></h3>
+<p><strong>prompt 工程</strong>（Prompt Engineering）关注：怎么写一个 prompt 让 LLM 输出更好。这是单轮的事。</p>
+<p><strong>上下文工程</strong>（Context Engineering）关注：多轮对话中，<strong>往 context window 里塞什么、不塞什么、按什么顺序塞</strong>。这是跨轮的事。</p>
+<div class="highlight"><pre><span></span><code>prompt 工程（单轮）：
+  "请用简体中文解释 LRU 缓存" → LLM → 解释
+
+上下文工程（多轮）：
+  轮 1: 用户问 LRU → 塞进 context → LLM 回答
+  轮 2: 用户问 Trie → 塞轮 1 的问答吗？塞多少？塞记忆吗？
+  轮 3: 用户问哈希 → 塞轮 1、2 的问答吗？token 超了怎么办？
+  ...
+</code></pre></div>
+<p>随着对话变长，context window 装不下所有历史，必须做选择：保留哪些、淘汰哪些、怎么压缩、怎么检索相关记忆。这就是上下文工程。</p>
+<h3 id="12">1.2 为什么上下文工程是核心<a class="headerlink" href="#12" title="Permanent link">&para;</a></h3>
+<p>LLM 应用的质量很大程度取决于 context 里塞了什么：</p>
+<ul>
+<li><strong>塞太多</strong>：token 超限、推理慢、成本高、噪声多反而答得差</li>
+<li><strong>塞太少</strong>：缺关键上下文、答非所问、丢失用户意图</li>
+<li><strong>塞错顺序</strong>：重要信息在中间（lost in the middle 问题），LLM 注意不到</li>
+</ul>
+<p>好的上下文工程让 LLM 用有限 token 看到最相关的信息，是 LLM 应用从 demo 到生产的关键一跃。</p>
+<h2 id="2-context-window-lru">2. context window 限制与 LRU 淘汰<a class="headerlink" href="#2-context-window-lru" title="Permanent link">&para;</a></h2>
+<h3 id="21-context-window">2.1 context window 的硬限制<a class="headerlink" href="#21-context-window" title="Permanent link">&para;</a></h3>
+<p>LLM 的 context window 是硬限制：输入 token 数不能超过上限。不同模型上限不同：</p>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>context window</th>
+<th>大致能装</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GPT-3.5</td>
+<td>16K</td>
+<td>一篇短文</td>
+</tr>
+<tr>
+<td>GPT-4</td>
+<td>128K</td>
+<td>一本书的一章</td>
+</tr>
+<tr>
+<td>Claude 3</td>
+<td>200K</td>
+<td>一本小书</td>
+</tr>
+<tr>
+<td>Gemini 1.5</td>
+<td>1M</td>
+<td>一本大书</td>
+</tr>
+</tbody>
+</table>
+<p>但 context window 越大，推理越慢越贵。即使有 128K 窗口，也不应该塞满——研究表明 LLM 在超长 context 上有 <strong>lost in the middle</strong> 问题：中间的信息容易被忽略。</p>
+<h3 id="22-lru-vs-fifo-vs">2.2 淘汰策略：LRU vs FIFO vs 随机<a class="headerlink" href="#22-lru-vs-fifo-vs" title="Permanent link">&para;</a></h3>
+<p>context 超限时必须淘汰。三种策略：</p>
+<div class="highlight"><pre><span></span><code>FIFO（先入先出）：
+  淘汰最早进入 context 的
+  问题：system prompt 最早进入，会被淘汰，但每轮都要用
+
+随机淘汰：
+  随机挑一个淘汰
+  问题：可能淘汰正在用的热点
+
+LRU（最近最少使用）：
+  淘汰最久未访问的
+  优势：system prompt 每轮都访问（最近用），永远不会被淘汰
+</code></pre></div>
+<p>实测：4000 次操作，85% 访问 5% 热点，LRU 命中率 82.5%，随机 71.4%，<strong>LRU 高 11 个百分点</strong>。</p>
+<h3 id="23-lru-context">2.3 LRU 在 context 管理中的具体应用<a class="headerlink" href="#23-lru-context" title="Permanent link">&para;</a></h3>
+<p>LRU 在 context 管理中决定：</p>
+<ul>
+<li><strong>system prompt</strong>：每轮都引用，<code>last_used</code> 不断更新，永远不被淘汰</li>
+<li><strong>最近几轮对话</strong>：刚访问过，<code>last_used</code> 大，不会被淘汰</li>
+<li><strong>工具调用结果</strong>：用完就不再引用，<code>last_used</code> 小，优先被淘汰</li>
+<li><strong>检索到的文档</strong>：只在当前轮用，下一轮不引用，会被淘汰</li>
+</ul>
+<p>这正好符合直觉：system prompt 和最近对话最重要，老的工具结果和过时的检索文档可以淘汰。</p>
+<h3 id="24-token-vs">2.4 token 预算 vs 条目数预算<a class="headerlink" href="#24-token-vs" title="Permanent link">&para;</a></h3>
+<p>普通 LRU 按条目数淘汰（最多 100 条），context LRU 按 token 总数淘汰（最多 128K token）。区别：</p>
+<ul>
+<li>条目数 LRU：每条等权，淘汰一条就够</li>
+<li>token 预算 LRU：每条占的 token 不同，可能要淘汰多条才够放一条大的</li>
+</ul>
+<p>如：预算 4096 token，要放一条 2000 token 的消息，可能要淘汰好几条小消息才够。token 预算 LRU 更贴合 context window 的实际限制。</p>
+<h2 id="3-prompt-trie">3. prompt 工程与 Trie 前缀共享<a class="headerlink" href="#3-prompt-trie" title="Permanent link">&para;</a></h2>
+<h3 id="31-system-prompt">3.1 system prompt 的重复<a class="headerlink" href="#31-system-prompt" title="Permanent link">&para;</a></h3>
+<p>LLM 应用的请求几乎都带 system prompt：</p>
+<div class="highlight"><pre><span></span><code>req_1: [你是一个数据结构助手，用简体中文回答...] + [用户问题 1]
+req_2: [你是一个数据结构助手，用简体中文回答...] + [用户问题 2]
+req_3: [你是一个数据结构助手，用简体中文回答...] + [用户问题 3]
+</code></pre></div>
+<p>system prompt 可能几千 token（角色设定 + 工具说明 + few-shot 示例）。如果每个请求独立处理，每次都要重新算前缀的 KV cache，浪费。</p>
+<h3 id="32-trie">3.2 Trie 共享前缀<a class="headerlink" href="#32-trie" title="Permanent link">&para;</a></h3>
+<p>用 Trie 把多个请求的 prompt 按前缀合并：</p>
+<div class="highlight"><pre><span></span><code>Trie 结构（system prompt = [你, 是, 一个, 助手]）：
+  根
+   └─ 你
+       └─ 是
+           └─ 一个
+               └─ 助手  ← system prompt 到这里，3 个请求共享
+                   ├─ 用户问题 1
+                   ├─ 用户问题 2
+                   └─ 用户问题 3
+</code></pre></div>
+<p>system prompt 部分只存一次，3 个请求共享。省下的 token = (N-1) × len(system_prompt)。</p>
+<p>实测：100 请求，system 500 token + 用户 50 token，无共享 55000 token，Trie 共享 5500 token，<strong>省 90.2%</strong>。</p>
+<h3 id="33-prefix-caching">3.3 prefix caching 在推理框架中的应用<a class="headerlink" href="#33-prefix-caching" title="Permanent link">&para;</a></h3>
+<p>vLLM、SGLang 等推理框架的 <strong>prefix caching</strong> 就是 Trie 思想的工程实现：</p>
+<ul>
+<li>按 token 序列算 hash，建前缀树</li>
+<li>公共前缀的 KV cache 只算一次，存起来</li>
+<li>新请求来时，先查前缀树，命中前缀的 KV cache 直接复用</li>
+</ul>
+<p>这让多轮对话（每轮共享前 N-1 轮的 KV cache）和 batch 推理（多个请求共享 system prompt）的 prefill 成本大幅下降。vLLM 的 prefix caching 让多轮对话的 TTFT（首 token 延迟）降 5-10x。</p>
+<h3 id="34-prompt-token">3.4 prompt 工程的其他 token 优化<a class="headerlink" href="#34-prompt-token" title="Permanent link">&para;</a></h3>
+<p>除了前缀共享，prompt 工程还有：</p>
+<ul>
+<li><strong>prompt 压缩</strong>：用更少的 token 表达同样意思（如 "用中文答" 代替 "请使用简体中文进行回答"）</li>
+<li><strong>few-shot 选择</strong>：从大量示例中选最相关的几个，而不是全塞</li>
+<li><strong>工具说明懒加载</strong>：只在用到工具时才塞工具说明，不一开始就全塞</li>
+</ul>
+<p>这些都是为了在有限 context window 里塞更多有效信息。</p>
+<h2 id="4_1">4. 记忆系统：短期 + 长期<a class="headerlink" href="#4_1" title="Permanent link">&para;</a></h2>
+<h3 id="41">4.1 为什么需要记忆<a class="headerlink" href="#41" title="Permanent link">&para;</a></h3>
+<p>LLM 本身是无状态的——每次调用都是独立的，不记得之前说过什么。对话的"记忆"靠把历史消息塞进 context window 实现。但 context window 有限，长对话装不下所有历史。</p>
+<p>记忆系统解决：<strong>怎么把对话中的关键信息存下来，后续按需取回</strong>。</p>
+<h3 id="42_1">4.2 短期记忆：滑动窗口<a class="headerlink" href="#42_1" title="Permanent link">&para;</a></h3>
+<p>短期记忆 = 当前对话的最近几轮消息，用<strong>环形缓冲</strong>管理：</p>
+<div class="highlight"><pre><span></span><code>对话历史：[msg_1, msg_2, ..., msg_100]
+滑动窗口（保留最近 8 条）：[msg_93, ..., msg_100]
+</code></pre></div>
+<p>环形缓冲 O(1) push，固定内存，老消息自动滚出。这是最简单的记忆策略，LangChain 的 <code>ConversationBufferWindowMemory</code> 就是这个。</p>
+<p>缺点：老消息直接丢，可能丢失关键信息（如用户在第 1 轮说了偏好，第 100 轮还在用）。</p>
+<h3 id="43">4.3 长期记忆：哈希表 + 向量检索<a class="headerlink" href="#43" title="Permanent link">&para;</a></h3>
+<p>长期记忆 = 跨对话的事实，存在外部存储。两种检索方式：</p>
+<p><strong>按 key 精确取（哈希表）</strong>：
+<div class="highlight"><pre><span></span><code>记忆库：
+  "user_pref_lang" → "Python"
+  "user_level" → "beginner"
+  "user_project" → "data_structure_tutorial"
+
+每轮开始时：
+  lang = memory.get("user_pref_lang")  # O(1)
+  level = memory.get("user_level")     # O(1)
+  → 塞进 context：[用户偏好 Python，是新手]
+</code></pre></div></p>
+<p>适合存结构化事实（用户偏好、项目信息、设定参数）。哈希表 O(1) 查找，5000 条记忆 5000 次查询只要 1.74 ms。</p>
+<p><strong>按语义相似度（向量检索）</strong>：
+<div class="highlight"><pre><span></span><code>记忆库（embedding）：
+  "用户喜欢 Python" → [0.1, 0.8, ...]
+  "用户在学数据结构" → [0.3, 0.7, ...]
+  "用户用 VSCode" → [0.5, 0.2, ...]
+
+查询："用户喜欢什么编程语言"
+  → embedding("用户喜欢什么编程语言") = [0.1, 0.7, ...]
+  → 最近邻搜索 → "用户喜欢 Python"
+</code></pre></div></p>
+<p>适合存非结构化记忆，按语义相关性检索。用 HNSW 等向量索引（见第 12 章）。</p>
+<h3 id="44_1">4.4 摘要记忆：压缩老消息<a class="headerlink" href="#44_1" title="Permanent link">&para;</a></h3>
+<p>另一种记忆策略：把老消息<strong>摘要</strong>成一段，而不是直接丢或全留：</p>
+<div class="highlight"><pre><span></span><code>原始历史（100 轮，20000 token）：
+  msg_1: 用户问 LRU
+  msg_2: 助手答 LRU 是...
+  ...
+  msg_100: 用户问栈
+
+摘要记忆（1 段，200 token）：
+  "之前讨论了 LRU、Trie、哈希表、环形缓冲的原理和应用"
+
+当前 context：
+  [摘要 200 token] + [最近 8 轮原始消息 2000 token]
+  → 用 2200 token 覆盖了 100 轮的关键信息
+</code></pre></div>
+<p>LangChain 的 <code>ConversationSummaryMemory</code> 实现这个。摘要本身要调 LLM（有成本），但摘要后每轮省大量 token。</p>
+<h3 id="45-memgpt">4.5 MemGPT 的分级记忆<a class="headerlink" href="#45-memgpt" title="Permanent link">&para;</a></h3>
+<p>MemGPT（现 Letta）把操作系统的内存管理思想搬到 LLM，分级记忆：</p>
+<table>
+<thead>
+<tr>
+<th>层级</th>
+<th>类比</th>
+<th>内容</th>
+<th>淘汰策略</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>主 context</td>
+<td>寄存器</td>
+<td>当前对话窗口</td>
+<td>LRU</td>
+</tr>
+<tr>
+<td>记忆上下文</td>
+<td>内存</td>
+<td>存不下的内容</td>
+<td>按需 page in/out</td>
+</tr>
+<tr>
+<td>归档记忆</td>
+<td>硬盘</td>
+<td>长期存储</td>
+<td>向量检索</td>
+</tr>
+</tbody>
+</table>
+<p>LRU 决定什么留主 context、什么 page out 到记忆、什么归档。这模拟了 OS 的 LRU 页面置换，让 LLM 在有限 context 里"记住"远超窗口的信息。</p>
+<h2 id="5-agent_1">5. agent 调用嵌套与栈<a class="headerlink" href="#5-agent_1" title="Permanent link">&para;</a></h2>
+<h3 id="51-agent">5.1 多 agent 协作<a class="headerlink" href="#51-agent" title="Permanent link">&para;</a></h3>
+<p>现代 AI 应用常用多 agent 协作：主 agent 负责理解用户意图，子 agent 负责具体执行：</p>
+<div class="highlight"><pre><span></span><code>main_agent（理解意图）
+  ├── code_agent（写代码）
+  │     └── test_agent（跑测试）
+  ├── search_agent（搜索资料）
+  │     └── tool_agent（调用搜索 API）
+  └── review_agent（审查结果）
+</code></pre></div>
+<p>main_agent 调用 code_agent，code_agent 又调用 test_agent，形成嵌套。</p>
+<h3 id="52_1">5.2 栈管理嵌套返回<a class="headerlink" href="#52_1" title="Permanent link">&para;</a></h3>
+<p>嵌套调用必须按<strong>后进先出</strong>返回：最后调用的 agent 最先返回。</p>
+<div class="highlight"><pre><span></span><code>调用顺序：
+  push(main_agent) → push(code_agent) → push(test_agent)
+
+返回顺序（栈 pop）：
+  pop → test_agent 返回给 code_agent
+  pop → code_agent 返回给 main_agent
+  pop → main_agent 返回给用户
+</code></pre></div>
+<p>用栈保证返回顺序正确。如果错误地用队列（先调用的先返回），main_agent 会先返回，但 code_agent 还在跑，逻辑混乱。</p>
+<h3 id="53_1">5.3 栈在异常传播中的作用<a class="headerlink" href="#53_1" title="Permanent link">&para;</a></h3>
+<p>agent 嵌套中，内层 agent 抛异常时，栈逐层 pop 触发各层 fallback：</p>
+<div class="highlight"><pre><span></span><code>test_agent 抛异常 "测试失败"
+  → pop test_agent
+  → code_agent 收到异常，fallback：返回"代码需要修改"
+  → code_agent 决定重试或返回
+  → 如果 code_agent 也抛异常，pop
+  → main_agent 收到异常，fallback：向用户道歉并请求澄清
+</code></pre></div>
+<p>这就是编程语言异常处理的栈展开（stack unwinding），agent 系统复用这个机制做错误传播和恢复。</p>
+<h3 id="54-agent">5.4 递归 agent 与栈深度<a class="headerlink" href="#54-agent" title="Permanent link">&para;</a></h3>
+<p>有些 agent 会递归调用（如 agent A 调 agent B，agent B 又调 agent A）。栈的深度反映递归深度。要防止无限递归：</p>
+<ul>
+<li>设最大栈深度（如 10），超过就拒绝</li>
+<li>检测环（A 调 B 调 A），拒绝或用缓存打破环</li>
+</ul>
+<p>这和编程语言防止栈溢出的思路一样。</p>
+<h2 id="6-demo">6. demo 结果解读<a class="headerlink" href="#6-demo" title="Permanent link">&para;</a></h2>
+<h3 id="61-lru-vs">6.1 LRU vs 随机淘汰<a class="headerlink" href="#61-lru-vs" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>场景：4000 次操作，token 预算 1024，85% 访问 5% 热点
+LRU 淘汰  ：命中率 82.5%
+随机淘汰  ：命中率 71.4%
+→ LRU 高 11 个百分点
+</code></pre></div>
+<p>解读：访问有局部性时（大部分访问集中在小部分热点），LRU 保留热点，命中率显著高于随机。11 个百分点在生产环境意味着：每 100 次访问，LRU 多 11 次命中，少 11 次重新加载/计算，对延迟和成本影响巨大。</p>
+<h3 id="62-trie">6.2 Trie 前缀共享<a class="headerlink" href="#62-trie" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>场景：100 请求，system prompt 500 token + 用户消息 50 token
+无共享总 token = 55000
+Trie 共享后   = 5500
+省 90.2%
+</code></pre></div>
+<p>解读：system prompt 占 prompt 的大部分（500/550 = 91%），共享后只存一次，省的比例约等于 system prompt 占比。生产环境 system prompt 常几千 token，省的比例更高。vLLM 的 prefix caching 就是这个思路的工程实现。</p>
+<h3 id="63-vs-list">6.3 环形缓冲 vs list<a class="headerlink" href="#63-vs-list" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>场景：100000 次 push，容量 5000
+环形缓冲    ：132 ms（push O(1)）
+list+pop(0) ：1881 ms（push 满 O(n)）
+快 14x
+</code></pre></div>
+<p>解读：list.pop(0) 要前移所有元素，O(n)，n=5000 时每次前移 4999 个元素，100000 次就是 5 亿次元素移动。环形缓冲只改指针，O(1)，与容量无关。流式写入场景（消息不断到达）环形缓冲优势显著。</p>
+<h3 id="64-vs">6.4 哈希 vs 线性扫描<a class="headerlink" href="#64-vs" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>场景：5000 条记忆，5000 次 get 查询
+哈希表    ：1.74 ms（每次 O(1)）
+线性扫描  ：470 ms（每次 O(n)）
+快 270x
+</code></pre></div>
+<p>解读：线性扫描每次 get 要遍历整个 list 找 key，5000 条 × 5000 次 = 2500 万次比较。哈希表每次 get 直接定位桶，5000 次只要 5000 次哈希。记忆条数越多，哈希表优势越大。</p>
+<h2 id="7_1">7. 生产级实现<a class="headerlink" href="#7_1" title="Permanent link">&para;</a></h2>
+<h3 id="71-langchain-memory_1">7.1 LangChain Memory<a class="headerlink" href="#71-langchain-memory_1" title="Permanent link">&para;</a></h3>
+<p>LangChain 的 Memory 模块覆盖本章讨论的多种记忆策略：</p>
+<table>
+<thead>
+<tr>
+<th>Memory 类</th>
+<th>机制</th>
+<th>对应数据结构</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ConversationBufferMemory</code></td>
+<td>全量保留</td>
+<td>list</td>
+</tr>
+<tr>
+<td><code>ConversationBufferWindowMemory</code></td>
+<td>滑动窗口</td>
+<td>环形缓冲</td>
+</tr>
+<tr>
+<td><code>ConversationSummaryMemory</code></td>
+<td>摘要记忆</td>
+<td>list + LLM 摘要</td>
+</tr>
+<tr>
+<td><code>ConversationSummaryBufferMemory</code></td>
+<td>摘要 + 滑动窗口</td>
+<td>环形缓冲 + LLM 摘要</td>
+</tr>
+<tr>
+<td><code>ConversationKGMemory</code></td>
+<td>知识图谱记忆</td>
+<td>图 + 三元组</td>
+</tr>
+<tr>
+<td><code>VectorStoreRetrieverMemory</code></td>
+<td>向量记忆</td>
+<td>HNSW + embedding</td>
+</tr>
+</tbody>
+</table>
+<h3 id="72-memgpt-letta_1">7.2 MemGPT / Letta<a class="headerlink" href="#72-memgpt-letta_1" title="Permanent link">&para;</a></h3>
+<p>MemGPT（现 Letta）的分级记忆：</p>
+<ul>
+<li><strong>主 context</strong>：LRU 淘汰，像 OS 的页面置换</li>
+<li><strong>记忆上下文</strong>：按需 page in/out，像 OS 的内存</li>
+<li><strong>归档记忆</strong>：向量检索，像 OS 的硬盘</li>
+</ul>
+<p>MemGPT 让 LLM 在 8K context 里"记住"远超 8K 的信息，靠的就是 LRU + 分级存储 + 按需检索。</p>
+<h3 id="73-vllm-prefix-caching_1">7.3 vLLM prefix caching<a class="headerlink" href="#73-vllm-prefix-caching_1" title="Permanent link">&para;</a></h3>
+<p>vLLM 的 prefix caching 用 Trie 思想：</p>
+<ul>
+<li>按 token 序列算 hash，建前缀树</li>
+<li>公共前缀的 KV cache 只算一次</li>
+<li>新请求命中前缀直接复用 KV cache</li>
+</ul>
+<p>让多轮对话的 TTFT 降 5-10x，是 vLLM 性能领先的关键技术之一。</p>
+<h3 id="74-openai-assistants-api">7.4 OpenAI Assistants API<a class="headerlink" href="#74-openai-assistants-api" title="Permanent link">&para;</a></h3>
+<p>OpenAI 的 Assistants API 内置记忆管理：</p>
+<ul>
+<li><strong>Threads</strong>：对话历史存储（环形缓冲 + 滑动窗口）</li>
+<li><strong>Messages</strong>：按 thread 组织消息</li>
+<li><strong>Retrieval</strong>：文件上传后自动 embedding + 向量检索</li>
+<li><strong>Code Interpreter</strong>：工具调用（栈管理嵌套）</li>
+</ul>
+<p>用户不用自己管 context window，API 内部用类似机制处理。</p>
+<h2 id="8_1">8. 设计权衡<a class="headerlink" href="#8_1" title="Permanent link">&para;</a></h2>
+<h3 id="81">8.1 保留多少历史<a class="headerlink" href="#81" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>token 成本</th>
+<th>信息保留</th>
+<th>适用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>全量保留</td>
+<td>高（超窗口就崩）</td>
+<td>完整</td>
+<td>短对话</td>
+</tr>
+<tr>
+<td>滑动窗口</td>
+<td>低</td>
+<td>最近 N 轮</td>
+<td>多轮对话</td>
+</tr>
+<tr>
+<td>摘要记忆</td>
+<td>中</td>
+<td>摘要 + 最近几轮</td>
+<td>长对话</td>
+</tr>
+<tr>
+<td>向量检索</td>
+<td>低（按需检索）</td>
+<td>相关片段</td>
+<td>超长对话</td>
+</tr>
+</tbody>
+</table>
+<p>没有银弹，按对话长度和 token 预算选。</p>
+<h3 id="82">8.2 淘汰策略选择<a class="headerlink" href="#82" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>命中率</th>
+<th>实现复杂度</th>
+<th>适用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FIFO</td>
+<td>低</td>
+<td>简单</td>
+<td>均匀访问</td>
+</tr>
+<tr>
+<td>LRU</td>
+<td>高</td>
+<td>中</td>
+<td>有局部性</td>
+</tr>
+<tr>
+<td>LFU</td>
+<td>高（频率热点）</td>
+<td>中</td>
+<td>频率稳定的访问</td>
+</tr>
+<tr>
+<td>ARC（自适应）</td>
+<td>更高</td>
+<td>复杂</td>
+<td>访问模式变化</td>
+</tr>
+</tbody>
+</table>
+<p>context 管理常用 LRU（实现简单，命中率高）。数据库缓存常用 LFU 或 ARC。</p>
+<h3 id="83">8.3 记忆检索方式<a class="headerlink" href="#83" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>检索方式</th>
+<th>精确度</th>
+<th>召回率</th>
+<th>适用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>哈希表（按 key）</td>
+<td>精确</td>
+<td>低（要 key 完全匹配）</td>
+<td>结构化事实</td>
+</tr>
+<tr>
+<td>向量检索（按语义）</td>
+<td>模糊</td>
+<td>高</td>
+<td>非结构化记忆</td>
+</tr>
+<tr>
+<td>全文搜索</td>
+<td>中</td>
+<td>中</td>
+<td>关键词匹配</td>
+</tr>
+<tr>
+<td>知识图谱</td>
+<td>精确</td>
+<td>中</td>
+<td>实体关系</td>
+</tr>
+</tbody>
+</table>
+<p>结构化记忆用哈希表，非结构化用向量检索，复杂关系用知识图谱。生产系统常组合多种。</p>
+<h2 id="9">9. 小结<a class="headerlink" href="#9" title="Permanent link">&para;</a></h2>
+<p>上下文工程是 LLM 应用从 demo 到生产的关键：</p>
+<ul>
+<li><strong>context window 限制</strong> → LRU 淘汰（保留热点，token 不超限）</li>
+<li><strong>prompt 前缀共享</strong> → Trie（多请求共享 system prompt，省 90%+ token）</li>
+<li><strong>长期记忆检索</strong> → 哈希表（按 key O(1) 取，270x 快于线性扫描）</li>
+<li><strong>对话滑动窗口</strong> → 环形缓冲（O(1) push，14x 快于 list）</li>
+<li><strong>agent 调用嵌套</strong> → 栈（后进先出匹配返回）</li>
+</ul>
+<p>生产级系统（LangChain Memory、MemGPT、vLLM prefix caching、OpenAI Assistants API）用不同组合实现类似机制。理解这 5 种数据结构的协作，才能设计出在有限 context 里塞最多有效信息的上下文工程系统。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.indexes", "navigation.tracking", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

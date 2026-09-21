@@ -1,0 +1,2594 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="从底层实现到生产级应用——数据结构在 AI 系统优化与应用工程中的真实作用">
+      
+      
+        <meta name="author" content="wanglh39">
+      
+      
+        <link rel="canonical" href="https://wanglh39.github.io/ds-ai-teaching/ch12/">
+      
+      
+        <link rel="prev" href="../ch11/">
+      
+      
+        <link rel="next" href="../ch13/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>12 跳表+图 - 数据结构 × AI 优化</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+SC:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans SC";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#12-hnsw" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href=".." title="数据结构 × AI 优化" class="md-header__button md-logo" aria-label="数据结构 × AI 优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            数据结构 × AI 优化
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              12 跳表+图
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换至暗色模式"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换至暗色模式" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换至亮色模式"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换至亮色模式" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/wanglh39/ds-ai-teaching" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wanglh39/ds-ai-teaching
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  首页
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../intro/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  项目介绍
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../ch01/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  视角 A·系统优化
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../ch13/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  视角 B·应用工程
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../benchmarks/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  性能汇总
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="数据结构 × AI 优化" class="md-nav__button md-logo" aria-label="数据结构 × AI 优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    数据结构 × AI 优化
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/wanglh39/ds-ai-teaching" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wanglh39/ds-ai-teaching
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    首页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    项目介绍
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    项目介绍
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    设计思路
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../map/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    章节映射
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dual_view/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    双视角说明
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cross_index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    交叉索引
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    视角 A·系统优化
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    视角 A·系统优化
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 动态数组
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch02/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 链表
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch03/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 栈
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch04/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 循环队列
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch05/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05 哈希表
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch06/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 堆
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch07/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    07 Trie
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch08/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    08 KD-Tree
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch09/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    09 图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch10/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10 并查集
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch11/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11 页表/分块内存
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12 跳表+图
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12 跳表+图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要回答的问题
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        状态
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原理
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    视角 B·应用工程
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    视角 B·应用工程
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch13/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13 多智能体编排
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch14/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    14 任务调度与批处理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch15/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    15 上下文工程与记忆
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch16/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    16 RAG 与知识检索
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch17/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    17 数据管道与流式处理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch18/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    18 模型部署与推理服务
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch19/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    19 状态机与工作流
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch20/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    20 模型压缩
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    性能汇总
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要回答的问题
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        状态
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原理
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="12-hnsw">第 12 章 · HNSW 专题<a class="headerlink" href="#12-hnsw" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>数据结构：跳表（多层索引链表）+ 近邻图
+AI 优化：HNSW 向量检索</p>
+</blockquote>
+<h2 id="_1">本章要回答的问题<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>为什么纯图不够、纯跳表也不够？</li>
+<li>跳表给图提供了什么？图给跳表提供了什么？</li>
+<li>HNSW vs 暴力 KNN 在 1M 向量下的延迟差多少？</li>
+</ul>
+<h2 id="_2">目录<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>12_hnsw/
+├── c/                   # 跳表 + 图的 C 实现
+├── python/              # HNSW 向量检索 demo
+├── docs/
+│   ├── principle.md
+│   └── ai_application.md
+└── figures/
+</code></pre></div>
+<h2 id="_3">状态<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p>🚧 待填充</p>
+<hr />
+<h2 id="_4">原理<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<h1 id="hnsw">HNSW 原理：跳表 + 近邻图 = 亚线性向量检索<a class="headerlink" href="#hnsw" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>本文档讲清「为什么跳表和近邻图单独都不够，组合起来才是 HNSW」的数据结构原理：跳表的多层索引链表、抛硬币定层、O(log n) 搜索；近邻图的贪心搜索、入口点问题；HNSW 如何用跳表的思想给图提供分层入口点。C 实现逐行讲解。AI 应用（向量检索）见 <code>ai_application.md</code>。</p>
+</blockquote>
+<h2 id="1">1. 问题：高维向量检索为什么难<a class="headerlink" href="#1" title="Permanent link">&para;</a></h2>
+<p>给定 n 个 d 维向量和一个查询向量 q，找离 q 最近的 k 个向量。这是 <strong>k-近邻搜索（k-NN）</strong>。</p>
+<p><strong>暴力做法</strong>：算 q 到所有 n 个向量的距离，排序取前 k。复杂度 O(n·d)——数据量一大就崩。100 万向量、50 维，一次查询要算 5000 万次浮点运算，约 20ms。看起来不多，但 RAG 系统一次请求要查几十次，延迟就上去了。</p>
+<p><strong>空间数据结构</strong>（KD-tree、Ball-tree）在低维（d ≤ 10）很快，但高维（d ≥ 20）退化到 O(n)——「维度灾难」。向量检索的维度通常是 50~1536（BERT 是 768，OpenAI text-embedding-3 是 1536），KD-tree 完全没用。</p>
+<p><strong>HNSW</strong>（Hierarchical Navigable Small World）的答案：不切空间，建一张<strong>近邻图</strong>，在图上贪心搜索。配合<strong>跳表的分层思想</strong>选入口点，实现 O(log n) 的亚线性检索。这是 2018 年 Malkov 提出的算法，现在 FAISS、Milvus、hnswlib 都用它。</p>
+<p>本文档讲清两个组件——跳表和近邻图——以及它们为什么单独都不够、组合起来才够。</p>
+<h2 id="2">2. 跳表：多层索引链表<a class="headerlink" href="#2" title="Permanent link">&para;</a></h2>
+<h3 id="21">2.1 从有序链表说起<a class="headerlink" href="#21" title="Permanent link">&para;</a></h3>
+<p>有序链表插入/删除/搜索都是 O(n)——必须从头遍历找位置。即使数据有序，也用不上二分。</p>
+<p><strong>跳表的想法</strong>：在链表之上加几层「索引链表」。第 0 层是完整链表，第 1 层每隔一个节点留一个，第 2 层更稀疏……搜索时从最高层开始，快速跳过大段数据，再逐层下降精确定位。</p>
+<div class="highlight"><pre><span></span><code>第 3 层:  1 ──────────────────────────────→ 9
+第 2 层:  1 ──────────→ 5 ──────────→ 9
+第 1 层:  1 ────→ 3 ────→ 5 ────→ 7 ────→ 9
+第 0 层:  1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9
+</code></pre></div>
+<p>搜索 6：从第 3 层 1 出发，next 是 9 &gt; 6，下降到第 2 层；next 是 5 &lt; 6，走到 5，next 是 9 &gt; 6，下降到第 1 层；next 是 7 &gt; 6，下降到第 0 层；next 是 6，找到。总共走了 4 步，而非从头遍历 6 步。</p>
+<h3 id="22">2.2 抛硬币定层<a class="headerlink" href="#22" title="Permanent link">&para;</a></h3>
+<p>每个节点该出现在哪些层？<strong>抛硬币</strong>：插入时，从第 0 层开始，每次以概率 p（通常 0.5）决定是否升一层。抛到反面就停。</p>
+<div class="highlight"><pre><span></span><code>插入节点 6:
+  第 0 层：一定有
+  第 1 层：抛硬币 → 正面，有
+  第 2 层：抛硬币 → 反面，停
+  → 6 出现在第 0、1 层
+</code></pre></div>
+<p>期望层数 = 1/(1-p) = 2（p=0.5 时）。第 k 层的节点数期望 = n·p^k。最高层期望 = log_{1/p}(n)。</p>
+<p><strong>关键性质</strong>：层数服从几何分布，期望最高层 O(log n)。搜索时每层期望走 O(1/p) 步，总共 O(log n / p) = O(log n)。</p>
+<h3 id="23">2.3 跳表搜索<a class="headerlink" href="#23" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>search(key):
+  x = head
+  for i = top_level down to 0:
+    while x.next[i] != null and x.next[i].key &lt; key:
+      x = x.next[i]       # 在第 i 层向右走
+  x = x.next[0]            # 下降到第 0 层的候选
+  return x != null and x.key == key
+</code></pre></div>
+<p>从最高层开始，每层向右走到最后一个 &lt; key 的节点，然后下降。第 0 层的 next 就是目标位置。</p>
+<p><strong>复杂度</strong>：每层期望走 1/p 步（p=0.5 时 2 步），共 O(log n) 层，总共 O(log n)。</p>
+<h3 id="24-vs">2.4 跳表 vs 平衡树<a class="headerlink" href="#24-vs" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>跳表</th>
+<th>红黑树 / AVL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>期望复杂度</td>
+<td>O(log n)</td>
+<td>O(log n)</td>
+</tr>
+<tr>
+<td>实现难度</td>
+<td>简单（抛硬币）</td>
+<td>复杂（旋转）</td>
+</tr>
+<tr>
+<td>并发友好</td>
+<td>好（局部锁）</td>
+<td>差（旋转动多处）</td>
+</tr>
+<tr>
+<td>范围查询</td>
+<td>天然支持（第 0 层链表）</td>
+<td>需要中序遍历</td>
+</tr>
+<tr>
+<td>内存</td>
+<td>O(n) + 索引指针</td>
+<td>O(n)</td>
+</tr>
+<tr>
+<td>最坏情况</td>
+<td>O(n)（概率极低）</td>
+<td>O(log n)</td>
+</tr>
+</tbody>
+</table>
+<p>跳表用概率换简单性。实践中跳表常用于并发结构（Redis 的 ZSET、LevelDB 的 MemTable）。</p>
+<h3 id="25-c">2.5 C 实现讲解<a class="headerlink" href="#25-c" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// skiplist.h</span>
+<span class="cp">#define SKIPLIST_MAX_LEVEL 16</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">SkipNode</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">key</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">value</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">level</span><span class="p">;</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">SkipNode</span><span class="w"> </span><span class="o">*</span><span class="n">next</span><span class="p">[];</span><span class="w">   </span><span class="c1">// 柔性数组，next[0..level-1]</span>
+<span class="p">}</span><span class="w"> </span><span class="n">SkipNode</span><span class="p">;</span>
+</code></pre></div>
+<p><code>next[]</code> 是<strong>柔性数组</strong>——每个节点的层数不同，按实际层数分配内存。<code>sizeof(SkipNode) + sizeof(SkipNode*) * level</code>。</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// 抛硬币定层</span>
+<span class="kt">int</span><span class="w"> </span><span class="nf">skiplist_random_level</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">level</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">((</span><span class="n">rand</span><span class="p">()</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">level</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">SKIPLIST_MAX_LEVEL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">level</span><span class="o">++</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">level</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>rand() &amp; 1</code> 取随机数的最低位，等概率 0/1。连续抛到 1 就升层，抛到 0 就停。最高 16 层（够 2^16 = 65536 个节点，实际 log n 远小于此）。</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// 插入</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">skiplist_insert</span><span class="p">(</span><span class="n">SkipList</span><span class="w"> </span><span class="o">*</span><span class="n">sl</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">SkipNode</span><span class="w"> </span><span class="o">*</span><span class="n">update</span><span class="p">[</span><span class="n">SKIPLIST_MAX_LEVEL</span><span class="p">];</span><span class="w">   </span><span class="c1">// 记录每层要插入位置的前驱</span>
+<span class="w">    </span><span class="n">SkipNode</span><span class="w"> </span><span class="o">*</span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sl</span><span class="o">-&gt;</span><span class="n">head</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sl</span><span class="o">-&gt;</span><span class="n">level</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">--</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">x</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">key</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">key</span><span class="p">)</span>
+<span class="w">            </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">x</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">        </span><span class="n">update</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w">                      </span><span class="c1">// 第 i 层的前驱</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">lvl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">skiplist_random_level</span><span class="p">();</span><span class="w">      </span><span class="c1">// 抛硬币定层</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">lvl</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">sl</span><span class="o">-&gt;</span><span class="n">level</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sl</span><span class="o">-&gt;</span><span class="n">level</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">lvl</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="w">            </span><span class="n">update</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sl</span><span class="o">-&gt;</span><span class="n">head</span><span class="p">;</span><span class="w">           </span><span class="c1">// 新层的前驱是 head</span>
+<span class="w">        </span><span class="n">sl</span><span class="o">-&gt;</span><span class="n">level</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lvl</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">SkipNode</span><span class="w"> </span><span class="o">*</span><span class="n">node</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">skipnode_alloc</span><span class="p">(</span><span class="n">lvl</span><span class="p">,</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">);</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">lvl</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">node</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">update</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">[</span><span class="n">i</span><span class="p">];</span><span class="w"> </span><span class="c1">// 标准链表插入</span>
+<span class="w">        </span><span class="n">update</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">node</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">sl</span><span class="o">-&gt;</span><span class="n">count</span><span class="o">++</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>update[]</code> 记录每层的插入前驱——这是跳表插入的关键。搜索时顺便记录每层停在哪，插入时直接用。</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// find_closest：找 key 最接近的节点（HNSW 入口点选择用）</span>
+<span class="kt">bool</span><span class="w"> </span><span class="nf">skiplist_find_closest</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">SkipList</span><span class="w"> </span><span class="o">*</span><span class="n">sl</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="n">out_key</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="n">out_value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">le_key</span><span class="p">,</span><span class="w"> </span><span class="n">le_val</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">has_le</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">skiplist_find_le</span><span class="p">(</span><span class="n">sl</span><span class="p">,</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">le_key</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">le_val</span><span class="p">);</span><span class="w">   </span><span class="c1">// ≤ key 的最大</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">ge_key</span><span class="p">,</span><span class="w"> </span><span class="n">ge_val</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">has_ge</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">skiplist_find_ge</span><span class="p">(</span><span class="n">sl</span><span class="p">,</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">ge_key</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">ge_val</span><span class="p">);</span><span class="w">   </span><span class="c1">// ≥ key 的最小</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">has_le</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">has_ge</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">has_le</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">*</span><span class="n">out_key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ge_key</span><span class="p">;</span><span class="w"> </span><span class="o">*</span><span class="n">out_value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ge_val</span><span class="p">;</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">has_ge</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">*</span><span class="n">out_key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">le_key</span><span class="p">;</span><span class="w"> </span><span class="o">*</span><span class="n">out_value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">le_val</span><span class="p">;</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">key</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">le_key</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">ge_key</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">key</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">   </span><span class="c1">// 选更近的</span>
+<span class="w">        </span><span class="o">*</span><span class="n">out_key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">le_key</span><span class="p">;</span><span class="w"> </span><span class="o">*</span><span class="n">out_value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">le_val</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="o">*</span><span class="n">out_key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ge_key</span><span class="p">;</span><span class="w"> </span><span class="o">*</span><span class="n">out_value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ge_val</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>find_closest</code> 是 HNSW 入口点选择的核心：给定查询的「投影值」，O(log n) 找到投影最接近的节点作为图搜索的起点。</p>
+<h2 id="3">3. 近邻图：每节点连最近邻<a class="headerlink" href="#3" title="Permanent link">&para;</a></h2>
+<h3 id="31">3.1 图结构<a class="headerlink" href="#31" title="Permanent link">&para;</a></h3>
+<p><strong>近邻图</strong>：每个向量是一个节点，每个节点连到它的 M 个最近邻。搜索时从某个入口点出发，贪心走向查询点。</p>
+<div class="highlight"><pre><span></span><code>向量分布:                    近邻图 (M=3):
+  A    B                        A ── B
+   \  / \                       |    | \
+    C    D                      C    D──E
+     \  /                        \  /
+      E                           E
+</code></pre></div>
+<h3 id="32">3.2 贪心搜索<a class="headerlink" href="#32" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>greedy_search(query, entry):
+  current = entry
+  while True:
+    best_nb = None
+    best_dist = dist(current, query)
+    for nb in neighbors(current):
+      if dist(nb, query) &lt; best_dist:
+        best_dist = dist(nb, query)
+        best_nb = nb
+    if best_nb == None: break    # 局部最优，停
+    current = best_nb            # 走到更近的邻居
+  return current
+</code></pre></div>
+<p>每次看当前节点的所有邻居，走到离 query 最近的那个。重复直到没有邻居比当前更近——到达<strong>局部最优</strong>。</p>
+<p><strong>复杂度</strong>：每步看 M 个邻居，算 M 次距离。走多少步取决于图的结构——如果图是「可导航的」（Small World 性质），期望步数 O(log n)。总共 O(M·log n·d)。</p>
+<h3 id="33-best-first-searchhnsw">3.3 best-first search（HNSW 实际用的）<a class="headerlink" href="#33-best-first-searchhnsw" title="Permanent link">&para;</a></h3>
+<p>纯贪心只走一条路径，容易陷局部最优。HNSW 用 <strong>best-first search</strong>：维护一个大小 ef 的候选集，每次扩展最近的候选，而非只走最近的一个。</p>
+<div class="highlight"><pre><span></span><code>best_first_search(query, ef):
+  candidates = priority_queue(entry)    # 按 dist 排序
+  results = priority_queue(entry)       # 保留 ef 个最近
+  while candidates not empty:
+    c = candidates.pop_nearest()
+    if dist(c) &gt; results.farthest(): break   # 候选都比结果远，停
+    for nb in neighbors(c):
+      if nb not visited:
+        visited.add(nb)
+        if dist(nb) &lt; results.farthest() or len(results) &lt; ef:
+          candidates.push(nb)
+          results.push(nb)
+          if len(results) &gt; ef: results.pop_farthest()
+  return results
+</code></pre></div>
+<p>ef 越大，搜索越宽，召回率越高，但越慢。ef=1 退化为纯贪心。</p>
+<h3 id="34">3.4 图的入口点问题<a class="headerlink" href="#34" title="Permanent link">&para;</a></h3>
+<p>贪心搜索需要一个<strong>入口点</strong>。如果入口点离 query 很远，搜索可能走很多步，甚至走不到 query 附近（陷在远处的局部最优）。</p>
+<p><strong>朴素方案</strong>：固定一个入口点（比如第一个插入的节点）。问题：如果 query 在图的另一端，搜索要走很远。</p>
+<p><strong>随机方案</strong>：随机选入口点。问题：质量不稳定。</p>
+<p><strong>HNSW 的方案</strong>：用跳表的分层思想——上层图是下层的抽样，搜索从顶层（稀疏）开始，能跨大距离；逐层下降到第 0 层（密集）精确定位。</p>
+<h2 id="4">4. 为什么单独都不够<a class="headerlink" href="#4" title="Permanent link">&para;</a></h2>
+<h3 id="41">4.1 纯跳表在高维不够<a class="headerlink" href="#41" title="Permanent link">&para;</a></h3>
+<p>跳表是<strong>一维</strong>结构——按 key 排序。高维向量没有天然的「排序顺序」。</p>
+<p>可以把高维向量投影到一维（取第一维坐标、或到原点距离），用跳表排序。但<strong>不同向量可能投影到同一点</strong>（投影冲突），且<strong>投影近不等于原向量近</strong>。</p>
+<div class="highlight"><pre><span></span><code>二维向量:                    投影到 x 轴:
+  A(1, 10)                   A: 1
+  B(2, 0)                    B: 2     ← A、B 投影接近，但实际距离远
+  C(3, 10)                   C: 3
+</code></pre></div>
+<p>跳表能 O(log n) 找到投影接近的候选，但候选可能不是真正的近邻。高维下投影冲突严重，跳表退化。</p>
+<h3 id="42">4.2 纯近邻图入口点选择慢<a class="headerlink" href="#42" title="Permanent link">&para;</a></h3>
+<p>近邻图的贪心搜索很快（O(log n)），但<strong>入口点选择</strong>是瓶颈：</p>
+<ul>
+<li>固定入口点：query 离入口远时搜索慢</li>
+<li>暴力找入口点：O(n)，失去亚线性的意义</li>
+<li>随机入口点：质量不稳定</li>
+</ul>
+<p>没有好的入口点选择机制，近邻图的优势（贪心搜索快）发挥不出来。</p>
+<h3 id="43">4.3 互相补足<a class="headerlink" href="#43" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>强项</th>
+<th>弱项</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>跳表</td>
+<td>O(log n) 查找、有序</td>
+<td>高维投影冲突</td>
+</tr>
+<tr>
+<td>近邻图</td>
+<td>高维近邻搜索</td>
+<td>入口点选择</td>
+</tr>
+<tr>
+<td><strong>HNSW</strong></td>
+<td><strong>跳表给入口点，图给搜索路径</strong></td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p>跳表解决「从哪开始搜」（O(log n) 选入口点），图解决「怎么走最快」（贪心搜索 O(log n)）。组合起来 O(log n) + O(log n) = O(log n)。</p>
+<h2 id="5-hnsw">5. HNSW：跳表思想 + 近邻图<a class="headerlink" href="#5-hnsw" title="Permanent link">&para;</a></h2>
+<h3 id="51">5.1 分层结构<a class="headerlink" href="#51" title="Permanent link">&para;</a></h3>
+<p>HNSW 借鉴跳表的<strong>分层思想</strong>：不是建一张图，而是建多层图。</p>
+<ul>
+<li><strong>第 0 层</strong>：所有节点，每节点连 M 个最近邻（密集图）</li>
+<li><strong>第 1 层</strong>：约一半节点（抛硬币选），连 M 个最近邻（稀疏图）</li>
+<li><strong>第 L 层</strong>：更少节点（顶层最稀疏）</li>
+</ul>
+<div class="highlight"><pre><span></span><code>第 2 层:  A ──────────→ D              (稀疏，跨大距离)
+第 1 层:  A ───→ C ───→ D ───→ F       (中等)
+第 0 层:  A → B → C → D → E → F → G    (密集，精确定位)
+</code></pre></div>
+<p>节点出现在第 l 层的概率 = p^l（抛硬币，和跳表一样）。顶层期望 log_{1/p}(n) 层。</p>
+<h3 id="52">5.2 搜索：从顶层贪心下降<a class="headerlink" href="#52" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>hnsw_search(query, k):
+  # 从顶层开始，贪心走到最近的节点
+  entry = top_layer.entry_point
+  for l = top_layer down to 1:
+    entry = greedy_search(layer[l], query, entry, ef=1)   # 每层找最近
+  # 第 0 层用 best-first 精确搜索
+  results = best_first_search(layer[0], query, entry, ef=k)
+  return top_k(results)
+</code></pre></div>
+<p><strong>上层</strong>：图稀疏，节点间距离大，贪心搜索能快速跨大距离（几步走到 query 附近）。
+<strong>下层</strong>：图密集，节点间距离小，best-first 精确定位近邻。</p>
+<p>这和跳表搜索<strong>完全一样</strong>：从最高层粗定位，逐层下降精定位。跳表是「按 key 排序的分层链表」，HNSW 是「按近邻关系的分层图」。</p>
+<h3 id="53">5.3 插入：抛硬币定层 + 搜索找近邻<a class="headerlink" href="#53" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>hnsw_insert(vector):
+  l = random_level()           # 抛硬币决定出现在哪些层
+  # 从顶层到 l+1 层：贪心走，找最近的入口点
+  entry = top_layer.entry_point
+  for layer = top down to l+1:
+    entry = greedy_search(layer, query=vector, entry, ef=1)
+  # 从 l 层到第 0 层：best-first 找 ef_construction 个候选，选 M 个连接
+  for layer = l down to 0:
+    candidates = best_first_search(layer, vector, entry, ef_construction)
+    neighbors = select_M_nearest(candidates, vector)
+    add_edges(vector, neighbors)
+    entry = nearest(candidates)   # 下一层的入口点
+</code></pre></div>
+<p>插入时先抛硬币定层（和跳表一样），再用搜索找近邻连接。建图是增量的——每个新节点用已有图搜索找候选近邻，不需要全扫。</p>
+<h3 id="54">5.4 启发式邻居选择<a class="headerlink" href="#54" title="Permanent link">&para;</a></h3>
+<p>选 M 个候选近邻时，不只选最近的，还要选<strong>多样的</strong>（方向不同）。避免所有邻居挤在一个方向，导致搜索路径单一。</p>
+<div class="highlight"><pre><span></span><code>select_neighbors_heuristic(candidates, M):
+  result = []
+  for c in candidates sorted by distance:
+    if all(dist(c, r) &gt; dist(c, query) for r in result):
+      result.append(c)         # c 离 query 比离已选邻居都近 → 多样
+      if len(result) == M: break
+  return result
+</code></pre></div>
+<p>这保证邻居在各个方向都有，搜索时能从多方向接近 query。</p>
+<h2 id="6-c">6. C 实现逐行讲解<a class="headerlink" href="#6-c" title="Permanent link">&para;</a></h2>
+<p>我们的 C 实现是<strong>教学简化版</strong>——没有分层结构，只有一层近邻图 + 跳表入口点选择。完整 HNSW 的分层逻辑见上节。</p>
+<h3 id="61-hnsw">6.1 HNSW 结构<a class="headerlink" href="#61-hnsw" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// hnsw.h</span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">HnswVector</span><span class="w"> </span><span class="o">*</span><span class="n">vectors</span><span class="p">;</span><span class="w">        </span><span class="c1">// 所有向量</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="o">**</span><span class="n">neighbors</span><span class="p">;</span><span class="w">            </span><span class="c1">// 邻接表 neighbors[i][0..M-1]</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="n">neighbor_count</span><span class="p">;</span><span class="w">        </span><span class="c1">// 每节点的邻居数</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">n_nodes</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">capacity</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">dim</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">M</span><span class="p">;</span><span class="w">                      </span><span class="c1">// 最大连接数</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">entry_point</span><span class="p">;</span><span class="w">            </span><span class="c1">// 入口点索引</span>
+<span class="w">    </span><span class="n">SkipList</span><span class="w"> </span><span class="n">dist_index</span><span class="p">;</span><span class="w">        </span><span class="c1">// 跳表：key=量化距离, value=节点索引</span>
+<span class="p">}</span><span class="w"> </span><span class="n">HNSW</span><span class="p">;</span>
+</code></pre></div>
+<p><code>dist_index</code> 是跳表，key 是「向量到原点距离的量化值」，value 是节点索引。搜索时用 query 到原点距离查跳表，O(log n) 找到投影最接近的节点作为入口点。</p>
+<h3 id="62">6.2 插入<a class="headerlink" href="#62" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="nf">hnsw_insert</span><span class="p">(</span><span class="n">HNSW</span><span class="w"> </span><span class="o">*</span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="o">*</span><span class="n">coords</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">n_nodes</span><span class="p">;</span>
+<span class="w">    </span><span class="c1">// 存向量</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">dim</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="w">        </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">vectors</span><span class="p">[</span><span class="n">idx</span><span class="p">].</span><span class="n">coords</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">coords</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+
+<span class="w">    </span><span class="c1">// 算到原点距离，量化为 int，插入跳表</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">norm_sq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dist_sq_raw</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span><span class="w"> </span><span class="n">coords</span><span class="p">,</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">dim</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">quantize_dist</span><span class="p">(</span><span class="n">norm_sq</span><span class="p">);</span>
+<span class="w">    </span><span class="n">skiplist_insert</span><span class="p">(</span><span class="o">&amp;</span><span class="n">h</span><span class="o">-&gt;</span><span class="n">dist_index</span><span class="p">,</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">h</span><span class="o">-&gt;</span><span class="n">entry_point</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">-1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">entry_point</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">idx</span><span class="p">;</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">idx</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// 暴力找最近邻（教学简化，O(n)）</span>
+<span class="w">    </span><span class="c1">// 生产级 HNSW 用 best-first 搜索找候选，O(log n)</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="n">cand</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span><span class="w">  </span><span class="c1">// 所有已有节点</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="n">selected</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span><span class="w">  </span><span class="c1">// 选 M 个最近的</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">M</span><span class="p">;</span><span class="w"> </span><span class="n">s</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">add_edge</span><span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">,</span><span class="w"> </span><span class="n">selected</span><span class="p">[</span><span class="n">s</span><span class="p">]);</span><span class="w">      </span><span class="c1">// 正向连接</span>
+<span class="w">        </span><span class="n">add_edge</span><span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="n">selected</span><span class="p">[</span><span class="n">s</span><span class="p">],</span><span class="w"> </span><span class="n">idx</span><span class="p">);</span><span class="w">      </span><span class="c1">// 反向连接</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">idx</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>教学版用暴力找近邻（O(n)），保证图质量。生产级用搜索找候选（O(log n)），但图质量稍降。</p>
+<h3 id="63">6.3 搜索<a class="headerlink" href="#63" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="nf">hnsw_search</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">HNSW</span><span class="w"> </span><span class="o">*</span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="o">*</span><span class="n">query</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">k</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="n">result</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 1. 跳表找入口点：O(log n)</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">q_norm_sq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dist_sq_raw</span><span class="p">(</span><span class="n">query</span><span class="p">,</span><span class="w"> </span><span class="n">query</span><span class="p">,</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">dim</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">q_key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">quantize_dist</span><span class="p">(</span><span class="n">q_norm_sq</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">entry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">entry_point</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">found_key</span><span class="p">,</span><span class="w"> </span><span class="n">found_value</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">skiplist_find_closest</span><span class="p">(</span><span class="o">&amp;</span><span class="n">h</span><span class="o">-&gt;</span><span class="n">dist_index</span><span class="p">,</span><span class="w"> </span><span class="n">q_key</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">found_key</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">found_value</span><span class="p">))</span>
+<span class="w">        </span><span class="n">entry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">found_value</span><span class="p">;</span><span class="w">     </span><span class="c1">// 投影最接近的节点</span>
+
+<span class="w">    </span><span class="c1">// 2. 贪心搜索：从入口点走向 query</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="o">*</span><span class="n">visited</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">calloc</span><span class="p">(</span><span class="n">h</span><span class="o">-&gt;</span><span class="n">n_nodes</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="kt">bool</span><span class="p">));</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">current</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">entry</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">current_dist</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hnsw_distance_sq</span><span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="n">current</span><span class="p">,</span><span class="w"> </span><span class="n">query</span><span class="p">);</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="nb">true</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">visited</span><span class="p">[</span><span class="n">current</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">best_neighbor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">float</span><span class="w"> </span><span class="n">best_dist</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">current_dist</span><span class="p">;</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">neighbor_count</span><span class="p">[</span><span class="n">current</span><span class="p">];</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="kt">int</span><span class="w"> </span><span class="n">nb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">neighbors</span><span class="p">[</span><span class="n">current</span><span class="p">][</span><span class="n">i</span><span class="p">];</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">visited</span><span class="p">[</span><span class="n">nb</span><span class="p">])</span><span class="w"> </span><span class="k">continue</span><span class="p">;</span>
+<span class="w">            </span><span class="kt">float</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hnsw_distance_sq</span><span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="n">nb</span><span class="p">,</span><span class="w"> </span><span class="n">query</span><span class="p">);</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">d</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">best_dist</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">best_dist</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">d</span><span class="p">;</span><span class="w"> </span><span class="n">best_neighbor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nb</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">best_neighbor</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">-1</span><span class="p">)</span><span class="w"> </span><span class="k">break</span><span class="p">;</span><span class="w">   </span><span class="c1">// 局部最优</span>
+<span class="w">        </span><span class="n">current</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">best_neighbor</span><span class="p">;</span>
+<span class="w">        </span><span class="n">current_dist</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">best_dist</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// 3. 收集 current 的 2 跳邻居，取 top-k</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">n_result</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>第 1 步</strong>：跳表 O(log n) 找入口点。这是跳表给图的贡献——不用暴力找入口。
+<strong>第 2 步</strong>：贪心搜索，每步看 M 个邻居。这是图给搜索的贡献——不用全扫。
+<strong>第 3 步</strong>：从局部最优的 2 跳邻居里选 top-k，补充贪心可能漏掉的近邻。</p>
+<h3 id="64">6.4 跳表入口点选择的作用<a class="headerlink" href="#64" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// 没有跳表：入口点固定，query 远时搜索慢</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">entry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">entry_point</span><span class="p">;</span><span class="w">  </span><span class="c1">// 固定入口</span>
+
+<span class="c1">// 有跳表：O(log n) 找投影最近的入口</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">q_key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">quantize_dist</span><span class="p">(</span><span class="n">q_norm_sq</span><span class="p">);</span>
+<span class="n">skiplist_find_closest</span><span class="p">(</span><span class="o">&amp;</span><span class="n">h</span><span class="o">-&gt;</span><span class="n">dist_index</span><span class="p">,</span><span class="w"> </span><span class="n">q_key</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">found_key</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">found_value</span><span class="p">);</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">entry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">found_value</span><span class="p">;</span><span class="w">  </span><span class="c1">// 自适应入口</span>
+</code></pre></div>
+<p>跳表让入口点<strong>自适应</strong>——query 在哪，入口点就在哪附近。这把贪心搜索的起始距离从 O(n) 降到 O(√n)（投影距离），大幅减少搜索步数。</p>
+<h2 id="7">7. 复杂度分析<a class="headerlink" href="#7" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>暴力 KNN</th>
+<th>简化 HNSW</th>
+<th>完整 HNSW</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>建图</td>
+<td>—</td>
+<td>O(n²·d) 暴力</td>
+<td>O(n·log n·M·d) 搜索建图</td>
+</tr>
+<tr>
+<td>搜索</td>
+<td>O(n·d)</td>
+<td>O(log n + M·log n·d)</td>
+<td>O(log n·M·d)</td>
+</tr>
+<tr>
+<td>内存</td>
+<td>O(n·d)</td>
+<td>O(n·d + n·M)</td>
+<td>O(n·d + n·M)</td>
+</tr>
+</tbody>
+</table>
+<p>完整 HNSW 的搜索 O(log n·M·d)：跳表入口点 O(log n) + 贪心走 O(log n) 步 × 每步 M 邻居 × d 维距离。</p>
+<p><strong>对比暴力</strong>：n=1M, d=50, M=16 时，暴力 50M 次运算，HNSW 约 16·20·50 = 16000 次——<strong>3000 倍加速</strong>。实际受缓存、分支预测影响，约 100~1000 倍。</p>
+<h2 id="8">8. 与其他近邻搜索结构对比<a class="headerlink" href="#8" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>结构</th>
+<th>低维 (d≤10)</th>
+<th>高维 (d≥20)</th>
+<th>建图</th>
+<th>适合场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>KD-tree</td>
+<td>O(log n)</td>
+<td>O(n) 退化</td>
+<td>O(n log n)</td>
+<td>低维精确</td>
+</tr>
+<tr>
+<td>Ball-tree</td>
+<td>O(log n)</td>
+<td>O(n) 退化</td>
+<td>O(n log n)</td>
+<td>低中维</td>
+</tr>
+<tr>
+<td>LSH</td>
+<td>O(n^ρ) ρ&lt;1</td>
+<td>O(n^ρ)</td>
+<td>O(n·L)</td>
+<td>高维近似</td>
+</tr>
+<tr>
+<td><strong>HNSW</strong></td>
+<td>O(log n)</td>
+<td><strong>O(log n)</strong></td>
+<td>O(n log n)</td>
+<td><strong>高维近似，召回率高</strong></td>
+</tr>
+</tbody>
+</table>
+<p>HNSW 在高维下保持 O(log n)（常数大些），且召回率通常 95%+，是当前向量检索的主流选择。</p>
+<h2 id="9">9. 总结<a class="headerlink" href="#9" title="Permanent link">&para;</a></h2>
+<p>HNSW 的核心洞察：<strong>跳表和近邻图是同一个思想的不同实例</strong>——分层 + 贪心下降。</p>
+<ul>
+<li>跳表：按 key 排序的分层链表，搜索从顶层粗定位到第 0 层精定位</li>
+<li>HNSW：按近邻关系的分层图，搜索从顶层（稀疏图）跨大距离到第 0 层（密集图）精定位</li>
+</ul>
+<p>单独用跳表：高维投影冲突，找不到真正近邻。单独用近邻图：入口点选择慢。组合起来：跳表给 O(log n) 入口点，图给 O(log n) 搜索路径——亚线性高维向量检索。</p>
+<p>下一文档 <code>ai_application.md</code> 讲 HNSW 在 AI 里的应用：RAG、推荐、搜索，以及 FAISS/Milvus/hnswlib 等生产级实现。</p>
+<hr />
+<h2 id="ai">AI 应用<a class="headerlink" href="#ai" title="Permanent link">&para;</a></h2>
+<h1 id="hnsw-rag">HNSW 向量检索：RAG / 推荐 / 搜索的亚线性引擎<a class="headerlink" href="#hnsw-rag" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>本文档讲清 HNSW 在 AI 里的应用：为什么向量检索是 AI 基础设施、暴力 KNN 的 O(n) 瓶颈、HNSW 如何实现亚线性检索、demo 结果解读、生产级实现（FAISS/Milvus/hnswlib）。数据结构原理见 <code>principle.md</code>。</p>
+</blockquote>
+<h2 id="1-ai">1. 向量检索：AI 的底层基础设施<a class="headerlink" href="#1-ai" title="Permanent link">&para;</a></h2>
+<p>大模型时代，几乎所有 AI 应用都涉及「找相似」：</p>
+<ul>
+<li><strong>RAG（检索增强生成）</strong>：用户提问 → 把问题转向量 → 在知识库找最相似的文档片段 → 喂给 LLM 生成回答。一次 RAG 查询 = 一次向量检索。</li>
+<li><strong>推荐系统</strong>：用户行为序列转向量 → 找相似的商品/内容向量 → 推荐候选。每次刷新推荐流 = 一次向量检索。</li>
+<li><strong>语义搜索</strong>：查询句转向量 → 找语义相似的文档 → 排序返回。比关键词搜索理解意图。</li>
+<li><strong>图片搜索</strong>：图片过 CNN/CLIP 转向量 → 找相似图片向量。以图搜图。</li>
+<li><strong>去重</strong>：新内容转向量 → 查是否和已有内容相似 → 去重/聚类。</li>
+<li><strong>异常检测</strong>：实时向量 → 找最近邻 → 距离过大则异常。</li>
+</ul>
+<p>这些场景的共同模式：<strong>把对象编码成向量，找最近邻</strong>。向量检索的延迟直接决定应用响应速度。</p>
+<h3 id="11">1.1 向量从哪来<a class="headerlink" href="#11" title="Permanent link">&para;</a></h3>
+<p><strong>Embedding 模型</strong>把文本/图片/行为编码成稠密向量：</p>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>维度</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BERT</td>
+<td>768</td>
+<td>Google 2018</td>
+</tr>
+<tr>
+<td>text-embedding-3-small</td>
+<td>1536</td>
+<td>OpenAI 2024</td>
+</tr>
+<tr>
+<td>text-embedding-3-large</td>
+<td>3072</td>
+<td>OpenAI 2024</td>
+</tr>
+<tr>
+<td>BGE-large-zh</td>
+<td>1024</td>
+<td>智源 2023</td>
+</tr>
+<tr>
+<td>CLIP</td>
+<td>512</td>
+<td>OpenAI 2021</td>
+</tr>
+<tr>
+<td>Cohere embed-v3</td>
+<td>1024</td>
+<td>Cohere 2024</td>
+</tr>
+</tbody>
+</table>
+<p>维度通常 512~3072。向量检索要在这个维度下快速找近邻。</p>
+<h3 id="12">1.2 规模有多大<a class="headerlink" href="#12" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>应用</th>
+<th>向量数</th>
+<th>维度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>个人知识库 RAG</td>
+<td>10k~100k</td>
+<td>768~1536</td>
+</tr>
+<tr>
+<td>企业文档搜索</td>
+<td>1M~10M</td>
+<td>768~1536</td>
+</tr>
+<tr>
+<td>推荐系统商品库</td>
+<td>10M~100M</td>
+<td>64~256</td>
+</tr>
+<tr>
+<td>全网图片搜索</td>
+<td>1B+</td>
+<td>512</td>
+</tr>
+<tr>
+<td>大模型记忆层</td>
+<td>1M~100M</td>
+<td>768~3072</td>
+</tr>
+</tbody>
+</table>
+<p>100 万向量是常见规模。暴力 KNN 在这个规模下的延迟，就是下一节要算的瓶颈。</p>
+<h2 id="2-knn-on">2. 暴力 KNN 的 O(n) 瓶颈<a class="headerlink" href="#2-knn-on" title="Permanent link">&para;</a></h2>
+<h3 id="21_1">2.1 暴力做法<a class="headerlink" href="#21_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">brute_knn</span><span class="p">(</span><span class="n">vectors</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+    <span class="n">dists</span> <span class="o">=</span> <span class="p">[</span><span class="n">dist</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vectors</span><span class="p">]</span>   <span class="c1"># 算 n 次距离</span>
+    <span class="k">return</span> <span class="n">top_k</span><span class="p">(</span><span class="n">dists</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>                       <span class="c1"># 排序取前 k</span>
+</code></pre></div>
+<p>每次查询算 n 次距离，每次距离 O(d)。总共 O(n·d)。</p>
+<h3 id="22_1">2.2 延迟估算<a class="headerlink" href="#22_1" title="Permanent link">&para;</a></h3>
+<p>n=1M, d=1536（OpenAI embedding）, k=10：</p>
+<ul>
+<li>距离计算：1M × 1536 = 1.5G 次浮点运算</li>
+<li>numpy 向量化：约 50ms（单核）</li>
+<li>排序 top-10：O(n) 用 argpartition，约 5ms</li>
+<li><strong>单次查询约 55ms</strong></li>
+</ul>
+<p>看起来不多？但实际场景：</p>
+<ul>
+<li><strong>RAG 多跳查询</strong>：一次请求查 5~20 次（多路召回、重排），55ms × 20 = 1.1s</li>
+<li><strong>并发</strong>：100 QPS × 55ms = 5500ms CPU 时间/秒，需要 6 个核全跑满</li>
+<li><strong>实时推荐</strong>：用户刷新一次推荐流，查 50 个候选，55ms × 50 = 2.75s</li>
+</ul>
+<p><strong>1M 向量下暴力 KNN 的延迟，让 RAG 从「秒级响应」变成「数秒等待」</strong>。</p>
+<h3 id="23_1">2.3 为什么不能只靠缓存<a class="headerlink" href="#23_1" title="Permanent link">&para;</a></h3>
+<p>有人想：把热点查询结果缓存起来。但向量检索的查询是<strong>连续空间</strong>——用户的每个问题向量都不同，缓存命中率极低。不像关键词搜索有固定词表。</p>
+<h3 id="24">2.4 空间数据结构也不行<a class="headerlink" href="#24" title="Permanent link">&para;</a></h3>
+<p>KD-tree 在 d ≤ 10 时 O(log n)，但 d=1536 时<strong>退化到 O(n)</strong>——每个节点切分一次，高维下几乎所有点都在切分面两侧，剪枝无效。这是<strong>维度灾难</strong>的本质：高维空间里任意两点距离都差不多，没法用空间划分剪枝。</p>
+<h2 id="3-hnsw">3. HNSW：亚线性高维检索<a class="headerlink" href="#3-hnsw" title="Permanent link">&para;</a></h2>
+<h3 id="31_1">3.1 核心思想<a class="headerlink" href="#31_1" title="Permanent link">&para;</a></h3>
+<p>HNSW 不切空间，建<strong>近邻图</strong>——每个向量连它的最近邻，搜索时在图上贪心走。配合<strong>跳表的分层思想</strong>，从顶层稀疏图跨大距离，逐层下降到第 0 层精确定位。</p>
+<p><strong>为什么图能绕过维度灾难</strong>：图不依赖空间划分，而是依赖「近邻传递性」——A 近 B、B 近 C，则 A 大概率近 C。贪心搜索沿着近邻链走，不需要切分空间。</p>
+<h3 id="32_1">3.2 检索流程<a class="headerlink" href="#32_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>HNSW 搜索 query:
+  1. 跳表入口点选择：算 query 到原点距离，O(log n) 找投影最近的节点
+  2. 从顶层图贪心下降：每层 best-first 搜索，找最近的节点作为下层入口
+  3. 第 0 层 best-first 精搜：ef 个候选，返回 top-k
+</code></pre></div>
+<p><strong>复杂度</strong>：O(log n · M · d)。n=1M, M=16, d=1536：约 16 × 20 × 1536 = 500K 次浮点运算，约 0.5ms。<strong>比暴力 55ms 快 100 倍</strong>。</p>
+<h3 id="33">3.3 召回率<a class="headerlink" href="#33" title="Permanent link">&para;</a></h3>
+<p>HNSW 是<strong>近似</strong>算法——贪心搜索可能漏掉少量近邻。召回率 = HNSW 结果 ∩ 暴力结果 / 暴力结果。</p>
+<p>影响召回率的因素：
+- <strong>ef_search</strong>：搜索候选集大小。越大召回越高、越慢。典型 64~512。
+- <strong>M</strong>：每节点邻居数。越大图越密、召回越高、内存越大。典型 16~48。
+- <strong>ef_construction</strong>：建图候选集。越大图质量越好、建图越慢。典型 200~500。
+- <strong>分层结构</strong>：上层稀疏图帮助跨大距离，避免陷局部最优。</p>
+<p>典型配置下 recall@10 &gt; 95%，延迟比暴力快 100~1000 倍。</p>
+<h2 id="4-demo">4. demo 结果解读<a class="headerlink" href="#4-demo" title="Permanent link">&para;</a></h2>
+<p>我们跑了 HNSW vs 暴力 KNN 的对比，数据量 1k~100k，维度 10 和 50。</p>
+<h3 id="41_1">4.1 延迟对比<a class="headerlink" href="#41_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>n</th>
+<th>dim</th>
+<th>暴力 (ms)</th>
+<th>HNSW (ms)</th>
+<th>加速比</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1,000</td>
+<td>10</td>
+<td>0.044</td>
+<td>1.115</td>
+<td>0.04x</td>
+</tr>
+<tr>
+<td>10,000</td>
+<td>10</td>
+<td>0.348</td>
+<td>1.067</td>
+<td>0.33x</td>
+</tr>
+<tr>
+<td>100,000</td>
+<td>10</td>
+<td>7.672</td>
+<td>1.430</td>
+<td><strong>5.4x</strong></td>
+</tr>
+<tr>
+<td>1,000</td>
+<td>50</td>
+<td>0.079</td>
+<td>1.263</td>
+<td>0.06x</td>
+</tr>
+<tr>
+<td>10,000</td>
+<td>50</td>
+<td>1.754</td>
+<td>1.445</td>
+<td>1.2x</td>
+</tr>
+<tr>
+<td>100,000</td>
+<td>50</td>
+<td>18.894</td>
+<td>1.878</td>
+<td><strong>10.1x</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>趋势</strong>：
+1. <strong>小数据量（1k, 10k）暴力更快</strong>：numpy 向量化的暴力 KNN 常数极小，HNSW 的 Python 循环开销大于收益。HNSW 的优势在大数据量才显现。
+2. <strong>100k 下 HNSW 加速 5~10 倍</strong>：暴力 O(n) 线性增长，HNSW O(log n) 近乎恒定。
+3. <strong>dim=50 加速更显著</strong>：高维下暴力单次距离更贵（d=50 vs d=10），HNSW 的节省更大。</p>
+<p><strong>外推到 1M</strong>：暴力 dim=50 约 200ms，HNSW 约 2~3ms，<strong>加速 70~100 倍</strong>。这正是生产级 RAG 的瓶颈所在。</p>
+<h3 id="42_1">4.2 召回率<a class="headerlink" href="#42_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>n</th>
+<th>dim</th>
+<th>recall@10</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>100,000</td>
+<td>10</td>
+<td><strong>95.5%</strong></td>
+</tr>
+<tr>
+<td>100,000</td>
+<td>50</td>
+<td>39.8%</td>
+</tr>
+</tbody>
+</table>
+<p><strong>dim=10 召回 95%+</strong>：低维下图质量好，贪心搜索几乎找到所有真正近邻。</p>
+<p><strong>dim=50 召回 40%</strong>：高维下简化版（无分层结构）召回率下降。原因：
+1. 我们的简化版<strong>没有分层结构</strong>——只有一层图，贪心搜索容易陷局部最优
+2. M=16 邻居数不够——高维下需要更多邻居覆盖各方向
+3. ef=48 搜索宽度不够——高维下需要更大候选集</p>
+<p><strong>生产级 HNSW</strong>（hnswlib）在 dim=50 下 recall@10 &gt; 95%，因为：
+- 分层结构：上层稀疏图帮助跨大距离，避免局部最优
+- 启发式邻居选择：选多样邻居，搜索路径不单一
+- 更大参数：M=32, ef_construction=200, ef_search=128</p>
+<h3 id="43_1">4.3 建图延迟<a class="headerlink" href="#43_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>n</th>
+<th>dim</th>
+<th>建图 (ms)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10,000</td>
+<td>10</td>
+<td>223</td>
+</tr>
+<tr>
+<td>100,000</td>
+<td>10</td>
+<td>6,351</td>
+</tr>
+<tr>
+<td>100,000</td>
+<td>50</td>
+<td>63,087</td>
+</tr>
+</tbody>
+</table>
+<p>建图是一次性成本。100k dim=10 用 cKDTree 建图 6s（精确近邻），dim=50 用 numpy 暴力建图 63s。生产级 HNSW 用增量搜索建图，100k 约 1~2s。</p>
+<h3 id="44-hnsw">4.4 为什么小数据量 HNSW 慢<a class="headerlink" href="#44-hnsw" title="Permanent link">&para;</a></h3>
+<p>Python 实现的 HNSW 搜索有固定开销（跳表查找 + 堆操作 + visited 数组），约 1ms。暴力 KNN 用 numpy 全向量化，1k 数据只要 0.04ms。所以 n &lt; 10000 时暴力更快。</p>
+<p><strong>C/C++ 实现没有这个问题</strong>——hnswlib 的 HNSW 搜索 1k 数据约 0.01ms，比暴力 0.04ms 还快。Python demo 的 crossover 在 100k，C++ 实现在 1k 以下就 crossover 了。</p>
+<h2 id="5">5. 为什么是跳表 + 图<a class="headerlink" href="#5" title="Permanent link">&para;</a></h2>
+<h3 id="51_1">5.1 跳表给图什么<a class="headerlink" href="#51_1" title="Permanent link">&para;</a></h3>
+<p><strong>入口点选择</strong>。纯近邻图需要入口点，固定入口点在 query 远时搜索慢。跳表按「到原点距离」排序，O(log n) 找到投影最近的节点作为入口——入口点自适应 query 位置。</p>
+<div class="highlight"><pre><span></span><code>没有跳表：entry = 固定节点 → query 远时走很多步
+有跳表：  entry = 跳表查找(query 投影) → 入口点在 query 附近
+</code></pre></div>
+<h3 id="52_1">5.2 图给跳表什么<a class="headerlink" href="#52_1" title="Permanent link">&para;</a></h3>
+<p><strong>高维近邻搜索</strong>。跳表是一维结构，高维投影冲突严重。近邻图直接在高维空间建连接，贪心搜索沿着近邻链走，不受维度灾难影响。</p>
+<div class="highlight"><pre><span></span><code>跳表：找到投影接近的候选，但投影近 ≠ 向量近
+图：  从候选出发贪心走，沿着真正近邻链接近 query
+</code></pre></div>
+<h3 id="53_1">5.3 组合的威力<a class="headerlink" href="#53_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>数据结构</th>
+<th>作用</th>
+<th>复杂度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>入口点选择</td>
+<td>跳表</td>
+<td>O(log n) 找投影最近的节点</td>
+<td>O(log n)</td>
+</tr>
+<tr>
+<td>贪心搜索</td>
+<td>近邻图</td>
+<td>沿近邻链走向 query</td>
+<td>O(log n · M · d)</td>
+</tr>
+<tr>
+<td><strong>总计</strong></td>
+<td><strong>HNSW</strong></td>
+<td><strong>亚线性高维检索</strong></td>
+<td><strong>O(log n · M · d)</strong></td>
+</tr>
+</tbody>
+</table>
+<p>跳表解决「从哪开始搜」，图解决「怎么走最快」。单独都不够，组合起来 O(log n)。</p>
+<h2 id="6">6. 生产级实现<a class="headerlink" href="#6" title="Permanent link">&para;</a></h2>
+<h3 id="61-hnswlib">6.1 hnswlib<a class="headerlink" href="#61-hnswlib" title="Permanent link">&para;</a></h3>
+<p>Malkov 自己写的 C++ 实现，最接近原论文。</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">hnswlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="c1"># 建图</span>
+<span class="n">index</span> <span class="o">=</span> <span class="n">hnswlib</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="n">space</span><span class="o">=</span><span class="s1">'l2'</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">128</span><span class="p">)</span>
+<span class="n">index</span><span class="o">.</span><span class="n">init_index</span><span class="p">(</span><span class="n">max_elements</span><span class="o">=</span><span class="mi">1000000</span><span class="p">,</span> <span class="n">ef_construction</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">M</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">index</span><span class="o">.</span><span class="n">add_items</span><span class="p">(</span><span class="n">vectors</span><span class="p">)</span>
+
+<span class="c1"># 搜索</span>
+<span class="n">index</span><span class="o">.</span><span class="n">set_ef</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>  <span class="c1"># 搜索时 ef</span>
+<span class="n">labels</span><span class="p">,</span> <span class="n">distances</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">knn_query</span><span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>性能</strong>（1M 向量, dim=128, 单核）：
+- 建图：约 60s
+- 搜索：约 0.5ms/query
+- recall@10：&gt; 95%
+- 比暴力快约 1000 倍</p>
+<h3 id="62-faiss">6.2 FAISS<a class="headerlink" href="#62-faiss" title="Permanent link">&para;</a></h3>
+<p>Facebook（Meta）的向量检索库，支持多种索引：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">faiss</span>
+
+<span class="c1"># HNSW 索引</span>
+<span class="n">index</span> <span class="o">=</span> <span class="n">faiss</span><span class="o">.</span><span class="n">IndexHNSWFlat</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>  <span class="c1"># dim=128, M=16</span>
+<span class="n">index</span><span class="o">.</span><span class="n">hnsw</span><span class="o">.</span><span class="n">efConstruction</span> <span class="o">=</span> <span class="mi">200</span>
+<span class="n">index</span><span class="o">.</span><span class="n">hnsw</span><span class="o">.</span><span class="n">efSearch</span> <span class="o">=</span> <span class="mi">128</span>
+<span class="n">index</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vectors</span><span class="p">)</span>
+
+<span class="c1"># 搜索</span>
+<span class="n">D</span><span class="p">,</span> <span class="n">I</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+</code></pre></div>
+<p>FAISS 还支持：
+- <strong>IVF-HNSW</strong>：先倒排文件粗筛，再 HNSW 精搜。适合 10M+ 规模。
+- <strong>PQ + HNSW</strong>：乘积量化压缩向量，减少内存。1B 向量 128 维只需 128GB 而非 512GB。
+- <strong>GPU 加速</strong>：建图和搜索都在 GPU 上跑，快 10~100 倍。</p>
+<h3 id="63-milvus">6.3 Milvus<a class="headerlink" href="#63-milvus" title="Permanent link">&para;</a></h3>
+<p>开源向量数据库，支持 HNSW + 多种索引 + 分布式：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pymilvus</span><span class="w"> </span><span class="kn">import</span> <span class="n">Collection</span><span class="p">,</span> <span class="n">FieldSchema</span>
+
+<span class="c1"># 创建集合</span>
+<span class="n">collection</span> <span class="o">=</span> <span class="n">Collection</span><span class="p">(</span><span class="s2">"documents"</span><span class="p">)</span>
+<span class="n">collection</span><span class="o">.</span><span class="n">create_index</span><span class="p">(</span>
+    <span class="n">field_name</span><span class="o">=</span><span class="s2">"embedding"</span><span class="p">,</span>
+    <span class="n">index_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"index_type"</span><span class="p">:</span> <span class="s2">"HNSW"</span><span class="p">,</span> <span class="s2">"metric_type"</span><span class="p">:</span> <span class="s2">"L2"</span><span class="p">,</span>
+                  <span class="s2">"params"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"M"</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span> <span class="s2">"efConstruction"</span><span class="p">:</span> <span class="mi">200</span><span class="p">}}</span>
+<span class="p">)</span>
+
+<span class="c1"># 搜索</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">collection</span><span class="o">.</span><span class="n">search</span><span class="p">(</span>
+    <span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="n">query_vector</span><span class="p">],</span> <span class="n">anns_field</span><span class="o">=</span><span class="s2">"embedding"</span><span class="p">,</span>
+    <span class="n">param</span><span class="o">=</span><span class="p">{</span><span class="s2">"params"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"ef"</span><span class="p">:</span> <span class="mi">128</span><span class="p">},</span> <span class="s2">"metric_type"</span><span class="p">:</span> <span class="s2">"L2"</span><span class="p">,</span> <span class="s2">"limit"</span><span class="p">:</span> <span class="mi">10</span><span class="p">}</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>Milvus 解决了单机 HNSW 的局限：
+- <strong>分布式</strong>：10B+ 向量分片存储，多机并行搜索
+- <strong>持久化</strong>：向量存磁盘，内存只缓存热数据
+- <strong>增删改</strong>：支持删除（HNSW 原生不支持删除，Milvus 用标记删除 + 定期 compaction）
+- <strong>多索引</strong>：同一份数据建多种索引（HNSW + IVF + Flat），按查询模式选</p>
+<h3 id="64_1">6.4 各实现对比<a class="headerlink" href="#64_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>实现</th>
+<th>语言</th>
+<th>1M 延迟</th>
+<th>recall@10</th>
+<th>适合场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>暴力 KNN</td>
+<td>numpy</td>
+<td>~50ms</td>
+<td>100%</td>
+<td>小数据，精确</td>
+</tr>
+<tr>
+<td>我们的简化版</td>
+<td>Python</td>
+<td>~2ms</td>
+<td>40~95%</td>
+<td>教学</td>
+</tr>
+<tr>
+<td>hnswlib</td>
+<td>C++</td>
+<td>~0.5ms</td>
+<td>95%+</td>
+<td>单机，高性能</td>
+</tr>
+<tr>
+<td>FAISS HNSW</td>
+<td>C++</td>
+<td>~0.5ms</td>
+<td>95%+</td>
+<td>单机，多索引</td>
+</tr>
+<tr>
+<td>FAISS IVF-HNSW</td>
+<td>C++</td>
+<td>~1ms</td>
+<td>90%+</td>
+<td>10M+，内存敏感</td>
+</tr>
+<tr>
+<td>Milvus</td>
+<td>Go+C++</td>
+<td>~2ms</td>
+<td>95%+</td>
+<td>分布式，持久化</td>
+</tr>
+</tbody>
+</table>
+<h2 id="7_1">7. 实际应用中的考量<a class="headerlink" href="#7_1" title="Permanent link">&para;</a></h2>
+<h3 id="71">7.1 参数调优<a class="headerlink" href="#71" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>作用</th>
+<th>典型值</th>
+<th>调优方向</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M</td>
+<td>邻居数</td>
+<td>16~48</td>
+<td>召回↑ 内存↑ 建图慢↑</td>
+</tr>
+<tr>
+<td>ef_construction</td>
+<td>建图候选</td>
+<td>200~500</td>
+<td>图质量↑ 建图慢↑</td>
+</tr>
+<tr>
+<td>ef_search</td>
+<td>搜索候选</td>
+<td>64~512</td>
+<td>召回↑ 延迟↑</td>
+</tr>
+</tbody>
+</table>
+<p><strong>经验</strong>：先 M=16, ef_c=200, ef_s=64 跑出基线。召回不够加 ef_s；延迟太高减 ef_s；内存不够减 M。</p>
+<h3 id="72">7.2 距离度量<a class="headerlink" href="#72" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>L2（欧氏）</strong>：通用，适合图片、通用 embedding</li>
+<li><strong>内积（IP）</strong>：适合归一化后的 embedding（等价余弦相似度）</li>
+<li><strong>余弦</strong>：文本语义搜索常用。归一化后用 IP 即可</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># 余弦相似度 = 归一化后的内积</span>
+<span class="n">vectors_normalized</span> <span class="o">=</span> <span class="n">vectors</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vectors</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">index</span> <span class="o">=</span> <span class="n">hnswlib</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="n">space</span><span class="o">=</span><span class="s1">'ip'</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">128</span><span class="p">)</span>  <span class="c1"># 用 inner product</span>
+</code></pre></div>
+<h3 id="73">7.3 增量插入<a class="headerlink" href="#73" title="Permanent link">&para;</a></h3>
+<p>HNSW 支持增量插入——新向量用已有图搜索找近邻连接。不需要重建索引。</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 建好索引后，随时加新向量</span>
+<span class="n">index</span><span class="o">.</span><span class="n">add_items</span><span class="p">(</span><span class="n">new_vectors</span><span class="p">)</span>
+</code></pre></div>
+<p>但<strong>删除</strong>是难题——HNSW 原生不支持删除（删了节点图连通性可能破坏）。生产方案：
+- <strong>标记删除</strong>：打标记，搜索时跳过。内存不释放。
+- <strong>定期重建</strong>：积累一定删除后，重建索引。
+- <strong>Milvus 的 compaction</strong>：后台合并，清理已删除节点。</p>
+<h3 id="74-rag">7.4 与 RAG 的集成<a class="headerlink" href="#74-rag" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 典型 RAG 流程</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">rag_answer</span><span class="p">(</span><span class="n">question</span><span class="p">,</span> <span class="n">llm</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">documents</span><span class="p">):</span>
+    <span class="c1"># 1. 问题转向量</span>
+    <span class="n">q_vec</span> <span class="o">=</span> <span class="n">embed</span><span class="p">(</span><span class="n">question</span><span class="p">)</span>
+
+    <span class="c1"># 2. HNSW 检索 top-k 文档</span>
+    <span class="n">labels</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">knn_query</span><span class="p">(</span><span class="n">q_vec</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+    <span class="c1"># 3. 取回文档文本</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="p">[</span><span class="n">documents</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+
+    <span class="c1"># 4. 喂给 LLM 生成</span>
+    <span class="n">answer</span> <span class="o">=</span> <span class="n">llm</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">question</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">answer</span>
+</code></pre></div>
+<p>HNSW 的延迟（~1ms）远小于 LLM 生成延迟（~500ms），所以 RAG 的瓶颈在 LLM 而非检索。但<strong>并发</strong>场景下，检索的 QPS 限制会成为瓶颈——HNSW 单核约 1000 QPS，不够时需要多副本。</p>
+<h2 id="8-hnsw">8. HNSW 的局限与演进<a class="headerlink" href="#8-hnsw" title="Permanent link">&para;</a></h2>
+<h3 id="81">8.1 局限<a class="headerlink" href="#81" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>内存占用</strong>：图结构存 n×M 个指针，1M 向量 M=16 约 64MB 额外内存。加上向量本身 1M×128×4 = 512MB，总共约 600MB。</li>
+<li><strong>建图慢</strong>：O(n log n) 建图，1M 向量约 60s。不能实时建索引。</li>
+<li><strong>删除难</strong>：原生不支持删除，需要标记删除 + 定期重建。</li>
+<li><strong>参数敏感</strong>：M、ef 需要根据数据分布调优，没有万能参数。</li>
+</ul>
+<h3 id="82">8.2 演进方向<a class="headerlink" href="#82" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>DiskANN</strong>：微软提出，把图存磁盘，内存只存入口点 + 部分图。1B 向量只需 16GB 内存。</li>
+<li><strong>SPANN</strong>：阿里提出，空间分区 + 倒排，减少内存同时保持召回。</li>
+<li><strong>GPU-HNSW</strong>：FAISS 的 GPU 实现，建图和搜索都加速 10~100 倍。</li>
+<li><strong>学习索引</strong>：用小模型预测近邻位置，减少图搜索步数。</li>
+</ul>
+<h2 id="9_1">9. 总结<a class="headerlink" href="#9_1" title="Permanent link">&para;</a></h2>
+<p>HNSW 是当前向量检索的事实标准——FAISS、Milvus、hnswlib、pgvector 都用它。核心是<strong>跳表思想 + 近邻图</strong>的组合：</p>
+<ul>
+<li><strong>跳表的分层思想</strong>给图提供入口点和跨大距离能力</li>
+<li><strong>近邻图</strong>给高维空间提供 O(log n) 贪心搜索</li>
+<li>组合实现亚线性高维检索，100 万向量下比暴力快 100~1000 倍</li>
+</ul>
+<p>在 AI 应用中，HNSW 是 RAG、推荐、语义搜索的底层引擎。它的延迟（~1ms）让大模型应用的「检索」环节几乎无感，瓶颈转移到 LLM 生成上。</p>
+<p>理解 HNSW 的关键：<strong>跳表和近邻图是分层 + 贪心下降的同一思想</strong>——跳表按 key 排序分层，HNSW 按近邻关系分层。单独都不够，组合才够。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.indexes", "navigation.tracking", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

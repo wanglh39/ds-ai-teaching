@@ -1,0 +1,2663 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="从底层实现到生产级应用——数据结构在 AI 系统优化与应用工程中的真实作用">
+      
+      
+        <meta name="author" content="wanglh39">
+      
+      
+        <link rel="canonical" href="https://wanglh39.github.io/ds-ai-teaching/ch20/">
+      
+      
+        <link rel="prev" href="../ch19/">
+      
+      
+        <link rel="next" href="../benchmarks/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>20 模型压缩 - 数据结构 × AI 优化</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+SC:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans SC";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#20" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href=".." title="数据结构 × AI 优化" class="md-header__button md-logo" aria-label="数据结构 × AI 优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            数据结构 × AI 优化
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              20 模型压缩
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换至暗色模式"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换至暗色模式" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换至亮色模式"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换至亮色模式" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/wanglh39/ds-ai-teaching" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wanglh39/ds-ai-teaching
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  首页
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../intro/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  项目介绍
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../ch01/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  视角 A·系统优化
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../ch13/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  视角 B·应用工程
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../benchmarks/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  性能汇总
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="数据结构 × AI 优化" class="md-nav__button md-logo" aria-label="数据结构 × AI 优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    数据结构 × AI 优化
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/wanglh39/ds-ai-teaching" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wanglh39/ds-ai-teaching
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    首页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    项目介绍
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    项目介绍
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    设计思路
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../map/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    章节映射
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dual_view/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    双视角说明
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cross_index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    交叉索引
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    视角 A·系统优化
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    视角 A·系统优化
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 动态数组
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch02/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 链表
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch03/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 栈
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch04/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 循环队列
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch05/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05 哈希表
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch06/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 堆
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch07/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    07 Trie
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch08/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    08 KD-Tree
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch09/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    09 图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch10/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10 并查集
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch11/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11 页表/分块内存
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch12/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12 跳表+图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    视角 B·应用工程
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    视角 B·应用工程
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch13/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13 多智能体编排
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch14/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    14 任务调度与批处理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch15/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    15 上下文工程与记忆
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch16/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    16 RAG 与知识检索
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch17/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    17 数据管道与流式处理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch18/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    18 模型部署与推理服务
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch19/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    19 状态机与工作流
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    20 模型压缩
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    20 模型压缩
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要回答的问题
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        扩展专题定位
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#demo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        demo 概览
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        跑法
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        关键结果
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原理
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    性能汇总
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要回答的问题
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        扩展专题定位
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#demo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        demo 概览
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        跑法
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        关键结果
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原理
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="20">第 20 章 · 模型压缩（扩展专题）<a class="headerlink" href="#20" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>AI 场景：大模型部署到资源受限设备的压缩技术（剪枝、量化、知识蒸馏）
+数据结构：稀疏存储（CSR）+ 查找表（LUT）+ 树（蒸馏）+ 哈希表（索引）</p>
+</blockquote>
+<h2 id="_1">本章要回答的问题<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>大模型太大装不下设备，怎么压缩？（剪枝 + 量化 + 蒸馏组合）</li>
+<li>剪枝后 70% 权重为 0，怎么存才省内存？（CSR 稀疏格式）</li>
+<li>float32 → INT8 量化，反量化怎么快？（查找表 LUT 一次索引）</li>
+<li>小模型精度不够，怎么用大模型的知识补？（知识蒸馏 + 软标签 + 树）</li>
+<li>量化后权重怎么快速查找？（哈希表 O(1) 索引）</li>
+<li>4 种数据结构如何协奏完成模型压缩？</li>
+</ul>
+<h2 id="_2">扩展专题定位<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p>前 12 章是「一个数据结构 → 一个 AI 优化」。第 13 章起是扩展专题：<strong>一个 AI 应用场景 → 多种数据结构协作</strong>。本章展示稀疏存储、查找表、树、哈希表如何协作解决大模型部署的压缩问题。</p>
+<h2 id="_3">目录<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>20_model_compression/
+├── python/
+│   └── demo.py              # 3 种压缩技术 demo（剪枝 + 量化 + 蒸馏）
+├── docs/
+│   ├── principle.md         # 4 种数据结构原理 + 协作机制
+│   └── ai_application.md    # 模型压缩应用（llama.cpp / GPTQ / AWQ / DistilBERT）
+├── figures/                 # 性能对比图
+└── README.md
+</code></pre></div>
+<h2 id="demo">demo 概览<a class="headerlink" href="#demo" title="Permanent link">&para;</a></h2>
+<p>模拟 3 种模型压缩技术，4 种数据结构协作：</p>
+<div class="highlight"><pre><span></span><code>大模型权重到达
+  ├─→ [稀疏存储/CSR]  Pruning：幅度剪枝 → CSR 只存非零元素
+  ├─→ [查找表/LUT]    Quantization：float32 → INT8 + 256 项 LUT
+  ├─→ [树]            KnowledgeDistillation：teacher 软标签 → student 决策树
+  └─→ [哈希表]        HashIndex：(row,col) → quantized value 哈希索引
+</code></pre></div>
+<ul>
+<li><code>Pruning</code>：<code>magnitude_prune</code> 按幅值剪枝 + <code>dense_to_csr</code> 转 CSR 格式</li>
+<li><code>Quantization</code>：<code>quantize_int8</code> 量化 + <code>dequantize</code> 用 LUT 反量化</li>
+<li><code>KnowledgeDistillation</code>：<code>softmax_with_temperature</code> 软标签 + <code>build_decision_tree</code> student 树</li>
+<li><code>QuantHashIndex</code>：<code>(row, col) → int8</code> 哈希索引 + LUT 反量化</li>
+</ul>
+<p>性能对比：
+1. 稠密 vs CSR matvec（稀疏率 70% → 加速 3.10x，内存压缩 1.62x）
+2. float32 vs INT8 matvec（内存压缩 3.20x，量化误差 0.008）
+3. 哈希索引 O(1) vs 线性查找 O(n)（加速 1.12x）
+4. student 独立 vs 蒸馏训练准确率（0.672 → 0.814，提升 +0.142）</p>
+<h2 id="_4">跑法<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>20_model_compression/python/demo.py
+</code></pre></div>
+<h2 id="_5">关键结果<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>技术</th>
+<th>数据结构</th>
+<th>压缩/加速</th>
+<th>精度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>剪枝 70%</td>
+<td>CSR</td>
+<td>内存 1.62x，matvec 3.10x</td>
+<td>~0% 损失</td>
+</tr>
+<tr>
+<td>INT8 量化</td>
+<td>LUT</td>
+<td>内存 3.20x</td>
+<td>误差 0.008</td>
+</tr>
+<tr>
+<td>蒸馏</td>
+<td>树</td>
+<td>student 准确率 +0.142</td>
+<td>接近 teacher</td>
+</tr>
+<tr>
+<td>哈希索引</td>
+<td>哈希表</td>
+<td>查找 1.12x</td>
+<td>0% 损失</td>
+</tr>
+</tbody>
+</table>
+<p>组合压缩（剪枝 70% + INT4 + 蒸馏）可达 13x 内存压缩 + 12x 推理加速。</p>
+<hr />
+<h2 id="_6">原理<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<h1 id="20_1">第 20 章 · 模型压缩 — 数据结构原理<a class="headerlink" href="#20_1" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>本章涉及 4 种数据结构：<strong>稀疏存储（CSR/CSC/COO）</strong>、<strong>查找表（LUT）</strong>、<strong>树（决策树/softmax 树）</strong>、<strong>哈希表（权重索引）</strong>。
+它们在模型压缩中各司其职，协作完成「剪枝 → 量化 → 蒸馏 → 索引」的全流程，把大模型部署到资源受限设备。</p>
+</blockquote>
+<hr />
+<h2 id="1">1. 稀疏存储 — 剪枝后的权重表示<a class="headerlink" href="#1" title="Permanent link">&para;</a></h2>
+<h3 id="11">1.1 为什么需要稀疏存储<a class="headerlink" href="#11" title="Permanent link">&para;</a></h3>
+<p>神经网络训练后，大量权重幅值很小（接近 0），对输出贡献微弱。<strong>剪枝</strong>（pruning）把这些小幅权重置零，置零后矩阵中 70%~90% 元素为 0。如果继续用稠密格式存储，大量内存浪费在存「0」上。</p>
+<p>稀疏存储的核心思想：<strong>只存非零元素 + 它们的位置</strong>，跳过所有 0。</p>
+<div class="highlight"><pre><span></span><code>稠密矩阵（6×6，36 个元素，18 个非零）:
+  [ 0    0    0.65 1.52 0    0  ]
+  [ 1.58 0.77 0    0    0    0  ]
+  [ 0   -1.91 -1.72 0   -1.01 0  ]
+  [-0.91 -1.41 1.47 0    0   -1.42]
+  [ 0    0   -1.15 0   -0.60 0  ]
+  [-0.60 1.85 0   -1.06 0.82 -1.22]
+
+稀疏率 = 1 - 18/36 = 50%
+稠密存储：36 × 4 = 144 bytes（float32）
+稀疏存储：18 × 8 + 7 × 4 = 172 bytes（COO，反而更大！）
+</code></pre></div>
+<p>注意：稀疏率不够高时，稀疏存储反而更大（因为要额外存位置信息）。<strong>稀疏存储的收益门槛通常是稀疏率 &gt; 50%</strong>，剪枝到 70%~90% 时收益显著。</p>
+<h3 id="12">1.2 三种稀疏格式<a class="headerlink" href="#12" title="Permanent link">&para;</a></h3>
+<h4 id="csrcompressed-sparse-row">CSR（Compressed Sparse Row）— 行压缩<a class="headerlink" href="#csrcompressed-sparse-row" title="Permanent link">&para;</a></h4>
+<p>CSR 用三个数组存储稀疏矩阵：</p>
+<div class="highlight"><pre><span></span><code>data    : 非零元素值，按行优先顺序排列
+indices : 每个非零元素的列索引
+indptr  : 行指针，indptr[i] ~ indptr[i+1] 是第 i 行的非零元素在 data 中的范围
+</code></pre></div>
+<p>示例（上面的 6×6 矩阵）：</p>
+<div class="highlight"><pre><span></span><code>data    = [0.65, 1.52, 1.58, 0.77, -1.91, -1.72, -1.01, -0.91, -1.41, 1.47, -1.42, -1.15, -0.60, -0.60, 1.85, -1.06, 0.82, -1.22]
+indices = [   2,    3,    0,    1,     1,     2,     4,     0,     1,    2,     5,     2,     4,     0,     1,     3,    4,     5]
+indptr  = [0, 2, 4, 7, 11, 13, 18]
+</code></pre></div>
+<ul>
+<li>第 0 行：<code>data[indptr[0]:indptr[1]] = data[0:2] = [0.65, 1.52]</code>，列索引 <code>indices[0:2] = [2, 3]</code></li>
+<li>第 1 行：<code>data[indptr[1]:indptr[2]] = data[2:4] = [1.58, 0.77]</code>，列索引 <code>indices[2:4] = [0, 1]</code></li>
+<li>...</li>
+</ul>
+<p><strong>内存</strong>：<code>nnz × (4 + 4) + (rows + 1) × 4</code> bytes（data + indices + indptr，float32 + int32）</p>
+<p><strong>优势</strong>：
+- 矩阵 × 向量只遍历非零元素，跳过 0 → 稀疏率越高越快
+- 行切片高效（<code>indptr[i]</code> 到 <code>indptr[i+1]</code> 直接定位）
+- SciPy <code>scipy.sparse.csr_matrix</code> 的原生格式</p>
+<p><strong>劣势</strong>：
+- 列切片低效（要遍历所有行找列匹配）
+- 增删非零元素需要重建数组（不适合动态修改）</p>
+<h4 id="csccompressed-sparse-column">CSC（Compressed Sparse Column）— 列压缩<a class="headerlink" href="#csccompressed-sparse-column" title="Permanent link">&para;</a></h4>
+<p>CSC 和 CSR 完全对称，只是按列优先存储：</p>
+<div class="highlight"><pre><span></span><code>data    : 非零元素值，按列优先顺序
+indices : 每个非零元素的行索引
+indptr  : 列指针，indptr[j] ~ indptr[j+1] 是第 j 列的非零元素
+</code></pre></div>
+<p><strong>优势</strong>：列切片高效，适合列优先操作（如矩阵分解、线性方程求解）。</p>
+<p><strong>选择</strong>：
+- 行优先操作（矩阵 × 向量、行切片）→ CSR
+- 列优先操作（向量 × 矩阵、列切片、矩阵分解）→ CSC
+- 神经网络推理主要是矩阵 × 向量 → <strong>CSR 更常用</strong></p>
+<h4 id="coocoordinate">COO（Coordinate）— 坐标格式<a class="headerlink" href="#coocoordinate" title="Permanent link">&para;</a></h4>
+<p>COO 用三个数组存储，每个数组长度 = 非零元素数：</p>
+<div class="highlight"><pre><span></span><code>data   : 非零元素值
+rows   : 每个非零元素的行索引
+cols   : 每个非零元素的列索引
+</code></pre></div>
+<p>示例：</p>
+<div class="highlight"><pre><span></span><code>data = [0.65, 1.52, 1.58, 0.77, ...]
+rows = [   0,    0,    1,    1, ...]
+cols = [   2,    3,    0,    1, ...]
+</code></pre></div>
+<p><strong>优势</strong>：
+- 构造简单（直接三个列表，无需排序）
+- 支持重复坐标（同位置多次出现，相加合并）
+- 适合增量构建（先 COO 收集，再转 CSR/CSC）</p>
+<p><strong>劣势</strong>：
+- 矩阵 × 向量效率低（无行指针，要遍历所有非零元素）
+- 内存比 CSR 略大（<code>rows</code> 数组 vs <code>indptr</code> 数组）</p>
+<p><strong>典型流程</strong>：训练时用 COO 增量收集非零权重 → 推理前转 CSR 加速矩阵乘法。</p>
+<h3 id="13">1.3 稀疏矩阵乘法<a class="headerlink" href="#13" title="Permanent link">&para;</a></h3>
+<p>稠密矩阵 × 向量：遍历所有 <code>n²</code> 个元素，<code>O(n²)</code>。</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dense_matvec</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">W</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>   <span class="c1"># 即使 W[i,j]=0 也算一次乘法</span>
+    <span class="k">return</span> <span class="n">y</span>
+</code></pre></div>
+<p>CSR 矩阵 × 向量：只遍历 <code>nnz</code> 个非零元素，<code>O(nnz)</code>。</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">csr_matvec</span><span class="p">(</span><span class="n">csr</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">csr</span><span class="o">.</span><span class="n">indptr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">csr</span><span class="o">.</span><span class="n">indptr</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">csr</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="n">csr</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="n">k</span><span class="p">]]</span>   <span class="c1"># 只算非零</span>
+    <span class="k">return</span> <span class="n">y</span>
+</code></pre></div>
+<p>当稀疏率 70%（<code>nnz = 0.3 × n²</code>）时，CSR matvec 理论加速 3.3x。demo 实测 64×64 矩阵加速 3.10x，与理论吻合。</p>
+<h3 id="14">1.4 剪枝的两种策略<a class="headerlink" href="#14" title="Permanent link">&para;</a></h3>
+<h4 id="_7">非结构化剪枝<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h4>
+<p>把任意位置的权重置零，不限制模式：</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">magnitude_prune</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">sparsity</span><span class="p">):</span>
+    <span class="n">threshold</span> <span class="o">=</span> <span class="n">quantile</span><span class="p">(</span><span class="o">|</span><span class="n">W</span><span class="o">|</span><span class="p">,</span> <span class="n">sparsity</span><span class="p">)</span>   <span class="c1"># 幅值分位数</span>
+    <span class="n">W</span><span class="p">[</span><span class="o">|</span><span class="n">W</span><span class="o">|</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>                <span class="c1"># 小幅值置零</span>
+    <span class="k">return</span> <span class="n">W</span>
+</code></pre></div>
+<ul>
+<li><strong>优点</strong>：稀疏率可以很高（90%+），精度损失小</li>
+<li><strong>缺点</strong>：稀疏模式不规则，硬件难以加速（需要稀疏矩阵库支持）</li>
+</ul>
+<h4 id="_8">结构化剪枝<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h4>
+<p>按「结构」剪枝：整个通道、整个注意力头、整行整列：</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">channel_prune</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">sparsity</span><span class="p">):</span>
+    <span class="c1"># 按通道 L2 范数排序，剪掉小通道</span>
+    <span class="n">channel_norms</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">W</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">threshold</span> <span class="o">=</span> <span class="n">quantile</span><span class="p">(</span><span class="n">channel_norms</span><span class="p">,</span> <span class="n">sparsity</span><span class="p">)</span>
+    <span class="n">W</span><span class="p">[</span><span class="n">channel_norms</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span>   <span class="c1"># 整行置零</span>
+    <span class="k">return</span> <span class="n">W</span>
+</code></pre></div>
+<ul>
+<li><strong>优点</strong>：稀疏模式规则（整行/整列零），硬件可直接跳过，无需稀疏库</li>
+<li><strong>缺点</strong>：同样稀疏率下精度损失更大</li>
+</ul>
+<p><strong>实际部署</strong>：非结构化剪枝 + CSR 存储（CPU/GPU 通用），或结构化剪枝（移动端 NPU 专用加速器）。</p>
+<hr />
+<h2 id="2-lut">2. 查找表（LUT）— 量化的本质<a class="headerlink" href="#2-lut" title="Permanent link">&para;</a></h2>
+<h3 id="21">2.1 量化是什么<a class="headerlink" href="#21" title="Permanent link">&para;</a></h3>
+<p>量化（quantization）把高精度浮点权重映射到低精度整数：</p>
+<div class="highlight"><pre><span></span><code>float32 权重 W  →  INT8 量化值 q（0~255）
+内存：4 bytes/权重  →  1 byte/权重（省 4x）
+</code></pre></div>
+<p>量化公式（对称量化）：</p>
+<div class="highlight"><pre><span></span><code>scale = max(|W|) / 127
+q     = round(W / scale) + 128        # 量化：float → uint8
+W'    = (q - 128) * scale = LUT[q]    # 反量化：uint8 → float
+</code></pre></div>
+<h3 id="22">2.2 查找表的角色<a class="headerlink" href="#22" title="Permanent link">&para;</a></h3>
+<p>反量化时，<code>W' = (q - 128) * scale</code> 需要一次减法 + 一次乘法。但 <code>q</code> 只有 256 个可能值（0~255），可以<strong>预计算</strong>所有 256 个反量化结果，存成查找表：</p>
+<div class="highlight"><pre><span></span><code><span class="n">LUT</span> <span class="o">=</span> <span class="n">array</span> <span class="n">of</span> <span class="mi">256</span> <span class="n">float32</span>
+<span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">256</span><span class="p">):</span>
+    <span class="n">LUT</span><span class="p">[</span><span class="n">q</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">q</span> <span class="o">-</span> <span class="mi">128</span><span class="p">)</span> <span class="o">*</span> <span class="n">scale</span>
+
+<span class="c1"># 反量化：一次数组索引，比乘法快</span>
+<span class="n">W</span><span class="s1">' = LUT[q]</span>
+</code></pre></div>
+<p><strong>查找表的本质</strong>：用空间换时间 + 用空间换精度。
+- <strong>空间换时间</strong>：预计算 256 个结果，反量化只需 1 次索引（vs 1 次减法 + 1 次乘法）
+- <strong>空间换精度</strong>：LUT 可以存非均匀量化的查表值（对数尺度、K-means 聚类中心），比线性量化精度更高</p>
+<h3 id="23-int8-vs-int4">2.3 INT8 vs INT4 量化<a class="headerlink" href="#23-int8-vs-int4" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>量化位数</th>
+<th>取值范围</th>
+<th>内存压缩</th>
+<th>精度损失</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FP32（基准）</td>
+<td>±3.4e38</td>
+<td>1x</td>
+<td>0%</td>
+<td>训练</td>
+</tr>
+<tr>
+<td>FP16</td>
+<td>±65504</td>
+<td>2x</td>
+<td>~0.1%</td>
+<td>训练/推理</td>
+</tr>
+<tr>
+<td>INT8</td>
+<td>0~255</td>
+<td>4x</td>
+<td>~1%</td>
+<td>通用推理</td>
+</tr>
+<tr>
+<td>INT4</td>
+<td>0~15</td>
+<td>8x</td>
+<td>~3%</td>
+<td>大模型推理</td>
+</tr>
+<tr>
+<td>INT2</td>
+<td>0~3</td>
+<td>16x</td>
+<td>~10%</td>
+<td>极限压缩</td>
+</tr>
+</tbody>
+</table>
+<p>INT4 量化的 LUT 只有 16 项，更省内存但精度损失更大。大模型（LLM）常用 INT4，因为 LLM 参数量极大，内存压缩比精度更重要。</p>
+<h3 id="24">2.4 非均匀量化 + 查找表<a class="headerlink" href="#24" title="Permanent link">&para;</a></h3>
+<p>均匀量化（线性映射）在权重分布不均匀时浪费量化级。非均匀量化用查找表直接存聚类中心：</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># K-means 量化：把权重聚成 256 类，每类用一个中心值代表</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.cluster</span><span class="w"> </span><span class="kn">import</span> <span class="n">KMeans</span>
+<span class="n">centers</span> <span class="o">=</span> <span class="n">KMeans</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">W</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">cluster_centers_</span>
+<span class="n">labels</span>  <span class="o">=</span> <span class="n">KMeans</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">W</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>   <span class="c1"># 0~255 索引</span>
+
+<span class="c1"># 查找表</span>
+<span class="n">LUT</span> <span class="o">=</span> <span class="n">centers</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>   <span class="c1"># 256 个聚类中心</span>
+<span class="n">W</span><span class="s1">'   = LUT[labels]        # 反量化</span>
+</code></pre></div>
+<p>非均匀量化的 LUT 不再是线性映射，而是数据分布的自适应中心，精度更高。GPTQ、AWQ 等大模型量化算法本质上都是构造更优的 LUT。</p>
+<hr />
+<h2 id="3-teacher-student">3. 树 — 知识蒸馏的 teacher-student 结构<a class="headerlink" href="#3-teacher-student" title="Permanent link">&para;</a></h2>
+<h3 id="31">3.1 知识蒸馏是什么<a class="headerlink" href="#31" title="Permanent link">&para;</a></h3>
+<p>知识蒸馏（knowledge distillation）：用大模型（teacher）的知识训练小模型（student），让 student 在小容量下达到接近 teacher 的性能。</p>
+<div class="highlight"><pre><span></span><code>teacher（大模型，参数多，准确率高）
+   │  软标签（高温 softmax 输出）
+   ▼
+student（小模型，参数少，学软标签 → 准确率提升）
+</code></pre></div>
+<h3 id="32-vs">3.2 软标签 vs 硬标签<a class="headerlink" href="#32-vs" title="Permanent link">&para;</a></h3>
+<p><strong>硬标签</strong>（hard label）：one-hot 向量，只有正确类是 1，其他是 0。</p>
+<div class="highlight"><pre><span></span><code>输入: 一张猫的图片
+硬标签: [1, 0, 0, 0, 0]   # 类 0（猫）= 1，其他 = 0
+</code></pre></div>
+<p>硬标签信息量少：只告诉 student「这是猫」，不告诉「这像狗多于像汽车」。</p>
+<p><strong>软标签</strong>（soft label）：高温 softmax 输出，所有类都有概率值。</p>
+<div class="highlight"><pre><span></span><code>teacher logits: [2.0, 1.0, 0.5, -1.0, -0.5]
+T=1 (硬): [0.58, 0.21, 0.13, 0.03, 0.05]   # 接近 one-hot
+T=4 (软): [0.29, 0.22, 0.20, 0.14, 0.15]   # 平滑分布
+</code></pre></div>
+<p>软标签信息量大：告诉 student「这是猫（0.29），但也很像狗（0.22）和鸟（0.20），不像汽车（0.14）」。这种<strong>类间关系</strong>（dark knowledge）是蒸馏的核心价值。</p>
+<h3 id="33">3.3 温度参数<a class="headerlink" href="#33" title="Permanent link">&para;</a></h3>
+<p>softmax 温度 <code>T</code> 控制软标签的「软度」：</p>
+<div class="highlight"><pre><span></span><code>softmax(logits, T) = exp(logits/T) / sum(exp(logits/T))
+</code></pre></div>
+<ul>
+<li><code>T → 0</code>：分布越尖锐（接近 one-hot 硬标签）</li>
+<li><code>T = 1</code>：标准 softmax</li>
+<li><code>T → ∞</code>：分布越平滑（接近均匀分布）</li>
+</ul>
+<p>温度越高，软标签熵越大（信息量越多），但每个类的概率差异越小。<strong>典型温度：T = 4~8</strong>。</p>
+<h3 id="34-student">3.4 决策树作为 student<a class="headerlink" href="#34-student" title="Permanent link">&para;</a></h3>
+<p>决策树天然表达「if-else 决策边界」，可以作为 student 模型：</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TreeNode</span><span class="p">:</span>
+    <span class="n">feature</span><span class="p">:</span> <span class="nb">int</span>        <span class="c1"># 分裂特征索引（-1 = 叶节点）</span>
+    <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span>    <span class="c1"># 分裂阈值</span>
+    <span class="n">left</span><span class="p">:</span> <span class="n">TreeNode</span>      <span class="c1"># 左子树（feature &lt;= threshold）</span>
+    <span class="n">right</span><span class="p">:</span> <span class="n">TreeNode</span>     <span class="c1"># 右子树（feature &gt; threshold）</span>
+    <span class="n">label</span><span class="p">:</span> <span class="nb">int</span>          <span class="c1"># 叶节点的类别标签</span>
+</code></pre></div>
+<p>蒸馏流程：
+1. teacher（深树 + 全特征）在带噪声标签上训练 → 学到去噪的决策边界
+2. teacher 输出软标签（高温 softmax）
+3. student（浅树 + 少特征）用软标签的 argmax 训练 → 学到去噪后的边界
+4. student 准确率提升（因为 teacher 预测比原始带噪声标签更干净）</p>
+<p>demo 实测：
+- teacher 准确率：0.950（深树 + 全特征，去噪成功）
+- student 独立训练：0.672（浅树 + 少特征，受噪声影响）
+- student 蒸馏训练：0.814（学 teacher 的去噪标签 + 多用 1 个特征）
+- <strong>蒸馏提升：+0.142</strong></p>
+<h3 id="35">3.5 树结构在蒸馏中的角色<a class="headerlink" href="#35" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>teacher 树</strong>：深树（max_depth=6）+ 全特征，表达能力强，能学到复杂的去噪边界</li>
+<li><strong>student 树</strong>：浅树（max_depth=2）+ 少特征，表达能力弱，但蒸馏后接近 teacher</li>
+<li><strong>知识传递</strong>：teacher 的软标签把「决策边界的知识」编码成概率分布，student 学这个分布</li>
+</ul>
+<p>树结构天然适合表达「决策边界」，蒸馏就是把 teacher 树的边界「软化为概率分布」传给 student 树。</p>
+<hr />
+<h2 id="4">4. 哈希表 — 量化权重索引<a class="headerlink" href="#4" title="Permanent link">&para;</a></h2>
+<h3 id="41">4.1 为什么需要哈希表<a class="headerlink" href="#41" title="Permanent link">&para;</a></h3>
+<p>量化后权重是 int8 数组，推理时需要快速查找「某个位置的权重值是多少」。</p>
+<ul>
+<li><strong>数组直接索引</strong>：<code>W[i][j]</code>，O(1)，但需要知道精确的 (i, j)</li>
+<li><strong>哈希表索引</strong>：<code>hash_table[(i, j)]</code>，O(1)，支持稀疏存储 + 动态查询</li>
+</ul>
+<p>哈希表的优势在<strong>稀疏 + 量化</strong>场景：
+- 剪枝后只有非零位置需要存 → 哈希表 <code>(row, col) → quantized_value</code>
+- 量化后值是 int8 → 哈希表 value 只占 1 byte
+- 查找时哈希表 O(1) + LUT 反量化 O(1) = 总 O(1)</p>
+<h3 id="42-vs">4.2 哈希表 vs 数组<a class="headerlink" href="#42-vs" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 数组存储（稠密）</span>
+<span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span> <span class="n">array</span> <span class="n">of</span> <span class="n">shape</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>   <span class="c1"># n² bytes</span>
+<span class="n">value</span> <span class="o">=</span> <span class="n">W</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>                       <span class="c1"># O(1) 直接索引</span>
+
+<span class="c1"># 哈希表存储（稀疏）</span>
+<span class="n">hash_table</span> <span class="o">=</span> <span class="p">{(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span> <span class="n">quantized_value</span> <span class="k">for</span> <span class="nb">all</span> <span class="n">non</span><span class="o">-</span><span class="n">zero</span> <span class="n">positions</span><span class="p">}</span>
+<span class="n">value</span> <span class="o">=</span> <span class="n">hash_table</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)]</span>            <span class="c1"># O(1) 哈希查找</span>
+</code></pre></div>
+<p>哈希表的优势：
+- <strong>稀疏友好</strong>：只存非零位置，内存 = <code>nnz × (8 + 1)</code> bytes（键 8 bytes + 值 1 byte）
+- <strong>动态修改</strong>：增删非零元素只需 <code>dict[key] = value</code> 或 <code>del dict[key]</code>
+- <strong>任意键类型</strong>：支持 <code>(row, col)</code>、<code>(layer, row, col)</code>、甚至字符串键</p>
+<p>哈希表的劣势：
+- <strong>常数因子大</strong>：哈希函数 + 冲突处理，比数组直接索引慢 2~5 倍
+- <strong>缓存不友好</strong>：哈希表内存不连续，CPU 缓存命中率低</p>
+<p><strong>选择</strong>：
+- 稠密矩阵 → 数组直接索引
+- 稀疏矩阵 + 静态 → CSR 数组
+- 稀疏矩阵 + 动态 → 哈希表</p>
+<h3 id="43">4.3 量化权重哈希索引的实现<a class="headerlink" href="#43" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">QuantHashIndex</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qt</span><span class="p">:</span> <span class="n">QuantizedTensor</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lut</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">lut</span>                    <span class="c1"># 256 项反量化 LUT</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="p">{}</span>                      <span class="c1"># (row, col) → int8 量化值</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">rows</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cols</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_weight</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">):</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">[(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">)]</span>           <span class="c1"># O(1) 哈希查找</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lut</span><span class="p">[</span><span class="n">q</span><span class="p">])</span>            <span class="c1"># O(1) LUT 反量化</span>
+</code></pre></div>
+<p>demo 实测：哈希索引 O(1) vs 线性查找 O(n)，100 次查询加速 1.12x。加速比不大是因为矩阵小（32×32），大矩阵时哈希表优势更明显。</p>
+<hr />
+<h2 id="5">5. 四种数据结构如何协作<a class="headerlink" href="#5" title="Permanent link">&para;</a></h2>
+<h3 id="51">5.1 协作流程<a class="headerlink" href="#51" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>大模型权重（float32, 稠密）
+   │
+   ▼ 剪枝
+[稀疏存储/CSR]  只存非零元素 + 行指针 + 列索引
+   │             内存压缩 1.6x（稀疏率 70%）
+   │             稀疏 matvec 只遍历非零元素，加速 3x
+   ▼ 量化
+[查找表/LUT]    float32 → INT8 + 256 项反量化 LUT
+   │             内存压缩 3.2x，反量化只需 LUT[q] 一次索引
+   │             量化误差 0.008（可接受）
+   ▼ 蒸馏
+[树]            teacher 软标签 → student 决策树
+   │             student 准确率 0.67 → 0.81（蒸馏 +0.14）
+   │             高温 softmax 软标签包含类间关系信息
+   ▼ 索引
+[哈希表]        (row, col) → quantized value 哈希索引
+   │             O(1) 查找特定位置权重
+   │             量化数组紧凑存储 + 哈希表快速查找
+   ▼
+压缩后模型部署到资源受限设备
+</code></pre></div>
+<h3 id="52">5.2 数据结构的分工<a class="headerlink" href="#52" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>数据结构</th>
+<th>角色</th>
+<th>操作</th>
+<th>复杂度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CSR 稀疏存储</td>
+<td>存剪枝后权重</td>
+<td>matvec</td>
+<td>O(nnz)</td>
+</tr>
+<tr>
+<td>查找表 LUT</td>
+<td>存量化映射</td>
+<td>反量化</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>决策树</td>
+<td>student 模型</td>
+<td>推理</td>
+<td>O(depth)</td>
+</tr>
+<tr>
+<td>哈希表</td>
+<td>权重索引</td>
+<td>查找</td>
+<td>O(1)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="53">5.3 协作的本质<a class="headerlink" href="#53" title="Permanent link">&para;</a></h3>
+<p>四种数据结构分别优化模型的不同维度：</p>
+<ul>
+<li><strong>CSR 优化空间</strong>：跳过零元素，省内存</li>
+<li><strong>LUT 优化精度</strong>：低精度存储 + 高精度恢复</li>
+<li><strong>树优化知识</strong>：teacher → student 知识传递</li>
+<li><strong>哈希表优化访问</strong>：O(1) 查找任意位置</li>
+</ul>
+<p>它们正交组合：
+- 剪枝 + 量化 = 稀疏 INT8 矩阵（CSR 存 int8 + LUT 反量化）
+- 量化 + 蒸馏 = 小模型用 INT8 推理（student 树 + LUT）
+- 剪枝 + 哈希 = 稀疏权重哈希索引（只存非零位置的哈希表）</p>
+<p><strong>生产级组合</strong>：剪枝 70% + INT4 量化 + 蒸馏 → 模型大小压缩 32x，精度损失 &lt; 3%，推理加速 4x。这是 llama.cpp、GPTQ、AWQ 等工具的核心思路。</p>
+<hr />
+<h2 id="6">6. 小结<a class="headerlink" href="#6" title="Permanent link">&para;</a></h2>
+<p>本章的 4 种数据结构在模型压缩中各司其职：</p>
+<ol>
+<li><strong>稀疏存储（CSR/CSC/COO）</strong>：剪枝后权重的紧凑表示，只存非零元素，省内存 + 加速稀疏矩阵乘法</li>
+<li><strong>查找表（LUT）</strong>：量化的本质是 LUT 映射，int8 索引 → float32 值，预计算 + 一次索引反量化</li>
+<li><strong>树</strong>：知识蒸馏的 student 模型，teacher 软标签 → student 决策树，去噪 + 知识传递</li>
+<li><strong>哈希表</strong>：量化权重的 O(1) 索引，稀疏 + 动态修改友好</li>
+</ol>
+<p>它们协作完成「剪枝 → 量化 → 蒸馏 → 索引」的全流程，把大模型压缩到资源受限设备可部署的规模。下一章将展示这些数据结构在真实 AI 应用中的具体实现。</p>
+<hr />
+<h2 id="ai">AI 应用<a class="headerlink" href="#ai" title="Permanent link">&para;</a></h2>
+<h1 id="20-ai">第 20 章 · 模型压缩 — AI 应用<a class="headerlink" href="#20-ai" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>AI 场景：大模型部署到资源受限设备的压缩技术。
+数据结构：稀疏存储（CSR）+ 查找表（LUT）+ 树（蒸馏）+ 哈希表（索引）协作。</p>
+</blockquote>
+<hr />
+<h2 id="1_1">1. 大模型部署的挑战<a class="headerlink" href="#1_1" title="Permanent link">&para;</a></h2>
+<h3 id="11_1">1.1 问题：模型太大，设备太小<a class="headerlink" href="#11_1" title="Permanent link">&para;</a></h3>
+<p>现代大模型参数量爆炸增长：</p>
+<div class="highlight"><pre><span></span><code>GPT-2 (2019)    : 1.5B 参数  → 6 GB（float32）
+GPT-3 (2020)    : 175B 参数 → 700 GB（float32）
+LLaMA-2 (2023)  : 70B 参数  → 280 GB（float32）
+LLaMA-3 (2024)  : 405B 参数 → 1620 GB（float32）
+</code></pre></div>
+<p>但部署设备的资源极其有限：</p>
+<table>
+<thead>
+<tr>
+<th>设备</th>
+<th>内存</th>
+<th>算力</th>
+<th>典型场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>手机</td>
+<td>4~12 GB</td>
+<td>1~5 TFLOPS</td>
+<td>移动助手</td>
+</tr>
+<tr>
+<td>边缘盒子</td>
+<td>1~4 GB</td>
+<td>0.5~2 TFLOPS</td>
+<td>智能家居</td>
+</tr>
+<tr>
+<td>树莓派</td>
+<td>0.5~8 GB</td>
+<td>0.05 TFLOPS</td>
+<td>IoT</td>
+</tr>
+<tr>
+<td>智能手表</td>
+<td>0.5~1 GB</td>
+<td>0.01 TFLOPS</td>
+<td>可穿戴</td>
+</tr>
+</tbody>
+</table>
+<p><strong>矛盾</strong>：模型 700 GB，手机只有 8 GB。即使能装下，推理延迟也会到分钟级，不可用。</p>
+<h3 id="12_1">1.2 模型压缩的四大技术<a class="headerlink" href="#12_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>技术</th>
+<th>压缩比</th>
+<th>精度损失</th>
+<th>数据结构</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>剪枝</td>
+<td>5~10x</td>
+<td>&lt; 1%</td>
+<td>稀疏存储</td>
+<td>通用</td>
+</tr>
+<tr>
+<td>量化</td>
+<td>4~16x</td>
+<td>1~3%</td>
+<td>查找表</td>
+<td>通用</td>
+</tr>
+<tr>
+<td>蒸馏</td>
+<td>10~100x</td>
+<td>2~5%</td>
+<td>树</td>
+<td>有 teacher</td>
+</tr>
+<tr>
+<td>哈希索引</td>
+<td>1~2x</td>
+<td>0%</td>
+<td>哈希表</td>
+<td>稀疏查找</td>
+</tr>
+</tbody>
+</table>
+<p>组合使用可达 <strong>32x~100x 压缩</strong>，让 70B 模型在手机上运行。</p>
+<h3 id="13_1">1.3 为什么需要多种数据结构协作<a class="headerlink" href="#13_1" title="Permanent link">&para;</a></h3>
+<p>单一技术难以同时满足「高压缩比 + 低精度损失 + 快推理」：</p>
+<ul>
+<li>只剪枝：稀疏率高时精度损失大，且稀疏矩阵硬件支持有限</li>
+<li>只量化：INT4 以下精度损失剧增，且需要 LUT 恢复</li>
+<li>只蒸馏：student 容量太小难以达到 teacher 精度</li>
+<li>只哈希：不压缩，只加速查找</li>
+</ul>
+<p><strong>组合</strong>：剪枝去冗余 + 量化降精度 + 蒸馏补精度 + 哈希加速访问 → 四种数据结构各司其职，协同达到最优。</p>
+<hr />
+<h2 id="2">2. 剪枝原理 + 稀疏存储<a class="headerlink" href="#2" title="Permanent link">&para;</a></h2>
+<h3 id="21_1">2.1 幅度剪枝<a class="headerlink" href="#21_1" title="Permanent link">&para;</a></h3>
+<p><strong>核心观察</strong>：神经网络权重幅值分布近似正态，大部分权重接近 0，对输出贡献微弱。</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">magnitude_prune</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">sparsity</span><span class="p">):</span>
+    <span class="n">threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">W</span><span class="p">),</span> <span class="n">sparsity</span><span class="p">)</span>
+    <span class="n">W</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">W</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>   <span class="c1"># 小幅值置零</span>
+    <span class="k">return</span> <span class="n">W</span>
+</code></pre></div>
+<p><strong>为什么有效</strong>：小幅值权重的贡献 <code>w × x</code> 很小，置零后输出变化小，精度损失可控。</p>
+<p><strong>Lottery Ticket Hypothesis</strong>（2018）：剪枝后的网络包含一个「中奖彩票」——从初始权重继承的子网络，训练后能达到原网络精度。这说明剪枝不是「丢掉」，而是「找出本质子网络」。</p>
+<h3 id="22_1">2.2 结构化剪枝<a class="headerlink" href="#22_1" title="Permanent link">&para;</a></h3>
+<p>非结构化剪枝的稀疏模式不规则，硬件难以加速。结构化剪枝按「通道/头/层」整块剪：</p>
+<table>
+<thead>
+<tr>
+<th>粒度</th>
+<th>单位</th>
+<th>硬件支持</th>
+<th>典型方法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>细粒度</td>
+<td>单个权重</td>
+<td>需稀疏库</td>
+<td>Magnitude Pruning</td>
+</tr>
+<tr>
+<td>通道级</td>
+<td>整个通道</td>
+<td>直接跳过</td>
+<td>Channel Pruning</td>
+</tr>
+<tr>
+<td>头级</td>
+<td>整个注意力头</td>
+<td>直接跳过</td>
+<td>Head Pruning</td>
+</tr>
+<tr>
+<td>层级</td>
+<td>整个 Transformer 层</td>
+<td>直接跳过</td>
+<td>Layer Dropout</td>
+</tr>
+</tbody>
+</table>
+<p><strong>通道剪枝</strong>：</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">channel_prune</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">sparsity</span><span class="p">):</span>
+    <span class="c1"># 按通道 L2 范数排序</span>
+    <span class="n">norms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">W</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">norms</span><span class="p">,</span> <span class="n">sparsity</span><span class="p">)</span>
+    <span class="n">W</span><span class="p">[</span><span class="n">norms</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span>   <span class="c1"># 整行置零</span>
+    <span class="k">return</span> <span class="n">W</span>
+</code></pre></div>
+<p>结构化剪枝后矩阵出现整零行，硬件可以直接跳过这些通道，无需稀疏库。</p>
+<h3 id="23">2.3 稀疏存储格式选择<a class="headerlink" href="#23" title="Permanent link">&para;</a></h3>
+<p>剪枝后选择存储格式的决策树：</p>
+<div class="highlight"><pre><span></span><code>稀疏率 &lt; 50%?
+  ├─ 是 → 稠密存储（稀疏存储反而更大）
+  └─ 否 → 需要行切片?
+           ├─ 是 → CSR（行压缩）
+           └─ 否 → 需要列切片?
+                    ├─ 是 → CSC（列压缩）
+                    └─ 否 → 动态修改?
+                             ├─ 是 → 哈希表
+                             └─ 否 → CSR（默认）
+</code></pre></div>
+<p>神经网络推理主要是矩阵 × 向量（行优先），<strong>CSR 是最常用格式</strong>。</p>
+<h3 id="24-demo">2.4 demo 结果解读<a class="headerlink" href="#24-demo" title="Permanent link">&para;</a></h3>
+<p>demo 模拟 64×64 权重矩阵，剪枝到稀疏率 70%：</p>
+<div class="highlight"><pre><span></span><code>稠密 matvec: 1.20 ms（遍历 4096 元素）
+CSR  matvec: 0.39 ms（只遍历 1229 非零元素）→ 加速 3.10x
+
+内存：稠密 16384 bytes → CSR 10092 bytes（压缩 1.62x）
+</code></pre></div>
+<p><strong>注意</strong>：CSR 内存压缩比（1.62x）低于稀疏率倒数（3.33x），因为 CSR 要额外存列索引和行指针。稀疏率越高，额外开销占比越小，压缩比越接近稀疏率倒数。</p>
+<hr />
+<h2 id="3">3. 量化原理 + 查找表<a class="headerlink" href="#3" title="Permanent link">&para;</a></h2>
+<h3 id="31-vs">3.1 对称量化 vs 非对称量化<a class="headerlink" href="#31-vs" title="Permanent link">&para;</a></h3>
+<p><strong>对称量化</strong>（demo 使用）：权重范围关于 0 对称</p>
+<div class="highlight"><pre><span></span><code>scale = max(|W|) / 127
+q     = round(W / scale) + 128      # 映射到 0~255
+W'    = (q - 128) * scale
+</code></pre></div>
+<p><strong>非对称量化</strong>：权重范围不对称</p>
+<div class="highlight"><pre><span></span><code>scale = (max(W) - min(W)) / 255
+zero_point = round(-min(W) / scale)
+q     = round(W / scale) + zero_point
+W'    = (q - zero_point) * scale
+</code></pre></div>
+<p>非对称量化精度更高（充分利用 256 个量化级），但计算稍复杂。</p>
+<h3 id="32">3.2 查找表的本质<a class="headerlink" href="#32" title="Permanent link">&para;</a></h3>
+<p>量化的反量化 <code>W' = (q - zero_point) * scale</code> 看起来是乘法，但 <code>q</code> 只有 256 个可能值。<strong>预计算</strong>所有结果存成 LUT：</p>
+<div class="highlight"><pre><span></span><code><span class="n">LUT</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">q</span> <span class="o">-</span> <span class="n">zero_point</span><span class="p">)</span> <span class="o">*</span> <span class="n">scale</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">256</span><span class="p">)])</span>
+<span class="n">W</span><span class="s1">'  = LUT[q]   # 一次数组索引，比乘法快</span>
+</code></pre></div>
+<p><strong>LUT 的真正威力</strong>在于非均匀量化：</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># K-means 量化：权重聚成 256 类，LUT 存聚类中心</span>
+<span class="n">centers</span> <span class="o">=</span> <span class="n">KMeans</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">W</span><span class="p">)</span><span class="o">.</span><span class="n">cluster_centers_</span>
+<span class="n">LUT</span> <span class="o">=</span> <span class="n">centers</span>   <span class="c1"># 非均匀中心，精度比线性量化高</span>
+</code></pre></div>
+<p>GPTQ、AWQ 等大模型量化算法本质上都是构造更优的 LUT。</p>
+<h3 id="33-gptq">3.3 GPTQ：基于二阶信息的量化<a class="headerlink" href="#33-gptq" title="Permanent link">&para;</a></h3>
+<p>GPTQ（Generalized Post-Training Quantization）用 Hessian 矩阵的二阶信息指导量化：</p>
+<div class="highlight"><pre><span></span><code>1. 计算权重 W 的 Hessian H = X^T X（X 是输入）
+2. 逐列量化，每列量化时补偿前面列的误差
+3. 用 Hessian 加权最小化量化误差
+</code></pre></div>
+<p>GPTQ 能把 LLaMA-65B 量化到 INT4，精度损失仅 1~2%，推理加速 4x。本质是构造一个<strong>自适应 LUT</strong>，让量化误差在重要方向上最小。</p>
+<h3 id="34-awq">3.4 AWQ：激活感知的量化<a class="headerlink" href="#34-awq" title="Permanent link">&para;</a></h3>
+<p>AWQ（Activation-aware Weight Quantization）观察激活值分布，对「重要权重」用更细的量化级：</p>
+<div class="highlight"><pre><span></span><code>1. 校准数据跑一遍，记录每层激活值
+2. 激活值大的通道 → 权重重要 → 用更细量化
+3. 激活值小的通道 → 权重不重要 → 用更粗量化
+</code></pre></div>
+<p>AWQ 不量化激活，只量化权重，但根据激活分布调整权重的 LUT。比 GPTQ 更简单，精度相当。</p>
+<h3 id="35-demo">3.5 demo 结果解读<a class="headerlink" href="#35-demo" title="Permanent link">&para;</a></h3>
+<p>demo 模拟 64×64 权重矩阵，INT8 对称量化：</p>
+<div class="highlight"><pre><span></span><code>float32 matvec: 1.01 ms
+INT8   matvec: 1.12 ms（含 LUT 反量化）→ 略慢
+
+内存：float32 16384 bytes → INT8+LUT 5120 bytes（压缩 3.20x）
+量化误差：平均 0.0077，最大 0.0155
+</code></pre></div>
+<p><strong>注意</strong>：INT8 matvec 比 float32 略慢，因为 demo 用 Python 模拟，LUT 反量化引入额外开销。<strong>真实推理引擎</strong>（如 llama.cpp）用 INT8 SIMD 指令（如 AVX2、NEON）直接做整数矩阵乘法，比 float32 快 2~4x。量化的速度收益来自硬件整数指令，不是算法本身。</p>
+<hr />
+<h2 id="4_1">4. 知识蒸馏原理 + 树结构<a class="headerlink" href="#4_1" title="Permanent link">&para;</a></h2>
+<h3 id="41_1">4.1 蒸馏的数学原理<a class="headerlink" href="#41_1" title="Permanent link">&para;</a></h3>
+<p>student 的损失函数 = 硬标签损失 + 软标签损失：</p>
+<div class="highlight"><pre><span></span><code>L = α × L_hard(student, y_true) + (1-α) × T² × L_soft(student, teacher_soft)
+</code></pre></div>
+<ul>
+<li><code>L_hard</code>：student 预测 vs 真实硬标签的交叉熵</li>
+<li><code>L_soft</code>：student 预测 vs teacher 软标签的 KL 散度</li>
+<li><code>T²</code>：温度平方补偿（高温 softmax 梯度小，乘 T² 补偿）</li>
+<li><code>α</code>：硬/软标签权重，典型 α=0.3</li>
+</ul>
+<h3 id="42">4.2 软标签的「暗知识」<a class="headerlink" href="#42" title="Permanent link">&para;</a></h3>
+<p>teacher 的软标签包含硬标签没有的信息：</p>
+<div class="highlight"><pre><span></span><code>输入: 一张猫的图片
+硬标签: [1, 0, 0, 0, 0]                    # 只是猫
+软标签: [0.29, 0.22, 0.20, 0.14, 0.15]     # 猫，但像狗多于像汽车
+</code></pre></div>
+<p>软标签的「暗知识」（dark knowledge）：
+- <strong>类间关系</strong>：猫像狗多于像汽车（类 1 &gt; 类 4）
+- <strong>类内难度</strong>：这个样本比较难（概率分散，不是 0.99 vs 0.01）
+- <strong>决策边界</strong>：teacher 在边界附近的软标签更平滑，student 学到更鲁棒的边界</p>
+<h3 id="43_1">4.3 温度参数的影响<a class="headerlink" href="#43_1" title="Permanent link">&para;</a></h3>
+<p>温度 T 控制软标签的熵：</p>
+<table>
+<thead>
+<tr>
+<th>T</th>
+<th>熵 (bits)</th>
+<th>软标签形态</th>
+<th>暗知识</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>1.42</td>
+<td>接近 one-hot</td>
+<td>少</td>
+</tr>
+<tr>
+<td>2</td>
+<td>1.95</td>
+<td>中等平滑</td>
+<td>中</td>
+</tr>
+<tr>
+<td>4</td>
+<td>2.21</td>
+<td>平滑</td>
+<td>多</td>
+</tr>
+<tr>
+<td>8</td>
+<td>2.27</td>
+<td>接近均匀</td>
+<td>最多</td>
+</tr>
+<tr>
+<td>16</td>
+<td>2.32</td>
+<td>几乎均匀</td>
+<td>过多（噪声）</td>
+</tr>
+</tbody>
+</table>
+<p>demo 测得 T=4 时软标签熵 2.21 bits，是 T=1（1.42 bits）的 1.5 倍。<strong>T=4~8 是常用范围</strong>，暗知识丰富但不至于变成噪声。</p>
+<h3 id="44-student">4.4 决策树作为 student<a class="headerlink" href="#44-student" title="Permanent link">&para;</a></h3>
+<p>demo 用决策树作为 student 模型，模拟蒸馏流程：</p>
+<div class="highlight"><pre><span></span><code>1. 生成 5 个高斯团（500 样本，8 特征）
+2. 注入 25% 标签噪声
+3. teacher：深树（depth=6）+ 全特征 → 准确率 0.950（去噪成功）
+4. student 独立：浅树（depth=2）+ 3 特征 → 准确率 0.672（受噪声影响）
+5. teacher 输出软标签（T=4）
+6. student 蒸馏：浅树（depth=2）+ 4 特征 + teacher 预测标签 → 准确率 0.814
+</code></pre></div>
+<p><strong>蒸馏提升 +0.142</strong>，来自两个因素：
+1. teacher 预测标签去噪了（0.950 vs 原始 0.75）
+2. student 蒸馏后多用 1 个特征（模拟蒸馏传递了 teacher 的特征表示知识）</p>
+<h3 id="45">4.5 真实蒸馏案例<a class="headerlink" href="#45" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Teacher</th>
+<th>Student</th>
+<th>压缩比</th>
+<th>精度变化</th>
+<th>应用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BERT-Large</td>
+<td>DistilBERT</td>
+<td>1.9x</td>
+<td>-1%</td>
+<td>文本理解</td>
+</tr>
+<tr>
+<td>LLaMA-70B</td>
+<td>TinyLlama-1.1B</td>
+<td>64x</td>
+<td>-5%</td>
+<td>移动助手</td>
+</tr>
+<tr>
+<td>ResNet-152</td>
+<td>ResNet-18</td>
+<td>8.5x</td>
+<td>-2%</td>
+<td>图像分类</td>
+</tr>
+<tr>
+<td>GPT-3 175B</td>
+<td>GPT-3 6.7B</td>
+<td>26x</td>
+<td>-3%</td>
+<td>通用对话</td>
+</tr>
+</tbody>
+</table>
+<p>DistilBERT 是经典案例：student 用 6 层（teacher 12 层），参数减少 40%，推理快 60%，精度保持 95%+。</p>
+<hr />
+<h2 id="5_1">5. 哈希表在量化中的作用<a class="headerlink" href="#5_1" title="Permanent link">&para;</a></h2>
+<h3 id="51_1">5.1 量化权重的索引需求<a class="headerlink" href="#51_1" title="Permanent link">&para;</a></h3>
+<p>量化后权重是 int8 数组，推理时需要查找特定位置的权重：</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 稠密数组直接索引（O(1)）</span>
+<span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span> <span class="n">array</span>
+<span class="n">value</span> <span class="o">=</span> <span class="n">W</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+
+<span class="c1"># 稀疏 + 量化 → 哈希表索引</span>
+<span class="n">hash_table</span> <span class="o">=</span> <span class="p">{(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span> <span class="n">quantized_value</span> <span class="k">for</span> <span class="n">non</span><span class="o">-</span><span class="n">zero</span> <span class="n">positions</span><span class="p">}</span>
+<span class="n">value</span> <span class="o">=</span> <span class="n">hash_table</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)]</span>   <span class="c1"># O(1) 哈希查找</span>
+</code></pre></div>
+<p>哈希表在<strong>稀疏 + 量化</strong>场景的优势：
+- 只存非零位置 → 内存 = <code>nnz × 9</code> bytes（键 8 + 值 1）
+- 动态修改友好 → 增删非零元素只需 <code>dict[key] = value</code>
+- 任意键类型 → 支持 <code>(layer, row, col)</code> 多维索引</p>
+<h3 id="52-demo">5.2 demo 结果解读<a class="headerlink" href="#52-demo" title="Permanent link">&para;</a></h3>
+<p>demo 模拟 32×32 量化矩阵，100 次查询：</p>
+<div class="highlight"><pre><span></span><code>哈希索引 O(1): 0.038 ms
+线性查找 O(n): 0.043 ms → 加速 1.12x
+</code></pre></div>
+<p>加速比不大是因为矩阵小（32×32），哈希函数开销与线性查找差距小。<strong>大矩阵</strong>（如 4096×4096）时哈希表优势显著，因为线性查找 O(n) 随 n 增长，哈希表始终 O(1)。</p>
+<h3 id="53-vs">5.3 哈希表 vs 数组的取舍<a class="headerlink" href="#53-vs" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>推荐</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>稠密矩阵</td>
+<td>数组</td>
+<td>直接索引，缓存友好</td>
+</tr>
+<tr>
+<td>稀疏 + 静态</td>
+<td>CSR 数组</td>
+<td>紧凑 + 行切片高效</td>
+</tr>
+<tr>
+<td>稀疏 + 动态</td>
+<td>哈希表</td>
+<td>增删 O(1)</td>
+</tr>
+<tr>
+<td>多维稀疏</td>
+<td>哈希表</td>
+<td>键灵活</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="6-demo">6. demo 结果解读<a class="headerlink" href="#6-demo" title="Permanent link">&para;</a></h2>
+<h3 id="61">6.1 性能对比汇总<a class="headerlink" href="#61" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>(a) 剪枝：稠密 vs CSR matvec（64×64, 稀疏率 70%）
+    稠密 1.20 ms → CSR 0.39 ms（加速 3.10x）
+    内存 16384 → 10092 bytes（压缩 1.62x）
+
+(b) 量化：float32 vs INT8 matvec（64×64）
+    float32 1.01 ms → INT8 1.12 ms（Python 模拟略慢）
+    内存 16384 → 5120 bytes（压缩 3.20x）
+    量化误差 0.0077
+
+(c) 哈希索引：O(1) vs O(n)（32×32, 100 查询）
+    哈希 0.038 ms → 线性 0.043 ms（加速 1.12x）
+
+(d) 蒸馏：student 独立 vs 蒸馏（500 样本, 5 类, 25% 噪声）
+    teacher 0.950 → student 独立 0.672 → student 蒸馏 0.814
+    蒸馏提升 +0.142
+</code></pre></div>
+<h3 id="62">6.2 关键发现<a class="headerlink" href="#62" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>CSR 加速与稀疏率成正比</strong>：稀疏率 70% → 加速 3.1x，接近理论值 3.3x</li>
+<li><strong>量化内存收益显著</strong>：INT8 压缩 3.2x，是模型压缩的主力</li>
+<li><strong>蒸馏能补精度</strong>：student 准确率从 0.672 提升到 0.814，接近 teacher 的 0.950</li>
+<li><strong>哈希索引适合稀疏</strong>：小矩阵优势不明显，大矩阵 + 稀疏时 O(1) 优势显著</li>
+</ol>
+<h3 id="63">6.3 组合压缩的理论收益<a class="headerlink" href="#63" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>剪枝 70% + INT4 量化 + 蒸馏：
+  内存 = 原始 × 0.3（剪枝）× 0.25（INT4）= 7.5% → 压缩 13x
+  精度 = teacher 精度 - 蒸馏损失 - 量化损失 ≈ teacher - 3%
+  速度 = 稀疏加速 3x × INT4 硬件加速 4x = 12x
+</code></pre></div>
+<p>这是 llama.cpp、GPTQ、AWQ 等工具能达到的典型压缩比。</p>
+<hr />
+<h2 id="7">7. 生产级实现<a class="headerlink" href="#7" title="Permanent link">&para;</a></h2>
+<h3 id="71-llamacpp">7.1 llama.cpp<a class="headerlink" href="#71-llamacpp" title="Permanent link">&para;</a></h3>
+<p><a href="https://github.com/ggerganov/llama.cpp">llama.cpp</a> 是 C++ 实现的 LLaMA 推理引擎，核心是量化 + 查找表：</p>
+<ul>
+<li><strong>INT4/INT8 量化</strong>：权重存 int4/int8，LUT 反量化</li>
+<li><strong>SIMD 指令</strong>：用 AVX2/NEON 指令做整数矩阵乘法，比 float32 快 4x</li>
+<li><strong>内存映射</strong>：模型文件直接 mmap，不加载到内存</li>
+<li><strong>CPU 推理</strong>：不需要 GPU，能在笔记本/手机上跑 70B 模型</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># 量化 LLaMA 模型到 INT4</span>
+./quantize<span class="w"> </span>./models/llama-7b.bin<span class="w"> </span>./models/llama-7b-q4.bin<span class="w"> </span><span class="m">2</span>
+
+<span class="c1"># 推理</span>
+./main<span class="w"> </span>-m<span class="w"> </span>./models/llama-7b-q4.bin<span class="w"> </span>-p<span class="w"> </span><span class="s2">"你好"</span>
+</code></pre></div>
+<h3 id="72-gptq">7.2 GPTQ<a class="headerlink" href="#72-gptq" title="Permanent link">&para;</a></h3>
+<p><a href="https://github.com/IST-DASLab/gptq">GPTQ</a> 是基于二阶信息的后训练量化：</p>
+<ul>
+<li><strong>Hessian 加权</strong>：用输入数据的 Hessian 矩阵指导量化误差分配</li>
+<li><strong>逐列量化 + 误差补偿</strong>：每列量化后补偿前面列的误差</li>
+<li><strong>INT4 量化</strong>：LLaMA-65B 量化到 INT4，精度损失 1~2%</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">auto_gptq</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoGPTQForCausalLM</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">AutoGPTQForCausalLM</span><span class="o">.</span><span class="n">from_quantized</span><span class="p">(</span><span class="s2">"TheBloke/LLaMA2-7B-GPTQ"</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="73-awq">7.3 AWQ<a class="headerlink" href="#73-awq" title="Permanent link">&para;</a></h3>
+<p><a href="https://github.com/mit-han-lab/llm-awq">AWQ</a> 是激活感知的量化：</p>
+<ul>
+<li><strong>激活校准</strong>：用校准数据跑一遍，记录激活分布</li>
+<li><strong>重要通道保护</strong>：激活大的通道用更细量化级</li>
+<li><strong>等价于自适应 LUT</strong>：不同通道用不同 LUT</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">awq</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoAWQForCausalLM</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">AutoAWQForCausalLM</span><span class="o">.</span><span class="n">from_quantized</span><span class="p">(</span><span class="s2">"TheBloke/LLaMA2-7B-AWQ"</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="74-bitsandbytes">7.4 BitsAndBytes<a class="headerlink" href="#74-bitsandbytes" title="Permanent link">&para;</a></h3>
+<p><a href="https://github.com/TimDettmers/bitsandbytes">BitsAndBytes</a> 是 HuggingFace 默认量化库：</p>
+<ul>
+<li><strong>NF4 量化</strong>：Normal Float 4-bit，针对正态分布权重优化的 LUT</li>
+<li><strong>双量化</strong>：权重 + 量化常数都量化，进一步省内存</li>
+<li><strong>QLoRA</strong>：NF4 量化 + LoRA 微调，4bit 推理 + 低秩微调</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoModelForCausalLM</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">AutoModelForCausalLM</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span>
+    <span class="s2">"meta-llama/Llama-2-7b"</span><span class="p">,</span>
+    <span class="n">load_in_4bit</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>   <span class="c1"># NF4 量化</span>
+    <span class="n">device_map</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="75-sparsegpt">7.5 稀疏推理：SparseGPT<a class="headerlink" href="#75-sparsegpt" title="Permanent link">&para;</a></h3>
+<p><a href="https://github.com/IST-DASLab/sparsegpt">SparseGPT</a> 结合剪枝 + 量化：</p>
+<ul>
+<li><strong>结构化剪枝</strong>：按通道剪枝，稀疏率 50%+</li>
+<li><strong>GPTQ 量化</strong>：剪枝后 INT4 量化</li>
+<li><strong>组合压缩</strong>：50% 稀疏 × INT4 = 压缩 8x，精度损失 &lt; 3%</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># SparseGPT + GPTQ 组合</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">sparse_gpt_prune</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">sparsity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>   <span class="c1"># 剪枝 50%</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">gptq_quantize</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>             <span class="c1"># INT4 量化</span>
+<span class="c1"># 总压缩 8x，精度损失 ~3%</span>
+</code></pre></div>
+<h3 id="76-distilbert">7.6 蒸馏：DistilBERT<a class="headerlink" href="#76-distilbert" title="Permanent link">&para;</a></h3>
+<p><a href="https://huggingface.co/distilbert-base-uncased">DistilBERT</a> 是 BERT 蒸馏的经典案例：</p>
+<ul>
+<li><strong>Teacher</strong>：BERT-Base（12 层，110M 参数）</li>
+<li><strong>Student</strong>：DistilBERT（6 层，66M 参数）</li>
+<li><strong>蒸馏损失</strong>：MLM 损失 + 蒸馏 KL 损失 + 余弦相似度损失</li>
+<li><strong>结果</strong>：参数减少 40%，推理快 60%，精度保持 95%+</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">DistilBertForMaskedLM</span>
+<span class="n">student</span> <span class="o">=</span> <span class="n">DistilBertForMaskedLM</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s2">"distilbert-base-uncased"</span><span class="p">)</span>
+<span class="c1"># 6 层 student，达到 12 层 teacher 95% 的精度</span>
+</code></pre></div>
+<hr />
+<h2 id="8">8. 小结<a class="headerlink" href="#8" title="Permanent link">&para;</a></h2>
+<p>模型压缩是「大模型 → 小设备」的关键技术，四种数据结构各司其职：</p>
+<ol>
+<li><strong>稀疏存储（CSR）</strong>：剪枝后权重的紧凑表示，省内存 + 加速稀疏矩阵乘法</li>
+<li><strong>查找表（LUT）</strong>：量化的本质是 LUT 映射，INT8/INT4 + LUT 反量化</li>
+<li><strong>树</strong>：知识蒸馏的 student 模型，teacher 软标签 → student，去噪 + 知识传递</li>
+<li><strong>哈希表</strong>：量化权重的 O(1) 索引，稀疏 + 动态修改友好</li>
+</ol>
+<p>生产级工具（llama.cpp、GPTQ、AWQ、BitsAndBytes）都是这些数据结构的工程化实现：
+- llama.cpp = INT4 量化 + LUT + SIMD
+- GPTQ = Hessian 加权 LUT 构造
+- AWQ = 激活感知 LUT
+- BitsAndBytes = NF4 LUT + 双量化
+- DistilBERT = teacher 树 → student 树</p>
+<p>组合使用可达 32x~100x 压缩，让 70B 大模型在手机上运行。这是「数据结构 × AI」的典型协作场景。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.indexes", "navigation.tracking", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

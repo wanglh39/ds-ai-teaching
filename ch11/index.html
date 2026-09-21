@@ -1,0 +1,2566 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="从底层实现到生产级应用——数据结构在 AI 系统优化与应用工程中的真实作用">
+      
+      
+        <meta name="author" content="wanglh39">
+      
+      
+        <link rel="canonical" href="https://wanglh39.github.io/ds-ai-teaching/ch11/">
+      
+      
+        <link rel="prev" href="../ch10/">
+      
+      
+        <link rel="next" href="../ch12/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>11 页表/分块内存 - 数据结构 × AI 优化</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+SC:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans SC";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#11-pagedattention" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href=".." title="数据结构 × AI 优化" class="md-header__button md-logo" aria-label="数据结构 × AI 优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            数据结构 × AI 优化
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              11 页表/分块内存
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换至暗色模式"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换至暗色模式" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换至亮色模式"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换至亮色模式" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/wanglh39/ds-ai-teaching" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wanglh39/ds-ai-teaching
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  首页
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../intro/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  项目介绍
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../ch01/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  视角 A·系统优化
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../ch13/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  视角 B·应用工程
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../benchmarks/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  性能汇总
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="数据结构 × AI 优化" class="md-nav__button md-logo" aria-label="数据结构 × AI 优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    数据结构 × AI 优化
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/wanglh39/ds-ai-teaching" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wanglh39/ds-ai-teaching
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    首页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    项目介绍
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    项目介绍
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    设计思路
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../map/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    章节映射
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dual_view/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    双视角说明
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cross_index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    交叉索引
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    视角 A·系统优化
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    视角 A·系统优化
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 动态数组
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch02/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 链表
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch03/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 栈
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch04/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 循环队列
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch05/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05 哈希表
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch06/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 堆
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch07/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    07 Trie
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch08/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    08 KD-Tree
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch09/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    09 图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch10/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10 并查集
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11 页表/分块内存
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11 页表/分块内存
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要回答的问题
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        状态
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原理
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch12/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12 跳表+图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    视角 B·应用工程
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    视角 B·应用工程
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch13/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13 多智能体编排
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch14/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    14 任务调度与批处理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch15/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    15 上下文工程与记忆
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch16/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    16 RAG 与知识检索
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch17/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    17 数据管道与流式处理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch18/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    18 模型部署与推理服务
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch19/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    19 状态机与工作流
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch20/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    20 模型压缩
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    性能汇总
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要回答的问题
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        状态
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原理
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="11-pagedattention">第 11 章 · PagedAttention 专题<a class="headerlink" href="#11-pagedattention" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>数据结构：页表 + 固定大小块 + 空闲块池
+AI 优化：PagedAttention（vLLM 的 KV Cache 管理）</p>
+</blockquote>
+<h2 id="_1">本章要回答的问题<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>KV Cache 为什么会碎片化？</li>
+<li>操作系统的分页机制怎么搬到 KV Cache？</li>
+<li>朴素分配 vs PagedAttention 的显存利用率差多少？</li>
+</ul>
+<h2 id="_2">目录<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>11_paged_attention/
+├── c/                   # 页表 + 分块内存的 C 实现
+├── python/              # PagedAttention 模拟 demo
+├── docs/
+│   ├── principle.md
+│   └── ai_application.md
+└── figures/
+</code></pre></div>
+<h2 id="_3">状态<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p>🚧 待填充</p>
+<hr />
+<h2 id="_4">原理<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<h1 id="kv-cache">分页 KV Cache 原理：页表 + 固定块 + 空闲池 + 引用计数<a class="headerlink" href="#kv-cache" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>本文档讲清「把操作系统的分页机制搬到 KV Cache 管理」的数据结构原理：虚拟内存与页表回顾、固定大小块 + 空闲块池、逻辑页号 → 物理块号映射、引用计数实现块共享、C 实现逐行讲解、复杂度分析。AI 应用（vLLM PagedAttention）见 <code>ai_application.md</code>。</p>
+</blockquote>
+<h2 id="1-kv-cache">1. 为什么 KV Cache 需要分页<a class="headerlink" href="#1-kv-cache" title="Permanent link">&para;</a></h2>
+<p>大模型推理时，每个序列的 KV Cache 随 token 数线性增长。一个 batch 里多个序列长度各异，且在不断生成新 token。传统做法给每个序列<strong>连续分配</strong>一段显存，带来两个致命问题：</p>
+<ul>
+<li><strong>内部碎片</strong>：预分配 max_len 的空间，序列实际只用了很短一部分，浪费严重</li>
+<li><strong>外部碎片</strong>：序列长度可变，释放后显存里留下大小不一的空洞，新序列可能放不进去</li>
+</ul>
+<p>这和操作系统早期遇到的内存管理问题<strong>完全一样</strong>。OS 的答案是<strong>分页</strong>——把内存切成等大的页框，按需分配，用页表映射逻辑地址到物理地址。vLLM 的 PagedAttention 把这套机制原封不动搬到了 KV Cache。</p>
+<p>本文档讲清这套机制的数据结构原理。核心三件套：</p>
+<table>
+<thead>
+<tr>
+<th>数据结构</th>
+<th>作用</th>
+<th>对应 OS 概念</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Block（固定块）</strong></td>
+<td>显存的最小分配单位，每块 block_size 个 slot</td>
+<td>物理页框（page frame）</td>
+</tr>
+<tr>
+<td><strong>BlockPool（空闲块池）</strong></td>
+<td>管理所有块的分配/回收，free list 串联空闲块</td>
+<td>伙伴系统 / 空闲页框链表</td>
+</tr>
+<tr>
+<td><strong>PageTable（页表）</strong></td>
+<td>每个序列一张，逻辑页号 → 物理块号</td>
+<td>进程页表</td>
+</tr>
+</tbody>
+</table>
+<p>再加一个<strong>引用计数</strong>实现块共享（多序列共享前缀），对应 OS 的共享内存页。</p>
+<h2 id="2">2. 操作系统分页机制回顾<a class="headerlink" href="#2" title="Permanent link">&para;</a></h2>
+<h3 id="21">2.1 虚拟内存<a class="headerlink" href="#21" title="Permanent link">&para;</a></h3>
+<p>程序看到的是<strong>连续的虚拟地址空间</strong>，但物理内存可能不连续、甚至部分在磁盘上。OS 通过<strong>页表</strong>把虚拟地址翻译成物理地址，让程序以为自己在用一大块连续内存，实际物理页框可以分散在任意位置。</p>
+<div class="highlight"><pre><span></span><code>虚拟地址空间（程序看到的）     物理内存（实际的）
+┌──────────┐  页表          ┌──────────┐
+│ 页 0     │ ─────────────→ │ 页框 3   │
+│ 页 1     │ ─────────────→ │ 页框 7   │
+│ 页 2     │ ──× 缺页       │ 页框 1   │ ← 空闲
+│ 页 3     │ ─────────────→ │ 页框 2   │
+└──────────┘                └──────────┘
+</code></pre></div>
+<p><strong>关键洞察</strong>：虚拟页号连续，物理页框可以不连续。这让 OS 能在物理内存有碎片时仍然满足程序的分配请求——只要还有空闲页框，就能分配，不用找连续区间。</p>
+<h3 id="22">2.2 页表<a class="headerlink" href="#22" title="Permanent link">&para;</a></h3>
+<p><strong>页表</strong>（Page Table）是虚拟页号 → 物理页框号的映射数组。每个进程一张。地址翻译：</p>
+<div class="highlight"><pre><span></span><code>虚拟地址 = [页号 | 页内偏移]
+物理地址 = 页表[页号] 的页框号 + 页内偏移
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>页表:
+  逻辑页 0 → 物理页框 3
+  逻辑页 1 → 物理页框 7
+  逻辑页 2 → 物理页框 2   (每个条目一个映射)
+  逻辑页 3 → 未映射（缺页）
+</code></pre></div>
+<p>页表让"逻辑连续"和"物理分散"解耦。程序访问 page[2][offset] 时，OS 查页表得到物理页框 7，访问 frame[7][offset]。</p>
+<h3 id="23">2.3 缺页<a class="headerlink" href="#23" title="Permanent link">&para;</a></h3>
+<p>访问未映射的页 → 触发<strong>缺页中断</strong> → OS 分配一个空闲页框 → 更新页表 → 恢复执行。这就是"按需分配"（demand paging）：只在实际访问时才分配物理内存，不预先分配整个地址空间。</p>
+<p>KV Cache 的按需分配完全类似：序列生成新 token 时才申请新块，不预先分配最大长度。</p>
+<h3 id="24">2.4 固定大小页框<a class="headerlink" href="#24" title="Permanent link">&para;</a></h3>
+<p>页框大小固定（通常 4KB），带来两个好处：</p>
+<ol>
+<li><strong>无外部碎片</strong>：任何空闲页框都能满足请求，不用找"足够大的连续区间"</li>
+<li><strong>O(1) 分配</strong>：从空闲链表取一个即可，不用搜索</li>
+</ol>
+<p>代价是<strong>内部碎片</strong>：进程最后一页可能没填满，平均浪费半页。但页足够小（4KB vs GB 级内存），浪费可忽略。</p>
+<p>KV Cache 的块同理：固定 block_size（vLLM 默认 16），无外部碎片，内部碎片最多 block_size - 1 个 slot。</p>
+<h2 id="3-block">3. 固定大小块（Block）<a class="headerlink" href="#3-block" title="Permanent link">&para;</a></h2>
+<h3 id="31">3.1 数据结构<a class="headerlink" href="#31" title="Permanent link">&para;</a></h3>
+<p>每个块是显存的一小段，容纳 <code>block_size</code> 个 token 的 KV：</p>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">block_id</span><span class="p">;</span><span class="w">      </span><span class="c1">// 物理块号（0 ~ n_blocks-1）</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">ref_count</span><span class="p">;</span><span class="w">     </span><span class="c1">// 引用计数：多少个序列共享此块</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">used_slots</span><span class="p">;</span><span class="w">    </span><span class="c1">// 已写入的 slot 数（0 ~ block_size）</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">next_free</span><span class="p">;</span><span class="w">     </span><span class="c1">// 空闲链表的 next 指针（-1 = 链表末尾）</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">in_use</span><span class="p">;</span><span class="w">       </span><span class="c1">// 是否已分配</span>
+<span class="p">}</span><span class="w"> </span><span class="n">Block</span><span class="p">;</span>
+</code></pre></div>
+<ul>
+<li><code>block_id</code>：块的唯一编号，也是物理位置标识</li>
+<li><code>ref_count</code>：引用计数，支持多序列共享前缀（见 §6）</li>
+<li><code>used_slots</code>：块内已用 slot 数，用于算碎片化率</li>
+<li><code>next_free</code>：空闲块用链表串联，<code>next_free</code> 指向下一个空闲块</li>
+</ul>
+<h3 id="32">3.2 块的大小选择<a class="headerlink" href="#32" title="Permanent link">&para;</a></h3>
+<p>块大小是<strong>利用率</strong>和<strong>管理开销</strong>的权衡：</p>
+<table>
+<thead>
+<tr>
+<th>块大小</th>
+<th>内部碎片</th>
+<th>页表大小</th>
+<th>分配次数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>小（如 4）</td>
+<td>小（利用率高）</td>
+<td>大（每 token 1/4 页）</td>
+<td>多</td>
+</tr>
+<tr>
+<td>大（如 128）</td>
+<td>大（每序列浪费多）</td>
+<td>小</td>
+<td>少</td>
+</tr>
+<tr>
+<td>16（vLLM 默认）</td>
+<td>适中</td>
+<td>适中</td>
+<td>适中</td>
+</tr>
+</tbody>
+</table>
+<p>块越小，每序列最后一块浪费的 slot 越少，利用率越高。但页表项越多（序列长 1024 token，块大小 4 → 256 页表项 vs 块大小 16 → 64 项），管理开销越大。vLLM 实测 block_size=16 是 GPU kernel 友好性和利用率的平衡点。</p>
+<h2 id="4-blockpool">4. 空闲块池（BlockPool）<a class="headerlink" href="#4-blockpool" title="Permanent link">&para;</a></h2>
+<h3 id="41">4.1 数据结构<a class="headerlink" href="#41" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Block</span><span class="w"> </span><span class="o">*</span><span class="n">blocks</span><span class="p">;</span><span class="w">        </span><span class="c1">// 所有块的数组（预分配 n_blocks 个）</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">n_blocks</span><span class="p">;</span><span class="w">         </span><span class="c1">// 总块数</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">block_size</span><span class="p">;</span><span class="w">       </span><span class="c1">// 每块 slot 数</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">free_list_head</span><span class="p">;</span><span class="w">   </span><span class="c1">// 空闲链表头（-1 = 空）</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">n_free</span><span class="p">;</span><span class="w">           </span><span class="c1">// 空闲块数</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">n_used</span><span class="p">;</span><span class="w">           </span><span class="c1">// 已用块数</span>
+<span class="p">}</span><span class="w"> </span><span class="n">BlockPool</span><span class="p">;</span>
+</code></pre></div>
+<p>所有块预分配在一个数组里，空闲块用<strong>侵入式链表</strong>串联（<code>Block.next_free</code> 充当 next 指针，不额外分配链表节点）。</p>
+<h3 id="42">4.2 空闲链表<a class="headerlink" href="#42" title="Permanent link">&para;</a></h3>
+<p>初始化时所有块都是空闲的，按 <code>block_id</code> 顺序串成链表：</p>
+<div class="highlight"><pre><span></span><code>free_list_head → block[0] → block[1] → ... → block[n-1] → -1
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n_blocks</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">blocks</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">next_free</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n_blocks</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span>
+<span class="w">    </span><span class="n">blocks</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">in_use</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="n">free_list_head</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+</code></pre></div>
+<h3 id="43-o1">4.3 分配块：O(1)<a class="headerlink" href="#43-o1" title="Permanent link">&para;</a></h3>
+<p>从链表头取一个块：</p>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="nf">pool_alloc_block</span><span class="p">(</span><span class="n">BlockPool</span><span class="w"> </span><span class="o">*</span><span class="n">pool</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">pool</span><span class="o">-&gt;</span><span class="n">free_list_head</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">-1</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span><span class="w">     </span><span class="c1">// 没有空闲块</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pool</span><span class="o">-&gt;</span><span class="n">free_list_head</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pool</span><span class="o">-&gt;</span><span class="n">free_list_head</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pool</span><span class="o">-&gt;</span><span class="n">blocks</span><span class="p">[</span><span class="n">id</span><span class="p">].</span><span class="n">next_free</span><span class="p">;</span><span class="w">  </span><span class="c1">// 头指针后移</span>
+<span class="w">    </span><span class="n">pool</span><span class="o">-&gt;</span><span class="n">blocks</span><span class="p">[</span><span class="n">id</span><span class="p">].</span><span class="n">in_use</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pool</span><span class="o">-&gt;</span><span class="n">blocks</span><span class="p">[</span><span class="n">id</span><span class="p">].</span><span class="n">ref_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pool</span><span class="o">-&gt;</span><span class="n">blocks</span><span class="p">[</span><span class="n">id</span><span class="p">].</span><span class="n">used_slots</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pool</span><span class="o">-&gt;</span><span class="n">n_free</span><span class="o">--</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pool</span><span class="o">-&gt;</span><span class="n">n_used</span><span class="o">++</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>O(1)</strong>——不搜索，直接取头。这是分页比连续分配快的根本原因：连续分配要找足够大的空闲区间（首次适应 O(n)），分页随便一个空闲块都行。</p>
+<h3 id="44-o1">4.4 回收块：O(1)<a class="headerlink" href="#44-o1" title="Permanent link">&para;</a></h3>
+<p>归还块到链表头：</p>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">pool_release_block</span><span class="p">(</span><span class="n">BlockPool</span><span class="w"> </span><span class="o">*</span><span class="n">pool</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">pool</span><span class="o">-&gt;</span><span class="n">blocks</span><span class="p">[</span><span class="n">id</span><span class="p">].</span><span class="n">in_use</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pool</span><span class="o">-&gt;</span><span class="n">blocks</span><span class="p">[</span><span class="n">id</span><span class="p">].</span><span class="n">ref_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pool</span><span class="o">-&gt;</span><span class="n">blocks</span><span class="p">[</span><span class="n">id</span><span class="p">].</span><span class="n">used_slots</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pool</span><span class="o">-&gt;</span><span class="n">blocks</span><span class="p">[</span><span class="n">id</span><span class="p">].</span><span class="n">next_free</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pool</span><span class="o">-&gt;</span><span class="n">free_list_head</span><span class="p">;</span><span class="w">  </span><span class="c1">// 指向当前头</span>
+<span class="w">    </span><span class="n">pool</span><span class="o">-&gt;</span><span class="n">free_list_head</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">id</span><span class="p">;</span><span class="w">                          </span><span class="c1">// 成为新头</span>
+<span class="w">    </span><span class="n">pool</span><span class="o">-&gt;</span><span class="n">n_free</span><span class="o">++</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pool</span><span class="o">-&gt;</span><span class="n">n_used</span><span class="o">--</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>LIFO</strong>（后进先出）：刚释放的块下次优先分配。这有良好的缓存局部性——刚用过的块可能还在 GPU L2 cache 里。</p>
+<h3 id="45">4.5 为什么不用位图<a class="headerlink" href="#45" title="Permanent link">&para;</a></h3>
+<p>另一种方案是位图（bitmap），每位表示块是否空闲。分配时扫描位图找第一个 0：</p>
+<ul>
+<li>位图省内存（n_blocks 位 vs 链表 n_blocks 个 next 指针）</li>
+<li>但分配是 O(n/64)（要扫描字），链表是 O(1)</li>
+<li>回收两者都 O(1)</li>
+</ul>
+<p>链表用空间换时间，对 KV Cache（块数几千个）完全合理。</p>
+<h2 id="5-pagetable">5. 页表（PageTable）：逻辑页号 → 物理块号<a class="headerlink" href="#5-pagetable" title="Permanent link">&para;</a></h2>
+<h3 id="51">5.1 数据结构<a class="headerlink" href="#51" title="Permanent link">&para;</a></h3>
+<p>每个序列一张页表，记录它的逻辑页映射到哪个物理块：</p>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="n">pages</span><span class="p">;</span><span class="w">     </span><span class="c1">// pages[i] = 物理块号，-1 = 未映射</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">n_pages</span><span class="p">;</span><span class="w">    </span><span class="c1">// 已用页数</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">capacity</span><span class="p">;</span><span class="w">   </span><span class="c1">// 数组容量（动态扩容）</span>
+<span class="p">}</span><span class="w"> </span><span class="n">PageTable</span><span class="p">;</span>
+</code></pre></div>
+<p><code>pages</code> 是动态数组，<code>pages[i]</code> 存逻辑页 <code>i</code> 对应的物理块号。序列的第 <code>t</code> 个 token 在逻辑页 <code>t / block_size</code>、页内偏移 <code>t % block_size</code>，物理位置由 <code>pages[t / block_size]</code> 给出。</p>
+<h3 id="52">5.2 地址翻译<a class="headerlink" href="#52" title="Permanent link">&para;</a></h3>
+<p>给定序列的 token 索引 <code>t</code>，找物理块：</p>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="nf">kv_block_of_token</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">KVCacheManager</span><span class="w"> </span><span class="o">*</span><span class="n">mgr</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">seq_id</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">token_idx</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">slot</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">kv_find_seq</span><span class="p">(</span><span class="n">mgr</span><span class="p">,</span><span class="w"> </span><span class="n">seq_id</span><span class="p">);</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">Sequence</span><span class="w"> </span><span class="o">*</span><span class="n">seq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">mgr</span><span class="o">-&gt;</span><span class="n">seqs</span><span class="p">[</span><span class="n">slot</span><span class="p">];</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">token_idx</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">token_idx</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">seq</span><span class="o">-&gt;</span><span class="n">length</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">page</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">token_idx</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">mgr</span><span class="o">-&gt;</span><span class="n">block_size</span><span class="p">;</span><span class="w">       </span><span class="c1">// 逻辑页号</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">seq</span><span class="o">-&gt;</span><span class="n">page_table</span><span class="p">.</span><span class="n">pages</span><span class="p">[</span><span class="n">page</span><span class="p">];</span><span class="w">           </span><span class="c1">// 物理块号</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>这就是 OS 地址翻译的翻版：<code>虚拟地址 → [页号 | 偏移] → 查页表 → 物理页框</code>。</p>
+<h3 id="53">5.3 动态扩容<a class="headerlink" href="#53" title="Permanent link">&para;</a></h3>
+<p>序列不断生成新 token，页表要能增长。用动态数组，容量不够时翻倍：</p>
+<div class="highlight"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">pt_ensure_capacity</span><span class="p">(</span><span class="n">PageTable</span><span class="w"> </span><span class="o">*</span><span class="n">pt</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">needed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">needed</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">pt</span><span class="o">-&gt;</span><span class="n">capacity</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">new_cap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pt</span><span class="o">-&gt;</span><span class="n">capacity</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">pt</span><span class="o">-&gt;</span><span class="n">capacity</span><span class="p">;</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">new_cap</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">needed</span><span class="p">)</span><span class="w"> </span><span class="n">new_cap</span><span class="w"> </span><span class="o">*=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="n">new_pages</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">realloc</span><span class="p">(</span><span class="n">pt</span><span class="o">-&gt;</span><span class="n">pages</span><span class="p">,</span><span class="w"> </span><span class="n">new_cap</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">));</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pt</span><span class="o">-&gt;</span><span class="n">capacity</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">new_cap</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="w">        </span><span class="n">new_pages</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span><span class="w">                        </span><span class="c1">// 新页未映射</span>
+<span class="w">    </span><span class="n">pt</span><span class="o">-&gt;</span><span class="n">pages</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">new_pages</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pt</span><span class="o">-&gt;</span><span class="n">capacity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">new_cap</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>均摊 O(1) 追加。序列长度不可预测，动态扩容是必须的。</p>
+<h3 id="54">5.4 为什么每个序列一张页表<a class="headerlink" href="#54" title="Permanent link">&para;</a></h3>
+<p>OS 每个进程一张页表，因为每个进程有自己的虚拟地址空间。KV Cache 同理：每个序列看到的是连续的逻辑 token 位置（token 0, 1, 2, ...），但物理块可以分散在各处。页表让序列<strong>无需关心物理布局</strong>，只管逻辑位置。</p>
+<p>多序列共享块时，不同序列的页表可以指向<strong>同一个物理块</strong>——这正是引用计数要解决的。</p>
+<h2 id="6">6. 引用计数：块共享<a class="headerlink" href="#6" title="Permanent link">&para;</a></h2>
+<h3 id="61">6.1 为什么要共享<a class="headerlink" href="#61" title="Permanent link">&para;</a></h3>
+<p>多个序列常有<strong>相同前缀</strong>（same system prompt、same few-shot examples）。如果每个序列各存一份前缀的 KV，显存浪费巨大。理想做法是让多个序列的页表指向<strong>同一组物理块</strong>，前缀只存一份。</p>
+<div class="highlight"><pre><span></span><code>序列 A: "请翻译以下句子：Hello"     前缀 "请翻译以下句子：" 共享
+序列 B: "请翻译以下句子：World"     前缀 "请翻译以下句子：" 共享
+
+页表 A: [块0, 块1, 块2, 块3]  ← 块0,1 是共享前缀
+页表 B: [块0, 块1, 块4, 块5]  ← 块0,1 是同一物理块
+        ref_count[块0] = 2
+        ref_count[块1] = 2
+</code></pre></div>
+<h3 id="62">6.2 引用计数<a class="headerlink" href="#62" title="Permanent link">&para;</a></h3>
+<p>每个块维护 <code>ref_count</code>：有多少个序列的页表指向它。</p>
+<ul>
+<li>分配新块：<code>ref_count = 1</code></li>
+<li>共享（页表指向已有块）：<code>ref_count++</code></li>
+<li>释放序列：遍历其页表，每块 <code>ref_count--</code>；归零才真正归还块池</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="nf">kv_free_seq</span><span class="p">(</span><span class="n">KVCacheManager</span><span class="w"> </span><span class="o">*</span><span class="n">mgr</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">seq_id</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Sequence</span><span class="w"> </span><span class="o">*</span><span class="n">seq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">mgr</span><span class="o">-&gt;</span><span class="n">seqs</span><span class="p">[</span><span class="n">slot</span><span class="p">];</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">seq</span><span class="o">-&gt;</span><span class="n">page_table</span><span class="p">.</span><span class="n">n_pages</span><span class="p">;</span><span class="w"> </span><span class="n">p</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">block_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">seq</span><span class="o">-&gt;</span><span class="n">page_table</span><span class="p">.</span><span class="n">pages</span><span class="p">[</span><span class="n">p</span><span class="p">];</span>
+<span class="w">        </span><span class="n">mgr</span><span class="o">-&gt;</span><span class="n">pool</span><span class="p">.</span><span class="n">blocks</span><span class="p">[</span><span class="n">block_id</span><span class="p">].</span><span class="n">ref_count</span><span class="o">--</span><span class="p">;</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mgr</span><span class="o">-&gt;</span><span class="n">pool</span><span class="p">.</span><span class="n">blocks</span><span class="p">[</span><span class="n">block_id</span><span class="p">].</span><span class="n">ref_count</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">pool_release_block</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mgr</span><span class="o">-&gt;</span><span class="n">pool</span><span class="p">,</span><span class="w"> </span><span class="n">block_id</span><span class="p">);</span><span class="w">   </span><span class="c1">// 引用归零，回收</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="63">6.3 共享前缀<a class="headerlink" href="#63" title="Permanent link">&para;</a></h3>
+<p><code>kv_share_prefix</code> 把源序列的前 n_tokens 个块共享给目标序列：</p>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="nf">kv_share_prefix</span><span class="p">(</span><span class="n">KVCacheManager</span><span class="w"> </span><span class="o">*</span><span class="n">mgr</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">src_seq_id</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">dst_seq_id</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">n_tokens</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">blocks_to_share</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">n_tokens</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">block_size</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">block_size</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">blocks_to_share</span><span class="p">;</span><span class="w"> </span><span class="n">p</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">block_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">src</span><span class="o">-&gt;</span><span class="n">page_table</span><span class="p">.</span><span class="n">pages</span><span class="p">[</span><span class="n">p</span><span class="p">];</span>
+<span class="w">        </span><span class="n">mgr</span><span class="o">-&gt;</span><span class="n">pool</span><span class="p">.</span><span class="n">blocks</span><span class="p">[</span><span class="n">block_id</span><span class="p">].</span><span class="n">ref_count</span><span class="o">++</span><span class="p">;</span><span class="w">      </span><span class="c1">// 引用 +1</span>
+<span class="w">        </span><span class="n">pt_append</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dst</span><span class="o">-&gt;</span><span class="n">page_table</span><span class="p">,</span><span class="w"> </span><span class="n">block_id</span><span class="p">);</span><span class="w">        </span><span class="c1">// 目标页表指向同一块</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>不复制数据，只增加引用计数和页表项——<strong>O(共享块数)</strong>，不复制 KV 数据。这是 prefix caching 的核心。</p>
+<h3 id="64-copy-on-write">6.4 写时复制（Copy-on-Write）<a class="headerlink" href="#64-copy-on-write" title="Permanent link">&para;</a></h3>
+<p>共享块后，如果某个序列要<strong>修改</strong>块里的 KV（比如继续生成 token，写到最后一块的空 slot），而块被共享（<code>ref_count &gt; 1</code>），就需要<strong>写时复制</strong>：复制一份块给这个序列独占，原块引用减 1。</p>
+<p>本 C 实现简化了 CoW：<code>kv_append_token</code> 假设最后一块不被共享（或调用者保证语义正确）。vLLM 的生产实现会检查 <code>ref_count</code>，必要时 CoW。详见 <code>ai_application.md</code>。</p>
+<h2 id="7-kvcachemanager">7. KVCacheManager：管理器<a class="headerlink" href="#7-kvcachemanager" title="Permanent link">&para;</a></h2>
+<h3 id="71">7.1 数据结构<a class="headerlink" href="#71" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">BlockPool</span><span class="w"> </span><span class="n">pool</span><span class="p">;</span><span class="w">          </span><span class="c1">// 全局块池</span>
+<span class="w">    </span><span class="n">Sequence</span><span class="w"> </span><span class="o">*</span><span class="n">seqs</span><span class="p">;</span><span class="w">          </span><span class="c1">// 序列数组</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">n_seqs</span><span class="p">;</span><span class="w">              </span><span class="c1">// 序列数</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">seq_capacity</span><span class="p">;</span><span class="w">        </span><span class="c1">// 序列容量</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">block_size</span><span class="p">;</span><span class="w">          </span><span class="c1">// 块大小</span>
+<span class="p">}</span><span class="w"> </span><span class="n">KVCacheManager</span><span class="p">;</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">seq_id</span><span class="p">;</span><span class="w">              </span><span class="c1">// 序列 ID（用户指定）</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">length</span><span class="p">;</span><span class="w">              </span><span class="c1">// 已分配 token 数</span>
+<span class="w">    </span><span class="n">PageTable</span><span class="w"> </span><span class="n">page_table</span><span class="p">;</span><span class="w">    </span><span class="c1">// 该序列的页表</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">active</span><span class="p">;</span><span class="w">             </span><span class="c1">// 是否活跃</span>
+<span class="p">}</span><span class="w"> </span><span class="n">Sequence</span><span class="p">;</span>
+</code></pre></div>
+<p>管理器持有全局块池和所有序列。每个序列有自己的页表。<code>seq_id</code> 是用户指定的逻辑 ID（如请求 ID），内部用 <code>seqs[]</code> 数组槽位管理。</p>
+<h3 id="72">7.2 分配序列<a class="headerlink" href="#72" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="nf">kv_allocate_seq</span><span class="p">(</span><span class="n">KVCacheManager</span><span class="w"> </span><span class="o">*</span><span class="n">mgr</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">seq_id</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">n_tokens</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">slot</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">kv_find_free_seq_slot</span><span class="p">(</span><span class="n">mgr</span><span class="p">);</span><span class="w">        </span><span class="c1">// 找空闲序列槽</span>
+<span class="w">    </span><span class="n">Sequence</span><span class="w"> </span><span class="o">*</span><span class="n">seq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">mgr</span><span class="o">-&gt;</span><span class="n">seqs</span><span class="p">[</span><span class="n">slot</span><span class="p">];</span>
+<span class="w">    </span><span class="n">seq</span><span class="o">-&gt;</span><span class="n">seq_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">seq_id</span><span class="p">;</span>
+<span class="w">    </span><span class="n">seq</span><span class="o">-&gt;</span><span class="n">active</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">    </span><span class="n">kv_alloc_blocks_for_seq</span><span class="p">(</span><span class="n">mgr</span><span class="p">,</span><span class="w"> </span><span class="n">seq</span><span class="p">,</span><span class="w"> </span><span class="n">n_tokens</span><span class="p">);</span><span class="w">  </span><span class="c1">// 按需分配块</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>kv_alloc_blocks_for_seq</code> 算出需要的块数 <code>ceil(n_tokens / block_size)</code>，逐个从块池分配，加入页表，设置每块的 <code>used_slots</code>。</p>
+<h3 id="73-token">7.3 追加 token<a class="headerlink" href="#73-token" title="Permanent link">&para;</a></h3>
+<p>序列生成新 token 时，可能需要新块：</p>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="nf">kv_append_token</span><span class="p">(</span><span class="n">KVCacheManager</span><span class="w"> </span><span class="o">*</span><span class="n">mgr</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">seq_id</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">n_tokens</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 1. 先填满当前最后一块的剩余 slot</span>
+<span class="w">    </span><span class="c1">// 2. 剩余的 token 申请新块</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">n_tokens</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">block_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pool_alloc_block</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mgr</span><span class="o">-&gt;</span><span class="n">pool</span><span class="p">);</span>
+<span class="w">        </span><span class="n">pt_append</span><span class="p">(</span><span class="o">&amp;</span><span class="n">seq</span><span class="o">-&gt;</span><span class="n">page_table</span><span class="p">,</span><span class="w"> </span><span class="n">block_id</span><span class="p">);</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">fill</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">min</span><span class="p">(</span><span class="n">n_tokens</span><span class="p">,</span><span class="w"> </span><span class="n">block_size</span><span class="p">);</span>
+<span class="w">        </span><span class="n">mgr</span><span class="o">-&gt;</span><span class="n">pool</span><span class="p">.</span><span class="n">blocks</span><span class="p">[</span><span class="n">block_id</span><span class="p">].</span><span class="n">used_slots</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fill</span><span class="p">;</span>
+<span class="w">        </span><span class="n">n_tokens</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">fill</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>先填满最后一块的空 slot（避免浪费），再按需申请新块。这是"按需分页"——只在需要时才分配物理块，不预分配。</p>
+<h3 id="74">7.4 统计<a class="headerlink" href="#74" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">total_blocks</span><span class="p">;</span><span class="w">        </span><span class="c1">// 总块数</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">allocated_blocks</span><span class="p">;</span><span class="w">    </span><span class="c1">// 已分配块数</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">free_blocks</span><span class="p">;</span><span class="w">         </span><span class="c1">// 空闲块数</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">total_slots</span><span class="p">;</span><span class="w">         </span><span class="c1">// 总 slot 数</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">used_slots</span><span class="p">;</span><span class="w">          </span><span class="c1">// 已用 slot 数（实际 token 数）</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">wasted_slots</span><span class="p">;</span><span class="w">        </span><span class="c1">// 浪费 slot 数（已分配块内未用）</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">usage_ratio</span><span class="p">;</span><span class="w">      </span><span class="c1">// 显存利用率 = used_slots / total_slots</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">fragmentation_ratio</span><span class="p">;</span><span class="w">  </span><span class="c1">// 碎片化率 = wasted / (allocated * block_size)</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">n_active_seqs</span><span class="p">;</span><span class="w">       </span><span class="c1">// 活跃序列数</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">total_tokens</span><span class="p">;</span><span class="w">        </span><span class="c1">// 总 token 数</span>
+<span class="p">}</span><span class="w"> </span><span class="n">CacheStats</span><span class="p">;</span>
+</code></pre></div>
+<p>两个关键指标：</p>
+<ul>
+<li><strong>显存利用率</strong> <code>usage_ratio</code> = 实际 token 数 / 总显存容量。越高越好。</li>
+<li><strong>碎片化率</strong> <code>fragmentation_ratio</code> = 已分配块内浪费 slot / 已分配块总 slot。这是<strong>内部碎片</strong>，只发生在每序列最后一块。分页方案没有外部碎片。</li>
+</ul>
+<h2 id="8-c">8. C 实现逐行讲解<a class="headerlink" href="#8-c" title="Permanent link">&para;</a></h2>
+<h3 id="81-kv_init">8.1 初始化（kv_init）<a class="headerlink" href="#81-kv_init" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="nf">kv_init</span><span class="p">(</span><span class="n">KVCacheManager</span><span class="w"> </span><span class="o">*</span><span class="n">mgr</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">n_blocks</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">block_size</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">max_seqs</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">mgr</span><span class="o">-&gt;</span><span class="n">pool</span><span class="p">.</span><span class="n">blocks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">malloc</span><span class="p">(</span><span class="n">n_blocks</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">Block</span><span class="p">));</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n_blocks</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">mgr</span><span class="o">-&gt;</span><span class="n">pool</span><span class="p">.</span><span class="n">blocks</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">next_free</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n_blocks</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span>
+<span class="w">        </span><span class="n">mgr</span><span class="o">-&gt;</span><span class="n">pool</span><span class="p">.</span><span class="n">blocks</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">in_use</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w">       </span><span class="c1">// 全部空闲</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">mgr</span><span class="o">-&gt;</span><span class="n">pool</span><span class="p">.</span><span class="n">free_list_head</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">                 </span><span class="c1">// 空闲链表从块 0 开始</span>
+<span class="w">    </span><span class="n">mgr</span><span class="o">-&gt;</span><span class="n">pool</span><span class="p">.</span><span class="n">n_free</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">n_blocks</span><span class="p">;</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>预分配所有块，串成空闲链表。O(n_blocks) 一次性初始化。</p>
+<h3 id="82-pool_alloc_block">8.2 分配块（pool_alloc_block）<a class="headerlink" href="#82-pool_alloc_block" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="nf">pool_alloc_block</span><span class="p">(</span><span class="n">BlockPool</span><span class="w"> </span><span class="o">*</span><span class="n">pool</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pool</span><span class="o">-&gt;</span><span class="n">free_list_head</span><span class="p">;</span><span class="w">                </span><span class="c1">// 取链表头</span>
+<span class="w">    </span><span class="n">pool</span><span class="o">-&gt;</span><span class="n">free_list_head</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pool</span><span class="o">-&gt;</span><span class="n">blocks</span><span class="p">[</span><span class="n">id</span><span class="p">].</span><span class="n">next_free</span><span class="p">;</span><span class="w">  </span><span class="c1">// 头后移</span>
+<span class="w">    </span><span class="n">pool</span><span class="o">-&gt;</span><span class="n">blocks</span><span class="p">[</span><span class="n">id</span><span class="p">].</span><span class="n">in_use</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pool</span><span class="o">-&gt;</span><span class="n">blocks</span><span class="p">[</span><span class="n">id</span><span class="p">].</span><span class="n">ref_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">               </span><span class="c1">// 新分配，引用 1</span>
+<span class="w">    </span><span class="n">pool</span><span class="o">-&gt;</span><span class="n">n_free</span><span class="o">--</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pool</span><span class="o">-&gt;</span><span class="n">n_used</span><span class="o">++</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>O(1) 取头。对比连续分配的首次适应 O(n)，这是分页的核心优势。</p>
+<h3 id="83-pt_append">8.3 页表追加（pt_append）<a class="headerlink" href="#83-pt_append" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">pt_append</span><span class="p">(</span><span class="n">PageTable</span><span class="w"> </span><span class="o">*</span><span class="n">pt</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">block_id</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">pt_ensure_capacity</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span><span class="w"> </span><span class="n">pt</span><span class="o">-&gt;</span><span class="n">n_pages</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w">      </span><span class="c1">// 容量不够则扩容</span>
+<span class="w">    </span><span class="n">pt</span><span class="o">-&gt;</span><span class="n">pages</span><span class="p">[</span><span class="n">pt</span><span class="o">-&gt;</span><span class="n">n_pages</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">block_id</span><span class="p">;</span><span class="w">            </span><span class="c1">// 追加映射</span>
+<span class="w">    </span><span class="n">pt</span><span class="o">-&gt;</span><span class="n">n_pages</span><span class="o">++</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>均摊 O(1)（动态数组翻倍扩容）。</p>
+<h3 id="84-kv_free_seq">8.4 释放序列（kv_free_seq）<a class="headerlink" href="#84-kv_free_seq" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="nf">kv_free_seq</span><span class="p">(</span><span class="n">KVCacheManager</span><span class="w"> </span><span class="o">*</span><span class="n">mgr</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">seq_id</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">seq</span><span class="o">-&gt;</span><span class="n">page_table</span><span class="p">.</span><span class="n">n_pages</span><span class="p">;</span><span class="w"> </span><span class="n">p</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">block_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">seq</span><span class="o">-&gt;</span><span class="n">page_table</span><span class="p">.</span><span class="n">pages</span><span class="p">[</span><span class="n">p</span><span class="p">];</span>
+<span class="w">        </span><span class="n">mgr</span><span class="o">-&gt;</span><span class="n">pool</span><span class="p">.</span><span class="n">blocks</span><span class="p">[</span><span class="n">block_id</span><span class="p">].</span><span class="n">ref_count</span><span class="o">--</span><span class="p">;</span><span class="w">   </span><span class="c1">// 引用减 1</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mgr</span><span class="o">-&gt;</span><span class="n">pool</span><span class="p">.</span><span class="n">blocks</span><span class="p">[</span><span class="n">block_id</span><span class="p">].</span><span class="n">ref_count</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">pool_release_block</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mgr</span><span class="o">-&gt;</span><span class="n">pool</span><span class="p">,</span><span class="w"> </span><span class="n">block_id</span><span class="p">);</span><span class="w">  </span><span class="c1">// 归零才回收</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">pt_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">seq</span><span class="o">-&gt;</span><span class="n">page_table</span><span class="p">);</span>
+<span class="w">    </span><span class="n">seq</span><span class="o">-&gt;</span><span class="n">active</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>遍历页表，每块引用减 1。引用归零才归还块池——支持共享块的正确回收。</p>
+<h3 id="85-kv_usage_stats">8.5 统计（kv_usage_stats）<a class="headerlink" href="#85-kv_usage_stats" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">CacheStats</span><span class="w"> </span><span class="nf">kv_usage_stats</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">KVCacheManager</span><span class="w"> </span><span class="o">*</span><span class="n">mgr</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">mgr</span><span class="o">-&gt;</span><span class="n">pool</span><span class="p">.</span><span class="n">n_blocks</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mgr</span><span class="o">-&gt;</span><span class="n">pool</span><span class="p">.</span><span class="n">blocks</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">in_use</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">used_slots</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">mgr</span><span class="o">-&gt;</span><span class="n">pool</span><span class="p">.</span><span class="n">blocks</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">used_slots</span><span class="p">;</span>
+<span class="w">            </span><span class="n">allocated_slots</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">mgr</span><span class="o">-&gt;</span><span class="n">pool</span><span class="p">.</span><span class="n">block_size</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">stats</span><span class="p">.</span><span class="n">usage_ratio</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">double</span><span class="p">)</span><span class="n">used_slots</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">total_slots</span><span class="p">;</span>
+<span class="w">    </span><span class="n">stats</span><span class="p">.</span><span class="n">fragmentation_ratio</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">(</span><span class="kt">double</span><span class="p">)</span><span class="n">used_slots</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">allocated_slots</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>遍历所有块统计。O(n_blocks)。<code>usage_ratio</code> 是全局利用率，<code>fragmentation_ratio</code> 是已分配块内的内部碎片率。</p>
+<h2 id="9">9. 复杂度分析<a class="headerlink" href="#9" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>时间</th>
+<th>空间</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>kv_init(n, b, s)</code></td>
+<td>O(n + s)</td>
+<td>O(n + s)</td>
+</tr>
+<tr>
+<td><code>kv_allocate_seq(L)</code></td>
+<td>O(ceil(L/b))</td>
+<td>O(ceil(L/b)) 页表项</td>
+</tr>
+<tr>
+<td><code>kv_append_token(k)</code></td>
+<td>O(ceil(k/b))</td>
+<td>O(ceil(k/b))</td>
+</tr>
+<tr>
+<td><code>kv_free_seq()</code></td>
+<td>O(页表长度)</td>
+<td>释放页表</td>
+</tr>
+<tr>
+<td><code>kv_share_prefix(L)</code></td>
+<td>O(ceil(L/b))</td>
+<td>O(ceil(L/b)) 页表项（不复制数据）</td>
+</tr>
+<tr>
+<td><code>kv_block_of_token(t)</code></td>
+<td>O(1)</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td><code>kv_usage_stats()</code></td>
+<td>O(n_blocks)</td>
+<td>O(1)</td>
+</tr>
+</tbody>
+</table>
+<p>关键点：</p>
+<ul>
+<li><strong>分配/释放是 O(块数)</strong>，不是 O(序列长度)。块大小 16 时，1024 token 的序列只有 64 个块，操作 O(64)。</li>
+<li><strong>地址翻译 O(1)</strong>：一次除法 + 一次数组访问。GPU kernel 里这是关键——PagedAttention 的 attention 计算要频繁翻译地址，O(1) 保证不拖慢计算。</li>
+<li><strong>共享前缀不复制数据</strong>：只增加引用计数和页表项，O(页数) 而非 O(token 数)。前缀越长，省的复制越多。</li>
+<li><strong>无外部碎片</strong>：任何空闲块都能分配，不用找连续区间。这是分页比连续分配的根本优势。</li>
+<li><strong>内部碎片 ≤ block_size - 1 per 序列</strong>：每序列最后一块可能未满。block_size=16 时最多浪费 15 slot，序列越长浪费占比越小。</li>
+</ul>
+<h2 id="10">10. 与连续分配的对比<a class="headerlink" href="#10" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>连续分配</th>
+<th>分页分配</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>分配</td>
+<td>找连续区间 O(n)</td>
+<td>取空闲块 O(1)</td>
+</tr>
+<tr>
+<td>释放</td>
+<td>合并相邻区间 O(n)</td>
+<td>归还块池 O(1)</td>
+</tr>
+<tr>
+<td>外部碎片</td>
+<td>严重（空洞无法用）</td>
+<td>无</td>
+</tr>
+<tr>
+<td>内部碎片</td>
+<td>无（精确分配）</td>
+<td>每序列 ≤ block_size-1</td>
+</tr>
+<tr>
+<td>地址翻译</td>
+<td>直接（连续）</td>
+<td>查页表 O(1)</td>
+</tr>
+<tr>
+<td>共享前缀</td>
+<td>难（要复制）</td>
+<td>易（页表指向同块 + 引用计数）</td>
+</tr>
+<tr>
+<td>扩容</td>
+<td>难（要搬移）</td>
+<td>易（申请新块 + 页表追加）</td>
+</tr>
+</tbody>
+</table>
+<p>分页在分配/释放/共享/扩容上都优于连续分配，代价是地址翻译多一次查表。对 KV Cache 来说，这个代价远小于碎片化带来的浪费——vLLM 实测分页把显存利用率从 30-60% 提升到 95%+。</p>
+<h2 id="11">11. 总结<a class="headerlink" href="#11" title="Permanent link">&para;</a></h2>
+<p>分页 KV Cache 的四个关键思想：</p>
+<ol>
+<li><strong>固定块</strong>：显存切成等大块，分配单位是块不是 slot。消除外部碎片。</li>
+<li><strong>空闲块池</strong>：空闲块用链表串联，O(1) 分配/回收。不搜索连续区间。</li>
+<li><strong>页表</strong>：每序列一张，逻辑页号 → 物理块号。让逻辑连续和物理分散解耦。</li>
+<li><strong>引用计数</strong>：块可被多序列共享（前缀复用），引用归零才回收。支持 prefix caching。</li>
+</ol>
+<p>这套机制把操作系统的分页思想原封不动搬到 KV Cache：块 = 页框，页表 = 进程页表，空闲池 = 空闲页框链表，引用计数 = 共享内存页。结果是显存利用率从 30-60% 提升到 95%+，并发序列数翻倍——这就是 vLLM PagedAttention 的核心创新。</p>
+<hr />
+<h2 id="ai">AI 应用<a class="headerlink" href="#ai" title="Permanent link">&para;</a></h2>
+<h1 id="pagedattentionvllm-kv-cache">PagedAttention：vLLM 的 KV Cache 分页管理<a class="headerlink" href="#pagedattentionvllm-kv-cache" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>本文档讲清「分页 KV Cache 在 AI 里干什么」。原理见 <code>principle.md</code>。核心应用：<strong>vLLM 的 PagedAttention</strong>——把操作系统的分页机制搬到 KV Cache 管理，把显存利用率从 30-60% 提升到 95%+，让 LLM 推理吞吐量翻倍。这是 2023 年 LLM 推理系统最重要的工程创新之一。</p>
+</blockquote>
+<h2 id="1-kv-cache_1">1. KV Cache 是什么<a class="headerlink" href="#1-kv-cache_1" title="Permanent link">&para;</a></h2>
+<h3 id="11-transformer">1.1 Transformer 的自回归推理<a class="headerlink" href="#11-transformer" title="Permanent link">&para;</a></h3>
+<p>大模型（GPT、LLaMA、Qwen 等）生成文本是<strong>自回归</strong>的：每次生成一个 token，把它拼到输入上再生成下一个。每生成一个 token，要对之前所有 token 计算 attention：</p>
+<p>$$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d}}\right) V$$</p>
+<p>其中 $Q$ 是当前 token 的查询，$K/V$ 是<strong>所有历史 token</strong> 的键值。如果每步都重算所有历史 token 的 K、V，计算量随长度平方增长，极慢。</p>
+<h3 id="12-k-v">1.2 缓存 K 和 V<a class="headerlink" href="#12-k-v" title="Permanent link">&para;</a></h3>
+<p><strong>KV Cache</strong> 把每层的 K、V 缓存起来，下一步直接复用：</p>
+<div class="highlight"><pre><span></span><code>生成 token 5 时:
+  Q = token 5 的 query
+  K = [K_1, K_2, K_3, K_4, K_5]   ← 前 4 个从缓存读，第 5 个新算
+  V = [V_1, V_2, V_3, V_4, V_5]   ← 同上
+  attention = softmax(Q · K^T / √d) · V
+  缓存追加: K_cache.append(K_5), V_cache.append(V_5)
+</code></pre></div>
+<p>每层每个 token 存一对 (K, V)。模型有 L 层、hidden_dim = d、KV head 数 = h_kv、head_dim = d/h，则<strong>每个 token 的 KV Cache 大小</strong>：</p>
+<div class="highlight"><pre><span></span><code>2 (K和V) × L (层) × h_kv (KV头数) × head_dim (每头维度) × dtype_size
+</code></pre></div>
+<p>以 LLaMA-7B (fp16) 为例：L=32, h_kv=32, head_dim=128，每 token KV Cache = 2 × 32 × 32 × 128 × 2 = 524288 字节 = 512 KB。<strong>一个 token 半兆</strong>。</p>
+<h3 id="13">1.3 显存瓶颈<a class="headerlink" href="#13" title="Permanent link">&para;</a></h3>
+<p>序列越长、batch 越大，KV Cache 占的显存越多：</p>
+<table>
+<thead>
+<tr>
+<th>序列长度</th>
+<th>batch=1</th>
+<th>batch=32</th>
+<th>batch=64</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>512</td>
+<td>256 MB</td>
+<td>8 GB</td>
+<td>16 GB</td>
+</tr>
+<tr>
+<td>2048</td>
+<td>1 GB</td>
+<td>32 GB</td>
+<td>64 GB</td>
+</tr>
+<tr>
+<td>8192</td>
+<td>4 GB</td>
+<td>128 GB</td>
+<td>256 GB</td>
+</tr>
+</tbody>
+</table>
+<p>LLaMA-7B 模型权重才 13 GB，但 batch=64、序列 2048 的 KV Cache 就要 64 GB——<strong>KV Cache 比模型权重还大</strong>。A100 80GB 也放不下。</p>
+<p><strong>结论</strong>：KV Cache 是长序列、大 batch 推理的显存瓶颈。怎么高效管理它，直接决定吞吐量。</p>
+<h2 id="2_1">2. 朴素连续分配的碎片化<a class="headerlink" href="#2_1" title="Permanent link">&para;</a></h2>
+<h3 id="21_1">2.1 朴素方案<a class="headerlink" href="#21_1" title="Permanent link">&para;</a></h3>
+<p>早期 LLM 推理框架（如原始 vLLM 之前）给每个序列<strong>连续分配</strong>一段显存放 KV Cache：</p>
+<div class="highlight"><pre><span></span><code>显存: [序列1 ████████░░░░░░░░] [序列2 ████░░░░░░░░░░░░] [序列3 ████████████░░]
+       预留 max_len=2048        预留 max_len=2048        预留 max_len=2048
+       实际用了 512              实际用了 256              实际用了 768
+</code></pre></div>
+<p>每个序列预留 <code>max_seq_len</code> 的连续空间（因为生成时长度会增长，连续分配要预留余量）。</p>
+<h3 id="22_1">2.2 内部碎片<a class="headerlink" href="#22_1" title="Permanent link">&para;</a></h3>
+<p>序列实际长度通常远小于 <code>max_seq_len</code>（用户输入 50 token，max_len 设 2048），预留空间大量浪费：</p>
+<div class="highlight"><pre><span></span><code>预留: 2048 slot
+实际: 50 token
+浪费: 1998 slot (97.5%)
+利用率: 50/2048 = 2.4%
+</code></pre></div>
+<p>实测朴素预分配的显存利用率只有 <strong>20-40%</strong>——大部分显存预留了但没用。</p>
+<h3 id="23_1">2.3 外部碎片<a class="headerlink" href="#23_1" title="Permanent link">&para;</a></h3>
+<p>如果改成动态连续分配（不预留 max_len，按实际长度分配），释放后产生<strong>外部碎片</strong>：</p>
+<div class="highlight"><pre><span></span><code>初始: [空闲 4096]
+分配 seq1 (1000): [seq1 1000][空闲 3096]
+分配 seq2 (1500): [seq1 1000][seq2 1500][空闲 1596]
+分配 seq3 (800):  [seq1 1000][seq2 1500][seq3 800][空闲 796]
+释放 seq1:        [空闲 1000][seq2 1500][seq3 800][空闲 796]
+分配 seq4 (1200): 失败！没有连续 1200 的空闲区间（虽有 1000+796=1796 总空闲，但不连续）
+</code></pre></div>
+<p>序列长度可变 + 连续分配 = 必然产生外部碎片。长序列可能因找不到连续区间被拒，即使总空闲足够。</p>
+<h3 id="24_1">2.4 共享前缀的困难<a class="headerlink" href="#24_1" title="Permanent link">&para;</a></h3>
+<p>多个序列常有相同前缀（system prompt、few-shot examples）。连续分配下，每个序列各存一份前缀的 KV，无法共享——因为前缀在不同序列的连续区间里，物理位置不同。</p>
+<div class="highlight"><pre><span></span><code>序列 A: [前缀 KV][A 的独有 KV]    前缀存了一份
+序列 B: [前缀 KV][B 的独有 KV]    前缀又存了一份（完全相同的数据！）
+</code></pre></div>
+<p>长前缀（如 2000 token 的 system prompt）× 32 个序列 = 64000 token 的重复 KV，浪费巨大。</p>
+<h3 id="25">2.5 扩容的困难<a class="headerlink" href="#25" title="Permanent link">&para;</a></h3>
+<p>连续分配下，序列生成时长度增长，但连续区间可能不够。要么预留 max_len（浪费），要么搬移到更大的区间（复制开销大、可能找不到）。</p>
+<h2 id="3-pagedattention">3. PagedAttention 的核心思路<a class="headerlink" href="#3-pagedattention" title="Permanent link">&para;</a></h2>
+<p>PagedAttention（vLLM, 2023）把<strong>操作系统的分页机制</strong>搬到 KV Cache 管理，一举解决上述所有问题。三个核心创新：</p>
+<h3 id="31_1">3.1 分页：固定块 + 按需分配<a class="headerlink" href="#31_1" title="Permanent link">&para;</a></h3>
+<p>显存切成等大的<strong>块</strong>（block，vLLM 默认 16 token/块）。序列的 KV Cache 按<strong>块</strong>分配，不按连续区间：</p>
+<div class="highlight"><pre><span></span><code>显存块池: [块0][块1][块2][块3][块4][块5][块6][块7]...
+
+序列 A (10 token, block_size=4): 分配 3 个块
+  页表 A: [逻辑页0→块2][逻辑页1→块5][逻辑页2→块1]   (物理块不连续！)
+  逻辑:   [token 0-3][token 4-7][token 8-9]
+  物理:   块2        块5        块1
+
+序列 B (6 token): 分配 2 个块
+  页表 B: [逻辑页0→块3][逻辑页1→块7]
+</code></pre></div>
+<ul>
+<li><strong>无外部碎片</strong>：任何空闲块都能用，不用找连续区间</li>
+<li><strong>按需分配</strong>：序列生成新 token 才申请新块，不预留 max_len</li>
+<li><strong>内部碎片小</strong>：每序列最后一块可能未满，最多浪费 block_size - 1 = 15 slot</li>
+</ul>
+<h3 id="32_1">3.2 页表：逻辑连续，物理分散<a class="headerlink" href="#32_1" title="Permanent link">&para;</a></h3>
+<p>每个序列一张<strong>页表</strong>（block table），逻辑页号 → 物理块号。序列看到的是连续的逻辑 token 位置，物理块可以分散在各处：</p>
+<div class="highlight"><pre><span></span><code>序列 A 的逻辑视图:  [token 0][token 1]...[token 9]   (连续)
+序列 A 的物理布局:  块2[0-3] 块5[4-7] 块1[8-9]       (分散)
+
+attention 计算时:
+  for token t in 序列A:
+    page = t / block_size
+    offset = t % block_size
+    physical_block = 页表A[page]        ← 查页表
+    K[t] = KV_cache[physical_block][offset].K
+    V[t] = KV_cache[physical_block][offset].V
+</code></pre></div>
+<p>GPU kernel 里每次访问 KV 要查一次页表。这是 PagedAttention 的核心修改：把 attention kernel 里的连续内存访问改成<strong>分页访问</strong>——查页表得到物理块，再访问块内 offset。</p>
+<h3 id="33">3.3 块复用 + 引用计数：共享前缀<a class="headerlink" href="#33" title="Permanent link">&para;</a></h3>
+<p>多个序列的页表可以指向<strong>同一物理块</strong>，用引用计数管理：</p>
+<div class="highlight"><pre><span></span><code>序列 A: "请翻译：Hello"     页表 A: [块0][块1][块2][块3]
+序列 B: "请翻译：World"     页表 B: [块0][块1][块4][块5]
+                                    ↑↑↑↑ 共享前缀"请翻译："（2 个块）
+  ref_count[块0] = 2
+  ref_count[块1] = 2
+  ref_count[块2] = 1 (A 独有)
+  ref_count[块3] = 1 (A 独有)
+  ref_count[块4] = 1 (B 独有)
+  ref_count[块5] = 1 (B 独有)
+
+前缀 "请翻译：" 的 KV 只存一份（在块0、块1），两个序列共享。
+省了 2 块 × 16 token × 512 KB/token = 16 MB 显存。
+</code></pre></div>
+<p>序列释放时，每块引用减 1，归零才回收。共享前缀不复制数据，只增加引用计数和页表项——O(页数) 而非 O(token 数)。</p>
+<h2 id="4">4. 显存利用率对比<a class="headerlink" href="#4" title="Permanent link">&para;</a></h2>
+<h3 id="41-vs">4.1 朴素 vs 分页的理论利用率<a class="headerlink" href="#41-vs" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>利用率</th>
+<th>碎片类型</th>
+<th>并发数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>朴素预分配（预留 max_len）</td>
+<td>实际长度 / max_len ≈ 20-40%</td>
+<td>内部（预留未用）</td>
+<td>total / max_len</td>
+</tr>
+<tr>
+<td>朴素动态连续分配</td>
+<td>60-80%</td>
+<td>外部（空洞）</td>
+<td>受碎片限制</td>
+</tr>
+<tr>
+<td><strong>PagedAttention</strong></td>
+<td><strong>95%+</strong></td>
+<td>内部（块尾，≤block_size-1/序列）</td>
+<td>total / 平均长度</td>
+</tr>
+</tbody>
+</table>
+<p>分页的利用率 = 实际 token / (分配块数 × block_size)。每序列最多浪费 block_size - 1 个 slot，序列越长浪费占比越小。block_size=16、序列长 256 时，浪费 ≤ 15/256 = 5.9%，利用率 ≥ 94%。</p>
+<h3 id="42-demo">4.2 demo 实测对比<a class="headerlink" href="#42-demo" title="Permanent link">&para;</a></h3>
+<p>本 demo 模拟 4096 slot 显存、block_size=16、2000 步随机工作负载，对比三种方案：</p>
+<div class="highlight"><pre><span></span><code>方案                平均利用率    平均碎片化    最大并发数
+朴素预分配           23.07%      72.08%       8
+朴素动态分配          77.25%      73.00%       37
+PagedAttention      85.09%       5.57%       35
+</code></pre></div>
+<ul>
+<li><strong>朴素预分配</strong>：每序列预留 512 slot，最多 8 个序列，利用率 23%（序列平均才 100 多 token）</li>
+<li><strong>朴素动态分配</strong>：利用率 77%，但碎片化 73%（空闲区间分散，长序列被拒）</li>
+<li><strong>PagedAttention</strong>：利用率 85%，碎片化仅 5.6%（只有块尾内部碎片），并发 35</li>
+</ul>
+<h3 id="43">4.3 不同块大小的利用率<a class="headerlink" href="#43" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>block_size=  4: 利用率=89.57%, 碎片化=1.14%
+block_size=  8: 利用率=88.02%, 碎片化=2.70%
+block_size= 16: 利用率=85.09%, 碎片化=5.57%
+block_size= 32: 利用率=80.96%, 碎片化=10.15%
+block_size= 64: 利用率=73.89%, 碎片化=17.99%
+block_size=128: 利用率=63.29%, 碎片化=29.58%
+</code></pre></div>
+<p>块越小利用率越高（块尾浪费越少），但页表越大、管理开销越多。vLLM 默认 block_size=16 是平衡点。</p>
+<h3 id="44">4.4 固定长度场景<a class="headerlink" href="#44" title="Permanent link">&para;</a></h3>
+<p>当所有序列长度相同且是 block_size 的整数倍时，分页和动态分配利用率相同（93%），但分页碎片化为 0：</p>
+<div class="highlight"><pre><span></span><code>固定长度 128, block_size=16:
+  朴素动态分配: 利用率=93.11%, 碎片化=17.19% (外部碎片)
+  PagedAttention: 利用率=93.11%, 碎片化=0.00% (无碎片)
+</code></pre></div>
+<p>分页彻底消除了外部碎片。</p>
+<h2 id="5-demo">5. demo 结果解读<a class="headerlink" href="#5-demo" title="Permanent link">&para;</a></h2>
+<h3 id="51_1">5.1 利用率随时间变化<a class="headerlink" href="#51_1" title="Permanent link">&para;</a></h3>
+<p>demo 的 <code>kv_cache_usage_over_time.png</code> 显示三种方案的利用率随模拟步数变化：</p>
+<ul>
+<li><strong>朴素预分配</strong>：利用率始终在 25% 附近，因为每序列预留 512 但平均只用 100 多</li>
+<li><strong>朴素动态分配</strong>：利用率 70-85% 波动，释放后碎片导致波动</li>
+<li><strong>PagedAttention</strong>：利用率稳定在 85-93%，几乎不波动（块尾碎片小且稳定）</li>
+</ul>
+<h3 id="52_1">5.2 并发序列数<a class="headerlink" href="#52_1" title="Permanent link">&para;</a></h3>
+<p><code>kv_cache_concurrency_bar.png</code> 显示最大并发数：</p>
+<ul>
+<li>朴素预分配：8（受限于 total/max_len = 4096/512）</li>
+<li>朴素动态分配：37（受限于碎片）</li>
+<li>PagedAttention：35（受限于总块数和序列平均长度）</li>
+</ul>
+<p>分页的并发数和动态分配接近，但<strong>稳定性高</strong>——动态分配的并发数随碎片波动，分页几乎只受总显存限制。</p>
+<h3 id="53_1">5.3 块大小扫描<a class="headerlink" href="#53_1" title="Permanent link">&para;</a></h3>
+<p><code>paged_block_size_sweep.png</code> 显示块大小从 4 到 128 的利用率：</p>
+<ul>
+<li>块 4：利用率 89.6%，碎片 1.1%——几乎无浪费</li>
+<li>块 128：利用率 63.3%，碎片 29.6%——每序列浪费半块</li>
+</ul>
+<p>块越小越好，但 GPU kernel 对小块的访存效率低（页表查询次数多）。vLLM 选 16 是 GPU 友好性和利用率的权衡。</p>
+<h2 id="6-vllm">6. vLLM 的生产级实现<a class="headerlink" href="#6-vllm" title="Permanent link">&para;</a></h2>
+<h3 id="61_1">6.1 整体架构<a class="headerlink" href="#61_1" title="Permanent link">&para;</a></h3>
+<p>vLLM 的 PagedAttention 实现分三层：</p>
+<div class="highlight"><pre><span></span><code>┌─────────────────────────────────┐
+│ Scheduler（调度器）              │  决定哪些序列参与本轮推理
+├─────────────────────────────────┤
+│ BlockSpaceManager（块空间管理器） │  管理块池 + 每序列页表
+├─────────────────────────────────┤
+│ PagedAttention Kernel（GPU 核）  │  分页访存的 attention 计算
+└─────────────────────────────────┘
+</code></pre></div>
+<ul>
+<li><strong>Scheduler</strong>：每轮从等待队列选序列组成 batch，考虑显存余量</li>
+<li><strong>BlockSpaceManager</strong>：本 C 实现的 Python 版，管理块池和页表</li>
+<li><strong>Kernel</strong>：修改过的 attention GPU kernel，按页表分页访存</li>
+</ul>
+<h3 id="62-block-table">6.2 Block Table<a class="headerlink" href="#62-block-table" title="Permanent link">&para;</a></h3>
+<p>vLLM 给每个序列维护一个 <strong>block table</strong>（就是页表），在 GPU 上是一个整数数组：</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 序列 A 的 block table（逻辑页 → 物理块）</span>
+<span class="n">block_table_A</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>   <span class="c1"># 逻辑页 0→块2, 1→块5, 2→块1, ...</span>
+
+<span class="c1"># attention kernel 访问 token t 的 K:</span>
+<span class="n">page</span> <span class="o">=</span> <span class="n">t</span> <span class="o">//</span> <span class="n">block_size</span>
+<span class="n">offset</span> <span class="o">=</span> <span class="n">t</span> <span class="o">%</span> <span class="n">block_size</span>
+<span class="n">physical_block</span> <span class="o">=</span> <span class="n">block_table_A</span><span class="p">[</span><span class="n">page</span><span class="p">]</span>
+<span class="n">K_t</span> <span class="o">=</span> <span class="n">KV_cache</span><span class="p">[</span><span class="n">physical_block</span><span class="p">,</span> <span class="n">offset</span><span class="p">]</span>
+</code></pre></div>
+<p>block table 在 GPU 上，kernel 直接读取。每次序列增长（申请新块），更新 block table。</p>
+<h3 id="63-prefix-caching">6.3 Prefix Caching<a class="headerlink" href="#63-prefix-caching" title="Permanent link">&para;</a></h3>
+<p>vLLM 的 prefix caching 利用引用计数共享前缀：</p>
+<div class="highlight"><pre><span></span><code>请求 1: "系统提示 + 用户问题 1"
+请求 2: "系统提示 + 用户问题 2"
+
+1. 请求 1 来了: 分配块存 "系统提示" + "用户问题 1"
+2. 请求 2 来了: 发现 "系统提示" 已有块（hash 匹配）
+   → 直接让请求 2 的页表指向这些块（引用计数 +1）
+   → 不重新计算 "系统提示" 的 KV
+   → 只分配新块存 "用户问题 2" 的 KV
+</code></pre></div>
+<p>vLLM 用 <strong>hash of block content</strong> 标识块，新请求的前缀块 hash 匹配已有块就直接复用。前缀越长省的越多——2000 token 的 system prompt × 32 个请求，省 32 倍前缀计算和显存。</p>
+<h3 id="64-copy-on-writecow">6.4 Copy-on-Write（CoW）<a class="headerlink" href="#64-copy-on-writecow" title="Permanent link">&para;</a></h3>
+<p>共享块后，如果序列要<strong>修改</strong>块（如继续生成写最后一块的空 slot），而块被共享（ref_count &gt; 1），就要 CoW：</p>
+<div class="highlight"><pre><span></span><code>块 5 被 seq A 和 B 共享 (ref_count=2)
+seq A 要在块 5 写新 token:
+  1. 分配新块 5'
+  2. 复制块 5 的内容到块 5'（CoW）
+  3. seq A 的页表: 块5 → 块5'
+  4. ref_count[块5]-- (变 1, B 独占)
+  5. ref_count[块5'] = 1 (A 独占)
+  6. seq A 在块 5' 写新 token
+</code></pre></div>
+<p>CoW 保证共享块不被单方修改破坏。本 C 实现简化了 CoW（假设共享块只读），vLLM 完整实现了 CoW 逻辑。</p>
+<h3 id="65-gpu-kernel">6.5 GPU Kernel 的分页访存<a class="headerlink" href="#65-gpu-kernel" title="Permanent link">&para;</a></h3>
+<p>标准 attention kernel 假设 KV 连续：</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// 标准 attention（连续访存）</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">seq_len</span><span class="p">;</span><span class="w"> </span><span class="n">t</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">K_t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">KV_cache</span><span class="p">[</span><span class="n">seq_offset</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">t</span><span class="p">];</span><span class="w">   </span><span class="c1">// 连续地址</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>PagedAttention kernel 改成分页访存：</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// PagedAttention（分页访存）</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">seq_len</span><span class="p">;</span><span class="w"> </span><span class="n">t</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">page</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">block_size</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">offset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">block_size</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">physical_block</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">block_table</span><span class="p">[</span><span class="n">page</span><span class="p">];</span><span class="w">   </span><span class="c1">// 查页表</span>
+<span class="w">    </span><span class="n">K_t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">KV_cache</span><span class="p">[</span><span class="n">physical_block</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">block_size</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">offset</span><span class="p">];</span><span class="w">  </span><span class="c1">// 分页地址</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>每次访存多一次页表查询（block_table 是 GPU 上的小数组，cache 友好）。实测这个开销 &lt; 5%，远小于碎片化带来的浪费。</p>
+<h3 id="66">6.6 调度与抢占<a class="headerlink" href="#66" title="Permanent link">&para;</a></h3>
+<p>显存不够时，vLLM 的 scheduler 会<strong>抢占</strong>低优先级序列：</p>
+<div class="highlight"><pre><span></span><code>显存满，新请求来了:
+  1. 选最近最少使用的序列 (LRU)
+  2. 把它的 KV Cache 块释放（或换出到 CPU）
+  3. 腾出块给新请求
+  4. 被抢占的序列之后重新调度时，重算被换出的 KV
+</code></pre></div>
+<p>分页让抢占极快——释放几个块即可，不用搬移连续区间。连续分配下抢占要搬移或复制大段显存，开销巨大。</p>
+<h2 id="7">7. 与传统内存管理的类比<a class="headerlink" href="#7" title="Permanent link">&para;</a></h2>
+<p>PagedAttention 和 OS 分页的对应关系：</p>
+<table>
+<thead>
+<tr>
+<th>OS 分页</th>
+<th>PagedAttention</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>物理页框</td>
+<td>KV Cache 块</td>
+<td>显存的最小分配单位</td>
+</tr>
+<tr>
+<td>页大小（4KB）</td>
+<td>block_size（16 token）</td>
+<td>固定大小，权衡碎片和管理开销</td>
+</tr>
+<tr>
+<td>进程页表</td>
+<td>序列 block table</td>
+<td>逻辑页号 → 物理块号</td>
+</tr>
+<tr>
+<td>空闲页框链表</td>
+<td>空闲块池</td>
+<td>O(1) 分配/回收</td>
+</tr>
+<tr>
+<td>缺页中断</td>
+<td>按需分配新块</td>
+<td>序列增长时申请新块</td>
+</tr>
+<tr>
+<td>共享内存页</td>
+<td>prefix caching</td>
+<td>多序列共享前缀块</td>
+</tr>
+<tr>
+<td>引用计数</td>
+<td>块引用计数</td>
+<td>归零才回收</td>
+</tr>
+<tr>
+<td>写时复制</td>
+<td>CoW</td>
+<td>共享块被修改时复制</td>
+</tr>
+<tr>
+<td>交换（swap）</td>
+<td>换出到 CPU</td>
+<td>显存不够时把 KV 换到 CPU 内存</td>
+</tr>
+<tr>
+<td>LRU 淘汰</td>
+<td>序列抢占</td>
+<td>显存不够时释放低优先级序列</td>
+</tr>
+<tr>
+<td>虚拟地址</td>
+<td>逻辑 token 位置</td>
+<td>序列看到连续的逻辑位置</td>
+</tr>
+<tr>
+<td>物理地址</td>
+<td>物理块 + 偏移</td>
+<td>实际显存位置</td>
+</tr>
+</tbody>
+</table>
+<p><strong>PagedAttention 本质上就是把 OS 的内存管理子系统搬到 GPU 显存管理 KV Cache</strong>。vLLM 论文的标题就是 "Efficient Memory Management for Large Language Model Serving with PagedAttention"——明确把这是定位为内存管理创新。</p>
+<h2 id="8">8. 实际效果<a class="headerlink" href="#8" title="Permanent link">&para;</a></h2>
+<h3 id="81-vllm">8.1 vLLM 的吞吐量提升<a class="headerlink" href="#81-vllm" title="Permanent link">&para;</a></h3>
+<p>vLLM 论文报告的吞吐量对比（vs TGI、vLLM 朴素版）：</p>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>朴素</th>
+<th>PagedAttention</th>
+<th>提升</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LLaMA-7B</td>
+<td>1.0x</td>
+<td>2-4x</td>
+<td>2-4 倍</td>
+</tr>
+<tr>
+<td>LLaMA-13B</td>
+<td>1.0x</td>
+<td>2-4x</td>
+<td>2-4 倍</td>
+</tr>
+<tr>
+<td>LLaMA-33B</td>
+<td>1.0x</td>
+<td>2-3x</td>
+<td>2-3 倍</td>
+</tr>
+</tbody>
+</table>
+<p>提升主要来自：</p>
+<ol>
+<li><strong>显存利用率提升</strong>：30-60% → 95%+，同样显存能容纳更多序列</li>
+<li><strong>并发数提升</strong>：batch size 从几十提升到上百</li>
+<li><strong>prefix caching</strong>：共享前缀省的计算和显存</li>
+<li><strong>无碎片</strong>：序列不会被因碎片拒绝，调度更灵活</li>
+</ol>
+<h3 id="82">8.2 行业影响<a class="headerlink" href="#82" title="Permanent link">&para;</a></h3>
+<p>PagedAttention 之后，主流 LLM 推理框架都采用了分页 KV Cache：</p>
+<ul>
+<li><strong>vLLM</strong>：原创实现，block_size=16</li>
+<li><strong>TensorRT-LLM</strong>：NVIDIA 的实现，类似分页</li>
+<li><strong>SGLang</strong>：在 PagedAttention 基础上进一步优化 prefix caching</li>
+<li><strong>LMDeploy</strong>：商汤的实现，分页 + 其他优化</li>
+<li><strong>TGI</strong>：HuggingFace 的实现，也跟进分页</li>
+</ul>
+<p>PagedAttention 成了 LLM 推理系统的<strong>标配</strong>，就像分页成了 OS 的标配。</p>
+<h2 id="9_1">9. 局限与演进<a class="headerlink" href="#9_1" title="Permanent link">&para;</a></h2>
+<h3 id="91">9.1 块大小权衡<a class="headerlink" href="#91" title="Permanent link">&para;</a></h3>
+<p>块太小：页表大、kernel 访存次数多、管理开销大。块太大：内部碎片多、利用率下降。vLLM 默认 16 是经验值，不同模型/负载可能最优值不同。</p>
+<h3 id="92">9.2 页表访存开销<a class="headerlink" href="#92" title="Permanent link">&para;</a></h3>
+<p>每次 attention 访存要多一次页表查询。虽然 block table 在 GPU cache 里，但仍是非零开销。一些优化：</p>
+<ul>
+<li><strong>block table 预取</strong>：kernel 开始时预取整个 block table 到 shared memory</li>
+<li><strong>大块</strong>：增大 block_size 减少页表项（但增加碎片）</li>
+<li><strong>连续块优化</strong>：如果序列的块恰好连续，用连续访存路径</li>
+</ul>
+<h3 id="93-hash">9.3 跨序列共享的 hash 开销<a class="headerlink" href="#93-hash" title="Permanent link">&para;</a></h3>
+<p>prefix caching 要 hash 块内容来匹配前缀。hash 计算和比较有开销，且 hash 冲突可能误共享。vLLM 用 rolling hash 平衡速度和准确性。</p>
+<h3 id="94">9.4 演进方向<a class="headerlink" href="#94" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>多级分页</strong>：类似 OS 的多级页表，减少页表内存占用</li>
+<li><strong>块大小自适应</strong>：根据负载动态调整 block_size</li>
+<li><strong>跨 GPU 分页</strong>：多 GPU 时把块分布在不同 GPU，类似分布式共享内存</li>
+<li><strong>KV Cache 量化 + 分页</strong>：块内量化压缩，进一步省显存</li>
+</ul>
+<h2 id="10_1">10. 总结<a class="headerlink" href="#10_1" title="Permanent link">&para;</a></h2>
+<p>PagedAttention 的核心贡献是把<strong>操作系统的分页机制</strong>搬到 KV Cache 管理：</p>
+<ol>
+<li><strong>分页消除外部碎片</strong>：固定块 + 空闲池，任何块都能分配，不用找连续区间</li>
+<li><strong>按需分配消除内部碎片</strong>：序列增长才申请新块，不预留 max_len，利用率 95%+</li>
+<li><strong>页表解耦逻辑和物理</strong>：序列看连续逻辑位置，物理块分散各处</li>
+<li><strong>引用计数支持共享</strong>：多序列共享前缀块，prefix caching 省计算和显存</li>
+<li><strong>CoW 保证正确性</strong>：共享块被修改时复制，不破坏其他序列</li>
+</ol>
+<p>效果：显存利用率从 30-60% 提升到 95%+，吞吐量提升 2-4 倍。这是把经典数据结构思想（分页内存管理）应用到新领域（LLM 推理）的成功范例——OS 几十年的内存管理智慧，在 GPU 显存管理上同样有效。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.indexes", "navigation.tracking", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,2531 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="从底层实现到生产级应用——数据结构在 AI 系统优化与应用工程中的真实作用">
+      
+      
+        <meta name="author" content="wanglh39">
+      
+      
+        <link rel="canonical" href="https://wanglh39.github.io/ds-ai-teaching/ch10/">
+      
+      
+        <link rel="prev" href="../ch09/">
+      
+      
+        <link rel="next" href="../ch11/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>10 并查集 - 数据结构 × AI 优化</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+SC:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans SC";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#10" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href=".." title="数据结构 × AI 优化" class="md-header__button md-logo" aria-label="数据结构 × AI 优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            数据结构 × AI 优化
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              10 并查集
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换至暗色模式"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换至暗色模式" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换至亮色模式"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换至亮色模式" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/wanglh39/ds-ai-teaching" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wanglh39/ds-ai-teaching
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  首页
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../intro/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  项目介绍
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../ch01/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  视角 A·系统优化
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../ch13/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  视角 B·应用工程
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../benchmarks/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  性能汇总
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="数据结构 × AI 优化" class="md-nav__button md-logo" aria-label="数据结构 × AI 优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    数据结构 × AI 优化
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/wanglh39/ds-ai-teaching" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wanglh39/ds-ai-teaching
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    首页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    项目介绍
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    项目介绍
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    设计思路
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../map/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    章节映射
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dual_view/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    双视角说明
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cross_index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    交叉索引
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    视角 A·系统优化
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    视角 A·系统优化
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 动态数组
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch02/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 链表
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch03/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 栈
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch04/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 循环队列
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch05/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05 哈希表
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch06/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 堆
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch07/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    07 Trie
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch08/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    08 KD-Tree
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch09/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    09 图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10 并查集
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10 并查集
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要回答的问题
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        状态
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原理
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch11/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11 页表/分块内存
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch12/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12 跳表+图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    视角 B·应用工程
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    视角 B·应用工程
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch13/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13 多智能体编排
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch14/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    14 任务调度与批处理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch15/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    15 上下文工程与记忆
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch16/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    16 RAG 与知识检索
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch17/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    17 数据管道与流式处理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch18/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    18 模型部署与推理服务
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch19/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    19 状态机与工作流
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch20/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    20 模型压缩
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    性能汇总
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要回答的问题
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        状态
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原理
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="10">第 10 章 · 并查集<a class="headerlink" href="#10" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>数据结构：并查集（父指针 + 路径压缩 + 按秩合并）
+AI 优化：层次聚类（HAC）的连通分量维护</p>
+</blockquote>
+<h2 id="_1">本章要回答的问题<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>路径压缩 + 按秩合并为什么是近 O(1)？</li>
+<li>层次聚类的合并频繁，并查集怎么加速？</li>
+<li>并查集 vs BFS 判连通的性能差多少？</li>
+</ul>
+<h2 id="_2">目录<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>10_disjoint_set/
+├── c/                   # 并查集的 C 实现
+├── python/              # 层次聚类 demo
+├── docs/
+│   ├── principle.md
+│   └── ai_application.md
+└── figures/
+</code></pre></div>
+<h2 id="_3">状态<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p>🚧 待填充</p>
+<hr />
+<h2 id="_4">原理<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<h1 id="disjoint-set">并查集（Disjoint Set）原理：父指针 + 路径压缩 + 按秩合并<a class="headerlink" href="#disjoint-set" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>本文档讲清「并查集是什么、父指针表示、find 和路径压缩、union 和按秩合并、为什么近 O(1)（Ackermann 反函数 α(n)）、C 实现逐行讲解、与 BFS/DFS 判连通对比」。AI 应用（层次聚类 HAC）见 <code>ai_application.md</code>。</p>
+</blockquote>
+<h2 id="1">1. 并查集是什么：维护"属于同一集合"的数据结构<a class="headerlink" href="#1" title="Permanent link">&para;</a></h2>
+<p><strong>并查集</strong>（Disjoint Set Union, DSU）是维护<strong>若干不相交集合</strong>的数据结构，支持两个核心操作：</p>
+<ul>
+<li><strong>find(x)</strong>：返回元素 x 所在集合的代表元（根）</li>
+<li><strong>union(x, y)</strong>：把 x 和 y 所在的两个集合合并成一个</li>
+</ul>
+<p>并查集不关心集合里有什么元素，只关心<strong>哪些元素属于同一集合</strong>。这是很多算法的核心需求：</p>
+<ul>
+<li><strong>连通分量</strong>：图中两个顶点是否连通？合并就是加边</li>
+<li><strong>Kruskal 最小生成树</strong>：加边时判断两端是否已连通（避免成环）</li>
+<li><strong>等价类</strong>：哪些变量相等？合并就是加等式约束</li>
+<li><strong>层次聚类</strong>：哪些点属于同一簇？合并就是两个簇合体</li>
+</ul>
+<div class="highlight"><pre><span></span><code>初始: {0}, {1}, {2}, {3}, {4}     每个元素自成一集
+
+union(0, 1): {0,1}, {2}, {3}, {4}
+union(2, 3): {0,1}, {2,3}, {4}
+union(0, 2): {0,1,2,3}, {4}       0 和 2 合并，连带 1 和 3
+
+find(1) == find(3)?  →  是（都在 {0,1,2,3}）
+find(1) == find(4)?  →  否
+</code></pre></div>
+<h3 id="11">1.1 为什么不用别的数据结构<a class="headerlink" href="#11" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>需求</th>
+<th>哈希表</th>
+<th>链表</th>
+<th>并查集</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>查"x 和 y 同集？"</td>
+<td>O(1)（存标签）</td>
+<td>O(1)（存标签）</td>
+<td>O(α) ≈ O(1)</td>
+</tr>
+<tr>
+<td>合并两个集合</td>
+<td>O(n)（改所有标签）</td>
+<td>O(1)（接链表尾）</td>
+<td>O(α) ≈ O(1)</td>
+</tr>
+<tr>
+<td>增量加边判连通</td>
+<td>O(n) 每次</td>
+<td>O(1) 但要存链表</td>
+<td>O(α) 且不存邻接表</td>
+</tr>
+</tbody>
+</table>
+<p>哈希表查同集快，但合并要改一个集合所有元素的标签 O(n)。链表合并快（接尾），但要存链表 O(n) 内存。<strong>并查集两个操作都近 O(1)</strong>，且只存 parent 数组 O(n) 内存——这是它的核心优势。</p>
+<h2 id="2">2. 父指针表示：森林<a class="headerlink" href="#2" title="Permanent link">&para;</a></h2>
+<p>并查集用<strong>森林</strong>（forest）表示集合：每棵树是一个集合，树根是代表元。每个元素存一个 <code>parent</code> 指针指向父节点，根的 parent 指向自己。</p>
+<div class="highlight"><pre><span></span><code>集合 {0,1,2,3} 和 {4,5}:
+
+    树表示:          parent 数组:
+       0              index: 0  1  2  3  4  5
+      / \             parent:0  0  0  1  4  4
+     1   2
+     |
+     3
+
+    4
+     \
+      5
+
+  find(x) = 沿 parent 走到根
+  find(3) = 3 → 1 → 0  (根是 0)
+  find(5) = 5 → 4      (根是 4)
+</code></pre></div>
+<p><strong>为什么用树？</strong> 因为合并极快：union(x,y) 只需把一棵树的根挂到另一棵树的根下——改一个 parent 指针。</p>
+<div class="highlight"><pre><span></span><code>union(3, 5):  把 4 挂到 0 下
+  before:        after:
+     0              0
+    / \            /|\
+   1   2          1 2 4
+   |              |   |
+   3              3   5
+   (根 0)         (根 0)
+   4
+    \
+     5
+   (根 4)
+</code></pre></div>
+<p>合并只需 <code>parent[4] = 0</code>，一个赋值。这是并查集比哈希表合并快的原因。</p>
+<h3 id="21">2.1 朴素实现的退化<a class="headerlink" href="#21" title="Permanent link">&para;</a></h3>
+<p>如果每次 union 都把一棵树挂到另一棵树下，最坏情况会退化成<strong>链表</strong>：</p>
+<div class="highlight"><pre><span></span><code>union(0,1), union(1,2), union(2,3), ..., union(n-2, n-1):
+
+  0 ← 1 ← 2 ← 3 ← ... ← n-1   (一条链)
+
+  find(n-1) 要走 n 步 → O(n)
+  n 次 find 总 O(n²)
+</code></pre></div>
+<p>树高 O(n)，find 退化成 O(n)。两个优化让树高降到近 O(1)：<strong>路径压缩</strong>和<strong>按秩合并</strong>。</p>
+<h2 id="3-find">3. find 和路径压缩<a class="headerlink" href="#3-find" title="Permanent link">&para;</a></h2>
+<p><strong>路径压缩</strong>（Path Compression）：find(x) 沿 parent 走到根后，把路径上所有节点<strong>直接挂到根下</strong>——下次 find 这些节点就是 O(1)。</p>
+<div class="highlight"><pre><span></span><code>find(3) 前的链:        find(3) 后:
+  0                     0
+  |                    /|\
+  1                   1 2 3   ← 路径上所有节点直接挂到根
+  |                   
+  2                   
+  |                   
+  3                   
+
+  下次 find(3) = O(1)（parent[3] 直接是根 0）
+</code></pre></div>
+<h3 id="31">3.1 递归实现<a class="headerlink" href="#31" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="nf">dset_find</span><span class="p">(</span><span class="n">DSet</span><span class="w"> </span><span class="o">*</span><span class="n">ds</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">parent</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">parent</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dset_find</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span><span class="w"> </span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">parent</span><span class="p">[</span><span class="n">x</span><span class="p">]);</span><span class="w">  </span><span class="c1">// 递归找根，回溯时压缩</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">parent</span><span class="p">[</span><span class="n">x</span><span class="p">];</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>递归版最简洁：<code>parent[x] = find(parent[x])</code> 一行同时做"找根"和"压缩"。递归到根后，回溯时把路径上每个节点的 parent 直接改成根。</p>
+<h3 id="32">3.2 迭代实现（两趟）<a class="headerlink" href="#32" title="Permanent link">&para;</a></h3>
+<p>递归版在 n 很大时可能栈溢出（链长 &gt; 栈深度）。迭代版用两趟：</p>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="nf">dset_find</span><span class="p">(</span><span class="n">DSet</span><span class="w"> </span><span class="o">*</span><span class="n">ds</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 第一趟：找根</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">root</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">x</span><span class="p">;</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">parent</span><span class="p">[</span><span class="n">root</span><span class="p">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">root</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">root</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">parent</span><span class="p">[</span><span class="n">root</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">// 第二趟：路径压缩，把路径上所有节点直接挂到根</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">parent</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">root</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">parent</span><span class="p">[</span><span class="n">x</span><span class="p">],</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">root</span><span class="p">,</span><span class="w"> </span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">parent</span><span class="p">[</span><span class="n">x</span><span class="p">];</span><span class="w">  </span><span class="c1">// 保存下一个，把当前挂到根，走到下一个</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">root</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>第一趟沿 parent 走到根，第二趟再走一遍把每个节点直接挂到根。本 C 实现用递归版（简洁），Python demo 用迭代版（避免栈溢出）。</p>
+<h3 id="33">3.3 路径压缩的效果<a class="headerlink" href="#33" title="Permanent link">&para;</a></h3>
+<p>路径压缩后，树变得<strong>非常扁平</strong>——大部分节点直接挂在根下。经过一次 find，后续 find 几乎都是 O(1)。但路径压缩单独用还不够：最坏情况下第一次 find 仍可能 O(n)。需要配合按秩合并保证树高始终小。</p>
+<h2 id="4-union">4. union 和按秩合并<a class="headerlink" href="#4-union" title="Permanent link">&para;</a></h2>
+<p><strong>按秩合并</strong>（Union by Rank）：union 时把<strong>矮树挂到高树下</strong>，避免树高增长。rank 是树高的上界（路径压缩后不精确，但够用）。</p>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="nf">dset_union_sets</span><span class="p">(</span><span class="n">DSet</span><span class="w"> </span><span class="o">*</span><span class="n">ds</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">rx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dset_find</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">ry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dset_find</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">rx</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">ry</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">                    </span><span class="c1">// 已在同一集合，不合并</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">rank</span><span class="p">[</span><span class="n">rx</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">rank</span><span class="p">[</span><span class="n">ry</span><span class="p">])</span><span class="w"> </span><span class="p">{</span><span class="w">         </span><span class="c1">// 保证 rx 是 rank 大的</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rx</span><span class="p">;</span><span class="w"> </span><span class="n">rx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ry</span><span class="p">;</span><span class="w"> </span><span class="n">ry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tmp</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">parent</span><span class="p">[</span><span class="n">ry</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rx</span><span class="p">;</span><span class="w">                       </span><span class="c1">// 矮树挂到高树下</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">rank</span><span class="p">[</span><span class="n">rx</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">rank</span><span class="p">[</span><span class="n">ry</span><span class="p">])</span><span class="w"> </span><span class="p">{</span><span class="w">        </span><span class="c1">// 等高时高树 rank +1</span>
+<span class="w">        </span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">rank</span><span class="p">[</span><span class="n">rx</span><span class="p">]</span><span class="o">++</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">n_sets</span><span class="o">--</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="41-rank">4.1 rank 的含义<a class="headerlink" href="#41-rank" title="Permanent link">&para;</a></h3>
+<p>rank 是<strong>树高的上界</strong>（不是精确高度，因为路径压缩会降高但不更新 rank）。关键性质：</p>
+<ul>
+<li>矮树挂到高树下，树高不变</li>
+<li>等高树合并，树高 +1</li>
+<li>rank 为 k 的树至少有 $2^k$ 个节点 → 树高最多 $\log_2 n$</li>
+</ul>
+<div class="highlight"><pre><span></span><code>rank 0:  单个节点        rank 1:  两节点合并     rank 2:  两个 rank 1 合并
+    x                   x                    x
+                        |                   / \
+                        y                  y   z
+                                           |   |
+                                          ...  ...
+</code></pre></div>
+<h3 id="42">4.2 按秩合并的效果<a class="headerlink" href="#42" title="Permanent link">&para;</a></h3>
+<p>只按秩合并（不路径压缩），树高最多 $\log_2 n$，find 是 $O(\log n)$。n=10⁶ 时树高最多 20——已经很快。但配合路径压缩后，能做到近 O(1)。</p>
+<h3 id="43">4.3 两个优化必须一起用<a class="headerlink" href="#43" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>优化</th>
+<th>树高</th>
+<th>find</th>
+<th>union</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>都不用</td>
+<td>O(n)</td>
+<td>O(n)</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>只路径压缩</td>
+<td>摊还 O(α)</td>
+<td>摊还 O(α)</td>
+<td>摊还 O(α)</td>
+</tr>
+<tr>
+<td>只按秩合并</td>
+<td>O(log n)</td>
+<td>O(log n)</td>
+<td>O(log n)</td>
+</tr>
+<tr>
+<td><strong>两者都用</strong></td>
+<td><strong>近 O(1)</strong></td>
+<td><strong>摊还 O(α)</strong></td>
+<td><strong>摊还 O(α)</strong></td>
+</tr>
+</tbody>
+</table>
+<p>路径压缩单独用已经是摊还 O(α)，但按秩合并让常数更小、实际更快。两者一起用是标准做法。</p>
+<h2 id="5-ackermann-n-o1">5. 复杂度：Ackermann 反函数 α(n) ≈ 近 O(1)<a class="headerlink" href="#5-ackermann-n-o1" title="Permanent link">&para;</a></h2>
+<p>两个优化一起用，find 和 union 的<strong>摊还复杂度</strong>是 $O(\alpha(n))$，其中 $\alpha(n)$ 是 <strong>Ackermann 反函数</strong>。</p>
+<h3 id="51-ackermann">5.1 Ackermann 函数<a class="headerlink" href="#51-ackermann" title="Permanent link">&para;</a></h3>
+<p>Ackermann 函数 $A(m, n)$ 是一个增长<strong>比任何原始递归函数都快</strong>的函数：</p>
+<div class="highlight"><pre><span></span><code>A(0, n)   = n + 1
+A(m+1, 0) = A(m, 1)
+A(m+1, n+1) = A(m, A(m+1, n))
+
+A(0, n) = n+1
+A(1, n) = n+2
+A(2, n) = 2n+3
+A(3, n) = 2^(n+3) - 3
+A(4, n) = 2^2^...^2 - 3   (n+3 个 2 的幂塔)
+</code></pre></div>
+<p>$A(4, 1)$ 已经是 $2^{65536} - 3$，远超宇宙原子数。</p>
+<h3 id="52-ackermann">5.2 Ackermann 反函数<a class="headerlink" href="#52-ackermann" title="Permanent link">&para;</a></h3>
+<p>$\alpha(n)$ 是 $A$ 的反函数：$\alpha(n) = \min{m : A(m, m) \geq n}$。</p>
+<p>因为 $A$ 增长极快，$\alpha$ 增长极慢：</p>
+<table>
+<thead>
+<tr>
+<th>$n$</th>
+<th>$\alpha(n)$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$n \leq 3$</td>
+<td>0</td>
+</tr>
+<tr>
+<td>$n \leq 7$</td>
+<td>1</td>
+</tr>
+<tr>
+<td>$n \leq 2^{65536}$</td>
+<td>4</td>
+</tr>
+</tbody>
+</table>
+<p><strong>对任何实际数据量</strong>，$\alpha(n) \leq 4$。宇宙原子数 $\approx 10^{80} &lt; 2^{65536}$，所以 $\alpha(10^{80}) = 4$。</p>
+<h3 id="53">5.3 实际含义<a class="headerlink" href="#53" title="Permanent link">&para;</a></h3>
+<p>并查集的 find/union 是 $O(\alpha(n))$，对任何实际问题 $\alpha(n) \leq 4$——<strong>常数时间</strong>。所以并查集被称为"近 O(1)"。</p>
+<p>n 次 union + m 次 find 的总成本是 $O((n+m) \cdot \alpha(n))$，实际就是 $O(n+m)$。这是并查集的强大之处：<strong>几乎所有操作都是常数时间</strong>。</p>
+<h3 id="54-o1">5.4 为什么不是真的 O(1)<a class="headerlink" href="#54-o1" title="Permanent link">&para;</a></h3>
+<p>理论上 $\alpha(n)$ 不是常数——它会随 n 增长，只是增长极慢。所以严格说是 $O(\alpha(n))$ 不是 $O(1)$。但实际中 $\alpha(n) = 4$ 对任何可想象的 n 都成立，所以工程上当作 O(1) 完全合理。</p>
+<h2 id="6-c">6. C 实现逐行讲解<a class="headerlink" href="#6-c" title="Permanent link">&para;</a></h2>
+<p>本实现文件 <code>10_disjoint_set/c/dset.h</code> + <code>dset.c</code>。</p>
+<h3 id="61-dseth">6.1 数据结构（dset.h）<a class="headerlink" href="#61-dseth" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="n">parent</span><span class="p">;</span><span class="w">    </span><span class="c1">// 父指针数组，parent[x] 是 x 的父节点</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="n">rank</span><span class="p">;</span><span class="w">      </span><span class="c1">// 秩数组，rank[x] 是以 x 为根的树高上界</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w">       </span><span class="c1">// 元素总数</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">n_sets</span><span class="p">;</span><span class="w">  </span><span class="c1">// 当前集合数（初始 n，每次 union 减 1）</span>
+<span class="p">}</span><span class="w"> </span><span class="n">DSet</span><span class="p">;</span>
+</code></pre></div>
+<p>只有两个数组 <code>parent</code> 和 <code>rank</code>，内存 $O(n)$。<code>n_sets</code> 维护集合数，union 时减 1，O(1) 查询。</p>
+<h3 id="62-dset_init">6.2 初始化（dset_init）<a class="headerlink" href="#62-dset_init" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">dset_init</span><span class="p">(</span><span class="n">DSet</span><span class="w"> </span><span class="o">*</span><span class="n">ds</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">n</span><span class="p">;</span>
+<span class="w">    </span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">n_sets</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w">                          </span><span class="c1">// 初始 n 个单元素集合</span>
+<span class="w">    </span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">parent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">));</span>
+<span class="w">    </span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">rank</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">calloc</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">));</span><span class="w">  </span><span class="c1">// rank 初始全 0</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">parent</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">i</span><span class="p">;</span><span class="w">              </span><span class="c1">// 每个元素自成一集，parent 指向自己</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>初始每个元素是一个单节点树，parent[i] = i（根指向自己），rank 全 0。</p>
+<h3 id="63-find-dset_find">6.3 find 带路径压缩（dset_find）<a class="headerlink" href="#63-find-dset_find" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="nf">dset_find</span><span class="p">(</span><span class="n">DSet</span><span class="w"> </span><span class="o">*</span><span class="n">ds</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">parent</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">parent</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dset_find</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span><span class="w"> </span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">parent</span><span class="p">[</span><span class="n">x</span><span class="p">]);</span><span class="w">  </span><span class="c1">// 递归找根，回溯时压缩</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">parent</span><span class="p">[</span><span class="n">x</span><span class="p">];</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>parent[x] != x</code> 说明 x 不是根，递归找根。回溯时 <code>parent[x] = root</code> 把 x 直接挂到根下。一行同时做"找根"和"路径压缩"。</p>
+<h3 id="64-union-dset_union_sets">6.4 union 按秩合并（dset_union_sets）<a class="headerlink" href="#64-union-dset_union_sets" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="nf">dset_union_sets</span><span class="p">(</span><span class="n">DSet</span><span class="w"> </span><span class="o">*</span><span class="n">ds</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">rx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dset_find</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w">               </span><span class="c1">// 找 x 的根</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">ry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dset_find</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">);</span><span class="w">               </span><span class="c1">// 找 y 的根</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">rx</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">ry</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">                  </span><span class="c1">// 已同集，不合并，返回 0</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">rank</span><span class="p">[</span><span class="n">rx</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">rank</span><span class="p">[</span><span class="n">ry</span><span class="p">])</span><span class="w"> </span><span class="p">{</span><span class="w">       </span><span class="c1">// 保证 rx 是 rank 大的</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rx</span><span class="p">;</span><span class="w"> </span><span class="n">rx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ry</span><span class="p">;</span><span class="w"> </span><span class="n">ry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tmp</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">parent</span><span class="p">[</span><span class="n">ry</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rx</span><span class="p">;</span><span class="w">                     </span><span class="c1">// 矮树（ry）挂到高树（rx）下</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">rank</span><span class="p">[</span><span class="n">rx</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">rank</span><span class="p">[</span><span class="n">ry</span><span class="p">])</span><span class="w"> </span><span class="p">{</span><span class="w">      </span><span class="c1">// 等高时高树 rank +1</span>
+<span class="w">        </span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">rank</span><span class="p">[</span><span class="n">rx</span><span class="p">]</span><span class="o">++</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">n_sets</span><span class="o">--</span><span class="p">;</span><span class="w">                            </span><span class="c1">// 集合数减 1</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">                                </span><span class="c1">// 合并成功，返回 1</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>关键三步：
+1. find 两边根（同时路径压缩）
+2. 矮树挂高树下（保证树高不增）
+3. 等高时 rank+1（树高增 1）</p>
+<p>返回值：1 表示合并了，0 表示已同集。<code>n_sets</code> 维护集合数。</p>
+<h3 id="65-connected-count_sets">6.5 connected 和 count_sets<a class="headerlink" href="#65-connected-count_sets" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="nf">dset_connected</span><span class="p">(</span><span class="n">DSet</span><span class="w"> </span><span class="o">*</span><span class="n">ds</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">dset_find</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">dset_find</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">);</span><span class="w">  </span><span class="c1">// 同根即连通</span>
+<span class="p">}</span>
+
+<span class="kt">size_t</span><span class="w"> </span><span class="nf">dset_count_sets</span><span class="p">(</span><span class="n">DSet</span><span class="w"> </span><span class="o">*</span><span class="n">ds</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">ds</span><span class="o">-&gt;</span><span class="n">n_sets</span><span class="p">;</span><span class="w">                       </span><span class="c1">// O(1) 查询，不用数根</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>connected</code> 两次 find 比根，$O(\alpha)$。<code>count_sets</code> 直接返回维护的 <code>n_sets</code>，O(1)。</p>
+<h2 id="7-bfsdfs">7. 与 BFS/DFS 判连通对比<a class="headerlink" href="#7-bfsdfs" title="Permanent link">&para;</a></h2>
+<p>判"两个顶点是否连通"有两种做法：</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>数据结构</th>
+<th>判连通</th>
+<th>加边</th>
+<th>内存</th>
+<th>增量加边</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>BFS/DFS</strong></td>
+<td>邻接表</td>
+<td>O(V+E)</td>
+<td>O(1)</td>
+<td>O(V+E)</td>
+<td>O(V+E) 重建</td>
+</tr>
+<tr>
+<td><strong>并查集</strong></td>
+<td>parent[]</td>
+<td>O(α)</td>
+<td>O(α)</td>
+<td>O(V)</td>
+<td>O(α)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="71">7.1 一次性判连通<a class="headerlink" href="#71" title="Permanent link">&para;</a></h3>
+<p>给定一个图，判"u 和 v 是否连通"：</p>
+<ul>
+<li><strong>BFS/DFS</strong>：从 u 出发遍历整个连通分量，看能否到 v。O(V+E) 时间，O(V+E) 内存（存邻接表）</li>
+<li><strong>并查集</strong>：对所有边 union 一遍，然后 find(u) == find(v)。O(E·α) 时间，O(V) 内存</li>
+</ul>
+<p>并查集时间多一个 α 因子（但 α≈4），内存省 O(E)（不存邻接表）。</p>
+<h3 id="72">7.2 增量加边判连通<a class="headerlink" href="#72" title="Permanent link">&para;</a></h3>
+<p><strong>核心差异</strong>：如果图在不断加边，每次加边后要判连通：</p>
+<ul>
+<li><strong>BFS/DFS</strong>：每次加边后，连通分量可能变，要重新 BFS O(V+E)。加 k 条边总 O(k·(V+E))</li>
+<li><strong>并查集</strong>：每次加边就 union O(α)，判连通就 find O(α)。加 k 条边总 O(k·α)</li>
+</ul>
+<p><strong>这是层次聚类的核心场景</strong>：逐步降低距离阈值，每次新边出现，两个簇合并。并查集每次 O(α)，BFS 每次重建 O(V+E)。</p>
+<h3 id="73">7.3 具体数字<a class="headerlink" href="#73" title="Permanent link">&para;</a></h3>
+<p>n=10000 点，E≈2000000 边，10 次阈值更新：</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>10 次更新总成本</th>
+<th>实测</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>并查集</td>
+<td>10 × ΔE × α ≈ 10 × 200000 × 4 = 8M</td>
+<td>~6.5 秒</td>
+</tr>
+<tr>
+<td>BFS 重建</td>
+<td>10 × (V+E) = 10 × 2010000 = 20M</td>
+<td>~24 秒</td>
+</tr>
+</tbody>
+</table>
+<p>实测并查集快 3.7x（纯 Python 开销拉低了理论优势，C 实现差距更大）。内存上并查集 O(V) = 80KB，BFS O(V+E) = 30MB，省 400x。</p>
+<h3 id="74-bfsdfs">7.4 什么时候用 BFS/DFS<a class="headerlink" href="#74-bfsdfs" title="Permanent link">&para;</a></h3>
+<p>并查集只能判"是否连通"，<strong>不能</strong>：</p>
+<ul>
+<li>找最短路径（BFS 的本职工作）</li>
+<li>遍历连通分量里的所有节点（BFS/DFS 可以，并查集要扫全图数根）</li>
+<li>处理带权图的最短路（Dijkstra/Bellman-Ford）</li>
+</ul>
+<p>所以并查集用于<strong>只需判连通/维护连通分量</strong>的场景。需要路径信息时用 BFS/DFS。</p>
+<h2 id="8">8. 复杂度汇总<a class="headerlink" href="#8" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>时间</th>
+<th>空间</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>init(n)</td>
+<td>O(n)</td>
+<td>O(n)</td>
+</tr>
+<tr>
+<td>find(x)</td>
+<td>O(α(n)) 摊还</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>union(x,y)</td>
+<td>O(α(n)) 摊还</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>connected(x,y)</td>
+<td>O(α(n)) 摊还</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>count_sets()</td>
+<td>O(1)</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>n 次 union + m 次 find</td>
+<td>O((n+m)·α(n))</td>
+<td>O(n)</td>
+</tr>
+</tbody>
+</table>
+<p>$\alpha(n) \leq 4$ 对任何实际 n，所以工程上所有操作都是 O(1)。这是并查集被称为"最接近魔法的数据结构"的原因。</p>
+<h2 id="9">9. 总结<a class="headerlink" href="#9" title="Permanent link">&para;</a></h2>
+<p>并查集的三个关键思想：</p>
+<ol>
+<li><strong>父指针表示</strong>：用森林表示集合，合并只需改一个指针</li>
+<li><strong>路径压缩</strong>：find 时把路径压平，后续 find 近 O(1)</li>
+<li><strong>按秩合并</strong>：矮树挂高树下，树高最多 O(log n)</li>
+</ol>
+<p>三者配合，得到 $O(\alpha(n))$ 摊还复杂度——对任何实际数据量都是常数时间。内存只 O(V)（不存邻接表），增量加边 O(α)（不重建）。这让并查集成为<strong>层次聚类、Kruskal MST、连通分量维护</strong>的首选数据结构。</p>
+<hr />
+<h2 id="ai">AI 应用<a class="headerlink" href="#ai" title="Permanent link">&para;</a></h2>
+<h1 id="ai-hac">并查集的 AI 应用：层次聚类 HAC 的连通分量维护<a class="headerlink" href="#ai-hac" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>本文档讲清「并查集在 AI 里干什么」。原理见 <code>principle.md</code>。核心应用：<strong>层次聚类（Hierarchical Agglomerative Clustering, HAC）</strong> 的连通分量维护。HAC 合并频繁，并查集的近 O(1) union 让增量维护极快，而 BFS 每次要重建 O(V+E)——这是并查集在 AI 里的杀手级应用。</p>
+</blockquote>
+<h2 id="1-ai">1. 聚类在 AI 里的应用<a class="headerlink" href="#1-ai" title="Permanent link">&para;</a></h2>
+<p><strong>聚类</strong>（Clustering）是无监督学习的核心任务：给定一堆没有标签的数据点，按相似性自动分簇。它在 AI 里无处不在：</p>
+<table>
+<thead>
+<tr>
+<th>应用</th>
+<th>场景</th>
+<th>聚类作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>客户分群</strong></td>
+<td>电商/广告</td>
+<td>按行为特征分客户群，精准营销</td>
+</tr>
+<tr>
+<td><strong>图像分割</strong></td>
+<td>计算机视觉</td>
+<td>按像素相似性分区域，提取物体</td>
+</tr>
+<tr>
+<td><strong>文档主题</strong></td>
+<td>NLP/搜索</td>
+<td>按词频分文档簇，自动发现主题</td>
+</tr>
+<tr>
+<td><strong>异常检测</strong></td>
+<td>风控/运维</td>
+<td>远离所有簇的点是异常</td>
+</tr>
+<tr>
+<td><strong>基因表达</strong></td>
+<td>生物信息</td>
+<td>按表达模式分基因簇，找功能模块</td>
+</tr>
+<tr>
+<td><strong>向量检索</strong></td>
+<td>RAG/推荐</td>
+<td>聚类加速近似最近邻搜索</td>
+</tr>
+</tbody>
+</table>
+<p>聚类算法分三大类：</p>
+<ol>
+<li><strong>划分式</strong>（K-Means）：指定 K 个簇，迭代分配</li>
+<li><strong>密度式</strong>（DBSCAN）：高密度区域连成簇</li>
+<li><strong>层次式</strong>（HAC）：逐步合并/分裂，产生聚类树</li>
+</ol>
+<p><strong>层次聚类</strong>的独特价值是产生<strong>树状图（dendrogram）</strong>——一次运行得到所有粒度的聚类，用户按需切树。这让 HAC 在探索性分析中不可替代。</p>
+<h2 id="2-hac">2. 层次聚类 HAC 原理<a class="headerlink" href="#2-hac" title="Permanent link">&para;</a></h2>
+<p><strong>层次聚类</strong>（Hierarchical Agglomerative Clustering）从每个点自成一簇开始，<strong>逐步合并最相似的两个簇</strong>，直到所有点合为一簇（或达到目标簇数）。</p>
+<h3 id="21_1">2.1 算法骨架<a class="headerlink" href="#21_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>HAC(点集 P, 距离函数 d):
+  clusters = {{p} for p in P}          # 初始每个点一簇
+  while len(clusters) &gt; 1:
+    (A, B) = argmin d(Ci, Cj)          # 找最近的两个簇
+    clusters.remove(A); clusters.remove(B)
+    clusters.add(A ∪ B)                # 合并
+  return 合并历史（树状图）
+</code></pre></div>
+<p>每步找最近的两个簇合并。簇间距离的定义决定变体：</p>
+<table>
+<thead>
+<tr>
+<th>变体</th>
+<th>簇间距离</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>单链接</strong>（Single Linkage）</td>
+<td>$\min_{a \in A, b \in B} d(a,b)$</td>
+<td>最近的两点距离</td>
+</tr>
+<tr>
+<td><strong>全链接</strong>（Complete Linkage）</td>
+<td>$\max_{a \in A, b \in B} d(a,b)$</td>
+<td>最远的两点距离</td>
+</tr>
+<tr>
+<td><strong>平均链接</strong>（Average Linkage）</td>
+<td>$\text{mean}_{a \in A, b \in B} d(a,b)$</td>
+<td>所有点对平均</td>
+</tr>
+<tr>
+<td><strong>Ward</strong></td>
+<td>合并后方差增量</td>
+<td>最小化簇内方差</td>
+</tr>
+</tbody>
+</table>
+<h3 id="22-hac">2.2 单链接 HAC 与连通分量<a class="headerlink" href="#22-hac" title="Permanent link">&para;</a></h3>
+<p><strong>单链接层次聚类</strong>有一个优美性质：它等价于<strong>按距离阈值连边后的连通分量</strong>。</p>
+<div class="highlight"><pre><span></span><code>单链接 HAC 在阈值 t 时的聚类 = 图 G(t) 的连通分量
+
+其中 G(t) 的边集 = {(i,j) : d(p_i, p_j) &lt;= t}
+</code></pre></div>
+<p>直觉：单链接用"最近两点距离"定义簇间距离，所以两个簇合并当且仅当它们之间有一条边距离 ≤ t。这正好是图 G(t) 的连通分量。</p>
+<div class="highlight"><pre><span></span><code>点集:  ●  ●    ●●●     ●●
+       1  2    345      67
+
+阈值 t=1.0 时的图 G(1.0):
+  1   2    3-4-5    6-7
+  (孤立)(连通分量)(连通分量)
+
+聚类: {1}, {2}, {3,4,5}, {6,7}  = 4 个簇
+
+阈值 t=2.0 时:
+  1-2    3-4-5    6-7
+  (连通分量)(连通分量)(连通分量)
+
+聚类: {1,2}, {3,4,5}, {6,7}  = 3 个簇
+</code></pre></div>
+<p><strong>关键洞察</strong>：单链接 HAC 就是逐步增大阈值，每次新边出现，两个连通分量合并。这正是<strong>并查集的增量 union</strong> 场景！</p>
+<h3 id="23-hac">2.3 HAC 的实现路线<a class="headerlink" href="#23-hac" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>路线</th>
+<th>数据结构</th>
+<th>时间复杂度</th>
+<th>适用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>朴素</strong></td>
+<td>距离矩阵 + 簇列表</td>
+<td>$O(n^3)$</td>
+<td>n &lt; 1000</td>
+</tr>
+<tr>
+<td><strong>优先队列</strong></td>
+<td>堆 + 簇间距离</td>
+<td>$O(n^2 \log n)$</td>
+<td>n &lt; 10000</td>
+</tr>
+<tr>
+<td><strong>单链接 + 并查集</strong></td>
+<td>边排序 + 并查集</td>
+<td>$O(n^2 + E \log E)$</td>
+<td>单链接专用，n &lt; 50000</td>
+</tr>
+<tr>
+<td><strong>scipy hierarchy</strong></td>
+<td>优化 C 实现</td>
+<td>$O(n^2)$</td>
+<td>生产级</td>
+</tr>
+</tbody>
+</table>
+<p>单链接 HAC 用并查集是最快的：把所有点对距离排序，按距离从小到大加入边，每次 union 两个簇。这本质是 <strong>Kruskal 算法</strong>在聚类上的应用。</p>
+<h2 id="3">3. 并查集维护连通分量<a class="headerlink" href="#3" title="Permanent link">&para;</a></h2>
+<h3 id="31-hac">3.1 单链接 HAC 的并查集实现<a class="headerlink" href="#31-hac" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">hac_single_linkage</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">thresholds</span><span class="p">):</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">DisjointSet</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>                           <span class="c1"># 初始每个点一集</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="n">find_all_edges_sorted</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>          <span class="c1"># 所有点对按距离排序</span>
+    <span class="n">history</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">next_edge</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">thresholds</span><span class="p">:</span>                          <span class="c1"># 逐步增大阈值</span>
+        <span class="k">while</span> <span class="n">next_edge</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span> <span class="ow">and</span> <span class="n">edges</span><span class="p">[</span><span class="n">next_edge</span><span class="p">]</span><span class="o">.</span><span class="n">dist</span> <span class="o">&lt;=</span> <span class="n">t</span><span class="p">:</span>
+            <span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">edges</span><span class="p">[</span><span class="n">next_edge</span><span class="p">]</span><span class="o">.</span><span class="n">u</span><span class="p">,</span> <span class="n">edges</span><span class="p">[</span><span class="n">next_edge</span><span class="p">]</span><span class="o">.</span><span class="n">v</span>
+            <span class="n">ds</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>                        <span class="c1"># 新边出现，合并两个簇</span>
+            <span class="n">next_edge</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">n_sets</span><span class="p">)</span>                 <span class="c1"># 当前簇数 = 连通分量数</span>
+    <span class="k">return</span> <span class="n">history</span>
+</code></pre></div>
+<p>核心：<strong>边按距离排序，逐步加入，每次 union 两个簇</strong>。并查集维护"哪些点在同一簇"。</p>
+<h3 id="32_1">3.2 为什么并查集是最佳选择<a class="headerlink" href="#32_1" title="Permanent link">&para;</a></h3>
+<p>HAC 的核心操作是<strong>合并</strong>——每次把两个簇合体。并查集的 union 就是为此设计：</p>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>并查集</th>
+<th>BFS 重建</th>
+<th>优势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>合并两个簇</td>
+<td>union O(α) ≈ O(1)</td>
+<td>重建邻接表 + BFS O(V+E)</td>
+<td>快 V+E 倍</td>
+</tr>
+<tr>
+<td>查簇数</td>
+<td>n_sets O(1)</td>
+<td>数连通分量 O(V+E)</td>
+<td>快 V+E 倍</td>
+</tr>
+<tr>
+<td>查两点同簇</td>
+<td>find O(α)</td>
+<td>BFS O(V+E)</td>
+<td>快 V+E 倍</td>
+</tr>
+<tr>
+<td>内存</td>
+<td>parent[] O(V)</td>
+<td>邻接表 O(V+E)</td>
+<td>省 E 倍</td>
+</tr>
+</tbody>
+</table>
+<p>HAC 合并 n-1 次（从 n 个单点簇到 1 个全簇）。并查集总成本 $O(n \cdot \alpha)$，BFS 总成本 $O(n \cdot (V+E))$。差距巨大。</p>
+<h3 id="33_1">3.3 增量合并的场景<a class="headerlink" href="#33_1" title="Permanent link">&para;</a></h3>
+<p>HAC 不是一次性算所有阈值，而是<strong>逐步增大阈值，每次只新增一些边</strong>：</p>
+<div class="highlight"><pre><span></span><code>阈值序列: t=0.3, 0.5, 0.7, 1.0, 1.5, 2.0
+
+t=0.3:  加入 100 条边    →  并查集 union 100 次 O(100·α)
+t=0.5:  新增 500 条边    →  并查集 union 500 次 O(500·α)  （只处理新增！）
+t=0.7:  新增 2000 条边   →  并查集 union 2000 次 O(2000·α)
+...
+
+并查集总成本 = O(E · α)  （每条边只 union 一次）
+
+BFS 每个阈值都要重建:
+t=0.3:  重建 O(V + 100)
+t=0.5:  重建 O(V + 600)    （重新建整个邻接表）
+t=0.7:  重建 O(V + 2600)
+...
+
+BFS 总成本 = O(k · (V + E))  （k 个阈值，每次重建）
+</code></pre></div>
+<p><strong>并查集的增量优势</strong>：每条边只处理一次，总 O(E·α)。BFS 每个阈值重建，总 O(k·(V+E))。k=10 时并查集快 10 倍。</p>
+<h2 id="4-demo">4. demo 结果解读<a class="headerlink" href="#4-demo" title="Permanent link">&para;</a></h2>
+<p>本 demo（<code>10_disjoint_set/python/demo.py</code>）对比并查集 vs BFS 在层次聚类中的性能。</p>
+<h3 id="41">4.1 实验设置<a class="headerlink" href="#41" title="Permanent link">&para;</a></h3>
+<ul>
+<li>生成 n 个 2D 点，分布在多个高斯团里</li>
+<li>用 cKDTree 高效找所有距离 ≤ 阈值的边</li>
+<li>两种方法找连通分量：</li>
+<li><code>cluster_dset</code>：并查集流式 union，不存邻接表</li>
+<li><code>cluster_bfs</code>：建邻接表 + BFS</li>
+<li>增量场景：10 个阈值批次，逐步增大阈值</li>
+</ul>
+<h3 id="42_1">4.2 一次性计算结果<a class="headerlink" href="#42_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>n</th>
+<th>边数</th>
+<th>平均度</th>
+<th>并查集时间</th>
+<th>BFS 时间</th>
+<th>内存比 (BFS/并查集)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1000</td>
+<td>56k</td>
+<td>113</td>
+<td>87 ms</td>
+<td>66 ms</td>
+<td>57x</td>
+</tr>
+<tr>
+<td>5000</td>
+<td>571k</td>
+<td>228</td>
+<td>841 ms</td>
+<td>728 ms</td>
+<td>115x</td>
+</tr>
+<tr>
+<td>10000</td>
+<td>1.94M</td>
+<td>389</td>
+<td>2859 ms</td>
+<td>2407 ms</td>
+<td>195x</td>
+</tr>
+<tr>
+<td>50000</td>
+<td>37.8M</td>
+<td>1512</td>
+<td>57125 ms</td>
+<td>51247 ms</td>
+<td>756x</td>
+</tr>
+</tbody>
+</table>
+<p><strong>解读</strong>：
+- <strong>时间</strong>：纯 Python 并查集略慢于 BFS（函数调用开销 + 稠密图 BFS 的 list 迭代效率高）。C 实现并查集会快很多（无函数调用开销）
+- <strong>内存</strong>：并查集 O(V) vs BFS O(V+E)，省 57x~756x。n=50000 时 BFS 邻接表占 590MB，并查集只 781KB——<strong>这是并查集的决定性优势</strong></p>
+<h3 id="43-hac">4.3 增量合并结果（HAC 核心场景）<a class="headerlink" href="#43-hac" title="Permanent link">&para;</a></h3>
+<p>n=10000，10 个阈值批次（0.3 → 2.0）：</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>总时间</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>并查集增量</td>
+<td>6459 ms</td>
+<td>每个阈值只 union 新增边</td>
+</tr>
+<tr>
+<td>BFS 重建</td>
+<td>23748 ms</td>
+<td>每个阈值重建邻接表 + BFS</td>
+</tr>
+<tr>
+<td><strong>加速比</strong></td>
+<td><strong>3.68x</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>各阈值下簇数变化（两种方法一致）：</p>
+<div class="highlight"><pre><span></span><code>阈值:   0.30  0.50  0.70  0.90  1.00  1.10  1.20  1.30  1.50  2.00
+簇数:    13    2     1     1     1     1     1     1     1     1
+</code></pre></div>
+<p>阈值 0.3 时 13 个簇（同簇点已连通，异簇未连），0.5 时 2 个簇（大部分合并），0.7 时全合为 1 簇。</p>
+<p>不同点数下增量合并的加速比：</p>
+<table>
+<thead>
+<tr>
+<th>n</th>
+<th>并查集</th>
+<th>BFS</th>
+<th>加速比</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2000</td>
+<td>294 ms</td>
+<td>1109 ms</td>
+<td>3.77x</td>
+</tr>
+<tr>
+<td>5000</td>
+<td>1649 ms</td>
+<td>5897 ms</td>
+<td>3.58x</td>
+</tr>
+<tr>
+<td>10000</td>
+<td>6323 ms</td>
+<td>23679 ms</td>
+<td>3.75x</td>
+</tr>
+<tr>
+<td>20000</td>
+<td>25725 ms</td>
+<td>97549 ms</td>
+<td>3.79x</td>
+</tr>
+</tbody>
+</table>
+<p><strong>加速比稳定在 3.7x 左右</strong>，因为并查集总成本 O(E·α)，BFS 总成本 O(k·(V+E))，比值约 k/α ≈ 10/4 = 2.5（实际 3.7，因为 BFS 重建还有邻接表分配开销）。</p>
+<h3 id="44-python">4.4 为什么纯 Python 并查集一次性计算略慢<a class="headerlink" href="#44-python" title="Permanent link">&para;</a></h3>
+<p>纯 Python 的并查集每条边调用 <code>union</code>（2 次 <code>find</code> + 比较 + 路径压缩），函数调用开销大。BFS 建邻接表用 <code>list.append</code>（C 实现，快），BFS 遍历用 <code>for nb in adj[node]</code>（list 迭代，C 实现）。</p>
+<p><strong>C 实现并查集没有这个问题</strong>——本 C 测试中 200000 次 union + 200000 次 connected 只用 14ms。生产级并查集（C/C++）一次性计算也快于 BFS。</p>
+<h3 id="45">4.5 内存优势是决定性的<a class="headerlink" href="#45" title="Permanent link">&para;</a></h3>
+<p>即使时间相近，并查集的内存优势巨大：</p>
+<div class="highlight"><pre><span></span><code>n=50000, E=37.8M:
+  并查集: parent[] + rank[] = 50000 * 8 * 2 = 800 KB
+  BFS:    邻接表 = 50000 * 8 + 37.8M * 2 * 8 = 590 MB
+  比值:   756x
+</code></pre></div>
+<p>对于大规模数据，BFS 的 O(V+E) 内存可能放不下，而并查集 O(V) 总能放下。这是并查集在大规模层次聚类中的关键优势。</p>
+<h2 id="5-scipy-hierarchy">5. 生产级实现：scipy hierarchy<a class="headerlink" href="#5-scipy-hierarchy" title="Permanent link">&para;</a></h2>
+<p>生产环境不用手写并查集，用 <code>scipy.cluster.hierarchy</code>：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">scipy.cluster.hierarchy</span><span class="w"> </span><span class="kn">import</span> <span class="n">linkage</span><span class="p">,</span> <span class="n">fcluster</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.spatial.distance</span><span class="w"> </span><span class="kn">import</span> <span class="n">pdist</span>
+
+<span class="c1"># 1. 算所有点对距离（ condensed 形式）</span>
+<span class="n">distances</span> <span class="o">=</span> <span class="n">pdist</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>                    <span class="c1"># O(n²) 内存</span>
+
+<span class="c1"># 2. 层次聚类（C 实现，内部用并查集）</span>
+<span class="n">Z</span> <span class="o">=</span> <span class="n">linkage</span><span class="p">(</span><span class="n">distances</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">'single'</span><span class="p">)</span>      <span class="c1"># O(n² log n)</span>
+
+<span class="c1"># 3. 按阈值切簇</span>
+<span class="n">labels</span> <span class="o">=</span> <span class="n">fcluster</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">criterion</span><span class="o">=</span><span class="s1">'distance'</span><span class="p">)</span>  <span class="c1"># O(n)</span>
+</code></pre></div>
+<h3 id="51-scipy-hierarchy">5.1 scipy hierarchy 的优化<a class="headerlink" href="#51-scipy-hierarchy" title="Permanent link">&para;</a></h3>
+<p>scipy 的 <code>linkage</code> 用优化的 C 实现，内部核心就是<strong>并查集</strong>：</p>
+<ol>
+<li><strong>单链接</strong>：用 Kruskal 思路 + 并查集，O(n²) 排序边 + O(n·α) 合并</li>
+<li><strong>全链接/平均链接/Ward</strong>：用优先队列 + 距离更新，O(n² log n)</li>
+<li><strong>fcluster</strong>：在合并历史上二分切簇，O(n)</li>
+</ol>
+<h3 id="52">5.2 什么时候手写并查集<a class="headerlink" href="#52" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>选择</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>标准层次聚类</td>
+<td>scipy hierarchy</td>
+<td>优化 C 实现，接口完整</td>
+</tr>
+<tr>
+<td>流式数据（边一条条来）</td>
+<td>手写并查集</td>
+<td>scipy 不支持增量</td>
+</tr>
+<tr>
+<td>自定义合并逻辑</td>
+<td>手写并查集</td>
+<td>灵活控制 union 时机</td>
+</tr>
+<tr>
+<td>超大规模（内存不够）</td>
+<td>手写并查集</td>
+<td>O(V) 内存，scipy 要 O(n²) 存距离矩阵</td>
+</tr>
+<tr>
+<td>教学/理解原理</td>
+<td>手写并查集</td>
+<td>理解近 O(1) 的来源</td>
+</tr>
+</tbody>
+</table>
+<p>scipy 的 <code>pdist</code> 要存 $O(n^2)$ 距离矩阵，n=50000 时 10GB——放不下。这时用 cKDTree 找边 + 手写并查集，只 O(V+E) 内存，能处理更大规模。</p>
+<h3 id="53-hdbscan">5.3 HDBSCAN：层次聚类的现代升级<a class="headerlink" href="#53-hdbscan" title="Permanent link">&para;</a></h3>
+<p><strong>HDBSCAN</strong>（Hierarchical DBSCAN）是层次聚类 + 密度聚类的结合，是当前最流行的聚类算法之一：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">hdbscan</span><span class="w"> </span><span class="kn">import</span> <span class="n">HDBSCAN</span>
+<span class="n">clusterer</span> <span class="o">=</span> <span class="n">HDBSCAN</span><span class="p">(</span><span class="n">min_cluster_size</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">labels</span> <span class="o">=</span> <span class="n">clusterer</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+</code></pre></div>
+<p>HDBSCAN 内部也用并查集维护连通分量——构建互达距离的 MST 时用 Kruskal + 并查集。这再次说明并查集在聚类算法中的核心地位。</p>
+<h2 id="6-ai">6. 并查集在其他 AI 算法中的应用<a class="headerlink" href="#6-ai" title="Permanent link">&para;</a></h2>
+<h3 id="61-kruskal">6.1 Kruskal 最小生成树<a class="headerlink" href="#61-kruskal" title="Permanent link">&para;</a></h3>
+<p>Kruskal 算法找 MST 时，按边权排序，依次加入不构成环的边。"不构成环"就是"两端不在同一连通分量"——并查集判连通：</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">kruskal</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">edges</span><span class="p">):</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">DisjointSet</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="n">edges</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>
+    <span class="n">mst</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ds</span><span class="o">.</span><span class="n">connected</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">u</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">v</span><span class="p">):</span>    <span class="c1"># O(α) 判环</span>
+            <span class="n">ds</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">u</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">v</span><span class="p">)</span>            <span class="c1"># O(α) 合并</span>
+            <span class="n">mst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mst</span><span class="p">)</span> <span class="o">==</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span> <span class="k">break</span>
+    <span class="k">return</span> <span class="n">mst</span>
+</code></pre></div>
+<p>总成本 $O(E \log E + E \cdot \alpha)$。并查集让"判环"从 BFS 的 O(V+E) 降到 O(α)。</p>
+<h3 id="62">6.2 图神经网络的消息聚合<a class="headerlink" href="#62" title="Permanent link">&para;</a></h3>
+<p>GNN 在大图上做消息传递时，常用<strong>图分区</strong>把大图切成小块。分区后要维护"哪些节点在同一块"——并查集。增量切分（加边改变分区）时并查集的 O(α) union 优势明显。</p>
+<h3 id="63">6.3 并行图计算<a class="headerlink" href="#63" title="Permanent link">&para;</a></h3>
+<p>图计算的并行框架（GraphX、Giraph）用并查集做<strong>跨分区连通分量合并</strong>：每个分区独立算连通分量，然后跨分区合并时用并查集 union 不同分区的代表元。并查集的 O(α) 让合并阶段极快。</p>
+<h3 id="64">6.4 半监督标签传播<a class="headerlink" href="#64" title="Permanent link">&para;</a></h3>
+<p>标签传播算法中，已知标签的点通过图结构把标签扩散到未知点。维护"哪些点已确定标签"可以用并查集——合并已确定和未确定的点集，O(α) 每次。</p>
+<h2 id="7">7. 总结<a class="headerlink" href="#7" title="Permanent link">&para;</a></h2>
+<p>并查集在 AI 里的核心应用是<strong>层次聚类的连通分量维护</strong>：</p>
+<ol>
+<li><strong>单链接 HAC = 按距离阈值连边的连通分量</strong>：并查集天然适合</li>
+<li><strong>合并频繁是 HAC 的本质</strong>：并查集 union O(α) ≈ O(1)，BFS 重建 O(V+E)</li>
+<li><strong>增量加边只 union 新边</strong>：总 O(E·α)，BFS 每次重建 O(k·(V+E))</li>
+<li><strong>内存 O(V) 不存邻接表</strong>：比 BFS 省 E 倍，大规模数据关键</li>
+</ol>
+<p>demo 实测：增量合并并查集快 3.7x，内存省 756x。生产级用 scipy hierarchy（内部也是并查集），超大规模用手写并查集 + cKDTree（省 O(n²) 距离矩阵内存）。</p>
+<p>并查集的近 O(1) 合并是<strong>层次聚类、Kruskal MST、连通分量维护</strong>的首选——这就是"路径压缩 + 按秩合并"在 AI 里的价值。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.indexes", "navigation.tracking", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

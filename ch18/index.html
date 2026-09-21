@@ -1,0 +1,2598 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="从底层实现到生产级应用——数据结构在 AI 系统优化与应用工程中的真实作用">
+      
+      
+        <meta name="author" content="wanglh39">
+      
+      
+        <link rel="canonical" href="https://wanglh39.github.io/ds-ai-teaching/ch18/">
+      
+      
+        <link rel="prev" href="../ch17/">
+      
+      
+        <link rel="next" href="../ch19/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>18 模型部署与推理服务 - 数据结构 × AI 优化</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+SC:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans SC";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#18" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href=".." title="数据结构 × AI 优化" class="md-header__button md-logo" aria-label="数据结构 × AI 优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            数据结构 × AI 优化
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              18 模型部署与推理服务
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换至暗色模式"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换至暗色模式" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换至亮色模式"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换至亮色模式" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/wanglh39/ds-ai-teaching" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wanglh39/ds-ai-teaching
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  首页
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../intro/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  项目介绍
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../ch01/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  视角 A·系统优化
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../ch13/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  视角 B·应用工程
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../benchmarks/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  性能汇总
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="数据结构 × AI 优化" class="md-nav__button md-logo" aria-label="数据结构 × AI 优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    数据结构 × AI 优化
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/wanglh39/ds-ai-teaching" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wanglh39/ds-ai-teaching
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    首页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    项目介绍
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    项目介绍
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    设计思路
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../map/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    章节映射
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dual_view/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    双视角说明
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cross_index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    交叉索引
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    视角 A·系统优化
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    视角 A·系统优化
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 动态数组
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch02/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 链表
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch03/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 栈
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch04/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 循环队列
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch05/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05 哈希表
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch06/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 堆
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch07/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    07 Trie
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch08/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    08 KD-Tree
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch09/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    09 图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch10/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10 并查集
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch11/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11 页表/分块内存
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch12/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12 跳表+图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    视角 B·应用工程
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    视角 B·应用工程
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch13/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13 多智能体编排
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch14/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    14 任务调度与批处理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch15/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    15 上下文工程与记忆
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch16/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    16 RAG 与知识检索
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch17/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    17 数据管道与流式处理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    18 模型部署与推理服务
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    18 模型部署与推理服务
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要回答的问题
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        扩展专题定位
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#demo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        demo 概览
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        跑法
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        状态
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原理
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch19/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    19 状态机与工作流
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch20/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    20 模型压缩
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    性能汇总
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要回答的问题
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        扩展专题定位
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#demo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        demo 概览
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        跑法
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        状态
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原理
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="18">第 18 章 · 模型部署与推理服务（扩展专题）<a class="headerlink" href="#18" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>AI 场景：大模型（LLM）部署推理服务的全链路优化
+数据结构：计算图（算子融合）+ 堆（请求调度）+ 一致性哈希（负载均衡）+ 页表（显存管理）</p>
+</blockquote>
+<h2 id="_1">本章要回答的问题<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>几百个算子的计算图如何减少 kernel launch？（算子融合，14→11 kernel/block）</li>
+<li>混合优先级的推理请求如何调度？（堆/优先队列，SLA 违约率 95%→73%）</li>
+<li>多 GPU 分发请求，扩缩容时如何减少迁移？（一致性哈希，迁移 76%→25%）</li>
+<li>KV cache 显存如何按需分配不浪费？（页表/PagedAttention，利用率 13%→89%）</li>
+<li>4 种数据结构如何协奏完成推理服务？</li>
+</ul>
+<h2 id="_2">扩展专题定位<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p>前 12 章是「一个数据结构 → 一个 AI 优化」。第 13 章起是扩展专题：<strong>一个 AI 应用场景 → 多种数据结构协作</strong>。本章展示计算图、堆、一致性哈希、页表如何协作解决大模型推理服务的全链路问题。</p>
+<h2 id="_3">目录<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>18_model_deploy/
+├── python/
+│   └── demo.py              # 推理服务 demo（4 种数据结构协作）
+├── docs/
+│   ├── principle.md         # 4 种数据结构原理 + 协作机制
+│   └── ai_application.md    # 模型部署应用（vLLM / TensorRT-LLM / Triton）
+├── figures/                 # 性能对比图
+└── README.md
+</code></pre></div>
+<h2 id="demo">demo 概览<a class="headerlink" href="#demo" title="Permanent link">&para;</a></h2>
+<p>模拟完整大模型推理服务，4 种数据结构协作：</p>
+<div class="highlight"><pre><span></span><code>推理请求到达
+  ├─→ [堆/优先队列]   请求调度：按 SLA/优先级 pop，高优先级先服务
+  ├─→ [一致性哈希环]  负载均衡：分发到多 GPU，节点增减时迁移量小
+  ├─→ [计算图]        算子融合：合并相邻 element-wise 算子，减少 kernel launch
+  └─→ [页表]          显存管理：PagedAttention 分块分配 KV cache
+</code></pre></div>
+<ul>
+<li><code>OperatorFusion</code>：计算图 DAG + 拓扑序贪心融合 element-wise 算子</li>
+<li><code>RequestScheduler</code>：heapq 优先队列，(-priority, arrive_ts, req_id) tie-breaker</li>
+<li><code>ConsistentHashRing</code>：有序数组 + bisect 二分，虚拟节点解决倾斜</li>
+<li><code>MemoryPaged</code>：物理块池 + 页表 + 空闲链表，按需分配 block</li>
+</ul>
+<p>性能对比：
+1. 算子融合前后 kernel 数（168→132，减少 21.4%）
+2. 优先级调度 vs FIFO（SLA 违约 219 vs 285）
+3. 一致性哈希 vs 取模哈希（迁移 254 vs 763，3x 更优）
+4. 分页显存 vs 连续分配（利用率 88.55% vs 12.60%，7x 更优）</p>
+<h2 id="_4">跑法<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>18_model_deploy/python/demo.py
+</code></pre></div>
+<h2 id="_5">状态<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<p>已完成：demo + 文档 + 性能对比图，验证通过。</p>
+<hr />
+<h2 id="_6">原理<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<h1 id="18_1">第 18 章 · 模型部署与推理服务 — 数据结构原理<a class="headerlink" href="#18_1" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>本章涉及 4 种数据结构：<strong>计算图（DAG）</strong>、<strong>堆（优先队列）</strong>、<strong>一致性哈希环</strong>、<strong>页表</strong>。
+它们在大模型推理服务中各司其职，协作完成「请求调度 → 负载均衡 → 算子融合 → 显存管理」的全链路。</p>
+</blockquote>
+<hr />
+<h2 id="1-dag">1. 计算图（DAG）— 算子融合的载体<a class="headerlink" href="#1-dag" title="Permanent link">&para;</a></h2>
+<h3 id="11">1.1 基本概念<a class="headerlink" href="#11" title="Permanent link">&para;</a></h3>
+<p>计算图（computational graph）是有向无环图（DAG）：节点是算子（operator），边是张量流动。
+大模型（如 Transformer）的前向传播天然表示为计算图。</p>
+<div class="highlight"><pre><span></span><code>   x ─→ LayerNorm ─→ MatMul(Q) ─┐
+        │           MatMul(K) ─┤→ Attention ─→ Scale ─→ Softmax ─→ MatMul ─→ Add(residual)
+        └───────────────────────┘                                              │
+   ────────────────────────────────────────────────────────────────────────────┘
+   → LayerNorm ─→ MatMul(FFN1) ─→ GELU ─→ MatMul(FFN2) ─→ Add(residual) ─→ 输出
+</code></pre></div>
+<p>每个算子单独执行时，需要 launch 一个 GPU kernel。开销来自：
+- <strong>kernel launch 本身</strong>：每次 ~5-10 μs（GPU 启动 kernel 的固定开销）
+- <strong>中间张量读写</strong>：算子间中间结果写回 HBM（显存），下一个算子再读出</p>
+<h3 id="12-operator-fusion">1.2 算子融合（Operator Fusion）<a class="headerlink" href="#12-operator-fusion" title="Permanent link">&para;</a></h3>
+<p>算子融合把相邻的算子合并成一个 kernel，减少 kernel 数量和中间张量读写。</p>
+<p><strong>最典型的融合：element-wise 算子链</strong></p>
+<p>element-wise 算子（Add、ReLU、Scale、GELU 等）对每个元素独立计算，天然可融合：
+- 融合前：<code>y = ReLU(Add(a, b))</code> → 2 个 kernel，1 个中间张量
+- 融合后：<code>y = AddReLU(a, b)</code> → 1 个 kernel，中间结果留在寄存器</p>
+<p><strong>producer-consumer 融合</strong></p>
+<p>更一般地，如果一个算子（producer）只有一个消费者（consumer），且 consumer 是 element-wise，
+可以把 consumer 融合进 producer：
+- producer 计算完一个 tile 后，直接在寄存器里做 consumer 的 element-wise 运算
+- 中间结果不写回 HBM</p>
+<h3 id="13">1.3 实现：邻接表 + 拓扑序贪心融合<a class="headerlink" href="#13" title="Permanent link">&para;</a></h3>
+<p>本 demo 用邻接表存 DAG，融合策略：</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ComputeGraph</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fuse_elementwise</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># 1. 统计每个算子的消费者数</span>
+        <span class="c1"># 2. 按拓扑序扫描</span>
+        <span class="c1"># 3. 当前算子是 element-wise 且只有一个前驱</span>
+        <span class="c1">#    且前驱只有一个消费者 → 融合</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">topo_order</span><span class="p">():</span>
+            <span class="n">op</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ops</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">op</span><span class="o">.</span><span class="n">is_elementwise</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_preds</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">consumer_count</span><span class="p">[</span><span class="n">pred</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">op</span><span class="o">.</span><span class="n">fused</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># 不再单独 launch kernel</span>
+</code></pre></div>
+<p>融合条件：
+- 当前算子是 element-wise
+- 只有一个图内前驱（避免多输入的复杂融合）
+- 前驱只有一个消费者（避免前驱被复制）</p>
+<h3 id="14-transformer-block">1.4 Transformer block 的融合效果<a class="headerlink" href="#14-transformer-block" title="Permanent link">&para;</a></h3>
+<p>一个简化的 Transformer block 有 14 个算子：</p>
+<table>
+<thead>
+<tr>
+<th>算子</th>
+<th>类型</th>
+<th>可融合？</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LayerNorm</td>
+<td>reduction</td>
+<td>否</td>
+</tr>
+<tr>
+<td>MatMul × 4 (Q/K/V/out)</td>
+<td>matmul</td>
+<td>否</td>
+</tr>
+<tr>
+<td>Attention</td>
+<td>custom</td>
+<td>否</td>
+</tr>
+<tr>
+<td>Scale</td>
+<td>element-wise</td>
+<td>是（接 Attention）</td>
+</tr>
+<tr>
+<td>Softmax</td>
+<td>reduction</td>
+<td>否</td>
+</tr>
+<tr>
+<td>Add × 2 (residual)</td>
+<td>element-wise</td>
+<td>否（2 个前驱）</td>
+</tr>
+<tr>
+<td>GELU</td>
+<td>element-wise</td>
+<td>是（接 MatMul）</td>
+</tr>
+</tbody>
+</table>
+<p>本 demo 融合 3 个算子（Scale、GELU、以及一个 element-wise 链），kernel 数从 14 降到 11（减少 21%）。</p>
+<h3 id="15">1.5 复杂度<a class="headerlink" href="#15" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>复杂度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>构造图</td>
+<td>O(V + E)</td>
+</tr>
+<tr>
+<td>拓扑序</td>
+<td>O(V + E)</td>
+</tr>
+<tr>
+<td>贪心融合</td>
+<td>O(V + E)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="16">1.6 生产级实现<a class="headerlink" href="#16" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>XLA</strong>（TensorFlow/JAX）：自动融合 element-wise + reduction，生成 GPU/TPU 代码</li>
+<li><strong>MLIR</strong>（PyTorch/TorchInductor）：基于 MLIR 的图融合 + codegen</li>
+<li><strong>TensorRT</strong>：NVIDIA 的推理优化器，融合 conv+bn+relu、matmul+gelu 等</li>
+<li><strong>Triton</strong>（OpenAI）：DSL 写 fused kernel，vLLM/TorchInductor 底层用 Triton</li>
+</ul>
+<hr />
+<h2 id="2">2. 堆 / 优先队列 — 请求调度的核心<a class="headerlink" href="#2" title="Permanent link">&para;</a></h2>
+<h3 id="21">2.1 基本概念<a class="headerlink" href="#21" title="Permanent link">&para;</a></h3>
+<p>堆是完全二叉树，满足堆序性质：父节点优先级 ≥ 子节点。用数组实现：
+- 根在 <code>heap[0]</code>（最大/最小优先级）
+- 节点 i 的父在 <code>(i-1)//2</code>，左子在 <code>2i+1</code>，右子在 <code>2i+2</code></p>
+<p>Python <code>heapq</code> 是小顶堆。要实现大顶堆（优先级高的先出），存 <code>-priority</code>。</p>
+<h3 id="22">2.2 为什么推理服务需要优先级调度？<a class="headerlink" href="#22" title="Permanent link">&para;</a></h3>
+<p>大模型推理服务面对混合请求：</p>
+<table>
+<thead>
+<tr>
+<th>请求类型</th>
+<th>优先级</th>
+<th>SLA 要求</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VIP 用户在线交互</td>
+<td>5（最高）</td>
+<td>&lt; 100ms</td>
+</tr>
+<tr>
+<td>普通用户在线交互</td>
+<td>3</td>
+<td>&lt; 200ms</td>
+</tr>
+<tr>
+<td>后台批处理</td>
+<td>1</td>
+<td>无硬性要求</td>
+</tr>
+</tbody>
+</table>
+<p>如果用 FIFO（先到先服务），一个低优先级的批处理请求可能排在 VIP 请求前面，
+导致 VIP 用户等待过久，SLA 违约。</p>
+<p><strong>优先级调度</strong>：每次 pop 优先级最高的请求，VIP 优先服务。</p>
+<h3 id="23-sla">2.3 SLA 违约率<a class="headerlink" href="#23-sla" title="Permanent link">&para;</a></h3>
+<p>SLA（Service Level Agreement）要求请求在 deadline 前完成。违约率 = 违约数 / 总数。</p>
+<ul>
+<li><strong>FIFO</strong>：不看优先级，所有请求平等竞争 → 高优先级请求容易违约</li>
+<li><strong>优先级调度</strong>：高优先级先服务 → 高优先级违约率低，低优先级可能违约（可接受）</li>
+</ul>
+<p>本 demo 在过载场景下（服务能力略低于请求速率）：
+- FIFO 违约率：285/300 = 95%
+- 优先级违约率：219/300 = 73%（高优先级请求几乎不违约）</p>
+<h3 id="24-heapq-tie-breaker">2.4 实现：heapq + tie-breaker<a class="headerlink" href="#24-heapq-tie-breaker" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">heapq</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">RequestScheduler</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_heap</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">push</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">):</span>
+        <span class="c1"># (-priority, arrive_ts, req_id, req)</span>
+        <span class="c1"># 负优先级 → 大优先级先出</span>
+        <span class="c1"># arrive_ts → 同优先级 FIFO</span>
+        <span class="c1"># req_id → 最终 tie-breaker，避免比较 InferenceRequest</span>
+        <span class="n">heapq</span><span class="o">.</span><span class="n">heappush</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_heap</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="n">req</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span> <span class="n">req</span><span class="o">.</span><span class="n">arrive_ts</span><span class="p">,</span> <span class="n">req</span><span class="o">.</span><span class="n">req_id</span><span class="p">,</span> <span class="n">req</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">heapq</span><span class="o">.</span><span class="n">heappop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_heap</span><span class="p">)[</span><span class="mi">3</span><span class="p">]</span>
+</code></pre></div>
+<p>tie-breaker 设计：
+- <code>-priority</code>：大优先级先出（小顶堆存负值）
+- <code>arrive_ts</code>：同优先级先到先服务
+- <code>req_id</code>：避免比较 <code>InferenceRequest</code> 对象（Python 3 不允许比较 dataclass）</p>
+<h3 id="25">2.5 复杂度<a class="headerlink" href="#25" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>复杂度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>push</td>
+<td>O(log n)</td>
+</tr>
+<tr>
+<td>pop</td>
+<td>O(log n)</td>
+</tr>
+<tr>
+<td>peek</td>
+<td>O(1)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="26">2.6 生产级实现<a class="headerlink" href="#26" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>vLLM</strong>：连续批处理 + 优先级调度，支持 preemption（高优先级抢占低优先级）</li>
+<li><strong>Triton Inference Server</strong>：多模型多队列，按优先级和模型实例调度</li>
+<li><strong>TensorRT-LLM</strong>：in-flight batching，动态优先级调整</li>
+<li><strong>Redis + Lua</strong>：分布式优先队列，跨节点调度</li>
+</ul>
+<hr />
+<h2 id="3">3. 一致性哈希环 — 负载均衡的低迁移方案<a class="headerlink" href="#3" title="Permanent link">&para;</a></h2>
+<h3 id="31">3.1 基本概念<a class="headerlink" href="#31" title="Permanent link">&para;</a></h3>
+<p>一致性哈希（consistent hashing）把节点和 key 都映射到同一个哈希环上，
+key 顺时针找最近的节点。</p>
+<div class="highlight"><pre><span></span><code>哈希环（0 ~ 2^64）:
+        node_A (hash=1000)
+       /
+      /  key1 → node_A
+     /
+    ──────────────── node_B (hash=3000)
+                    │
+                    │  key2 → node_B
+                    │
+                    node_C (hash=5000)
+</code></pre></div>
+<h3 id="32">3.2 为什么不用取模哈希？<a class="headerlink" href="#32" title="Permanent link">&para;</a></h3>
+<p>取模哈希：<code>node = hash(key) % N</code>。简单，但节点增减时 N 变化，几乎所有 key 重新映射。</p>
+<p><strong>场景</strong>：3 个 GPU worker → 加 1 个 GPU 扩容：
+- 取模哈希：<code>hash(key) % 3 → hash(key) % 4</code>，约 75% 的 key 要迁移
+- 一致性哈希：新节点只接管环上一段区间，约 25% 的 key 迁移</p>
+<p>本 demo 实测（3→4 节点，1000 keys）：
+- 取模哈希迁移：763/1000 = 76.3%
+- 一致性哈希迁移：254/1000 = 25.4%（约 1/N）</p>
+<h3 id="33-vnode">3.3 虚拟节点（vnode）<a class="headerlink" href="#33-vnode" title="Permanent link">&para;</a></h3>
+<p>节点少时，一致性哈希分布不均（某节点管很大一段环）。虚拟节点解决：
+- 每个真实节点在环上放 v 个虚拟节点（如 v=150）
+- 虚拟节点均匀撒在环上 → key 分布均匀</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ConsistentHashRing</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vnodes</span><span class="p">):</span>  <span class="c1"># 150 个虚拟节点</span>
+            <span class="n">slot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hash</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">node</span><span class="si">}</span><span class="s2">#</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="n">bisect</span><span class="o">.</span><span class="n">insort</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ring</span><span class="p">,</span> <span class="n">slot</span><span class="p">)</span>  <span class="c1"># 有序数组</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_slot_to_node</span><span class="p">[</span><span class="n">slot</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="n">slot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hash</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">bisect</span><span class="o">.</span><span class="n">bisect_right</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ring</span><span class="p">,</span> <span class="n">slot</span><span class="p">)</span>  <span class="c1"># 二分找顺时针下一个</span>
+        <span class="k">if</span> <span class="n">pos</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ring</span><span class="p">):</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># 环绕</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_slot_to_node</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_ring</span><span class="p">[</span><span class="n">pos</span><span class="p">]]</span>
+</code></pre></div>
+<h3 id="34">3.4 实现：有序数组 + 二分查找<a class="headerlink" href="#34" title="Permanent link">&para;</a></h3>
+<p>环用有序数组存虚拟节点槽位，<code>bisect</code> 二分查找 O(log(V×N))，V=虚拟节点数，N=节点数。</p>
+<ul>
+<li><code>add_node</code>：插入 v 个槽位，每个 O(V×N)（insort 需要移动）</li>
+<li><code>remove_node</code>：删除 v 个槽位</li>
+<li><code>get_node</code>：O(log(V×N)) 二分</li>
+</ul>
+<h3 id="35">3.5 复杂度<a class="headerlink" href="#35" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>复杂度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>add_node</td>
+<td>O(V × V×N)（insort 移动）</td>
+</tr>
+<tr>
+<td>remove_node</td>
+<td>O(V × V×N)</td>
+</tr>
+<tr>
+<td>get_node</td>
+<td>O(log(V×N))</td>
+</tr>
+</tbody>
+</table>
+<p>生产级用红黑树/跳表替代有序数组，add/remove 降到 O(V log(V×N))。</p>
+<h3 id="36">3.6 生产级实现<a class="headerlink" href="#36" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>vLLM</strong>：多 GPU worker 用 Ray + 一致性哈希分发请求</li>
+<li><strong>Nginx</strong>：<code>upstream</code> 一致性哈希模块（<code>hash $request_uri consistent</code>）</li>
+<li><strong>Redis Cluster</strong>：16384 个 slot（虚拟节点），一致性哈希分配</li>
+<li><strong>Cassandra/DynamoDB</strong>：一致性哈希 + 虚拟节点（v=256）做数据分片</li>
+</ul>
+<hr />
+<h2 id="4-pagedattention">4. 页表 — PagedAttention 的显存管理<a class="headerlink" href="#4-pagedattention" title="Permanent link">&para;</a></h2>
+<h3 id="41">4.1 基本概念<a class="headerlink" href="#41" title="Permanent link">&para;</a></h3>
+<p>页表（page table）是操作系统虚拟内存的核心：逻辑页 → 物理页的映射。
+大模型推理的 KV cache 显存管理借用同样的思想，称为 <strong>PagedAttention</strong>。</p>
+<h3 id="42-kv-cache">4.2 KV cache 的显存问题<a class="headerlink" href="#42-kv-cache" title="Permanent link">&para;</a></h3>
+<p>大模型推理时，每个请求的 KV cache 随生成长度增长：</p>
+<div class="highlight"><pre><span></span><code>请求 1: 生成 200 token → KV cache 占 200 × 2 × n_layer × d_model × sizeof(fp16) 字节
+请求 2: 生成 50 token  → KV cache 占 50 × ... 字节
+</code></pre></div>
+<p><strong>连续分配</strong>（传统做法）：为每个请求预分配 <code>max_seq_len</code> 的连续显存。</p>
+<p>问题：
+- <code>max_seq_len</code> 通常设很大（如 2048），但实际生成长度远小于此
+- 请求 2 只生成 50 token，却预占 2048 的空间 → 利用率 50/2048 ≈ 2.4%
+- 多个请求并发时，显存很快被预分配占满，无法接新请求</p>
+<h3 id="43-pagedattention">4.3 分页分配（PagedAttention）<a class="headerlink" href="#43-pagedattention" title="Permanent link">&para;</a></h3>
+<p>PagedAttention 把显存分成固定大小的小 block（如 16 token/block），按需分配：</p>
+<div class="highlight"><pre><span></span><code>连续分配:  请求1 [████████████████████████████████████] 预分配 2048
+           请求2 [███░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 预分配 2048，只用 50
+           → 利用率 ~3%
+
+分页分配:  请求1 [block0][block1][block2]...[block12]  按需 13 个 block
+           请求2 [block13]                       按需 1 个 block
+           → 利用率 ~88%
+</code></pre></div>
+<p><strong>页表</strong>：每个序列维护逻辑页 → 物理页的映射，物理页可分散在显存任意位置。</p>
+<div class="highlight"><pre><span></span><code>序列 1 的页表:
+  逻辑页 0 → 物理块 5
+  逻辑页 1 → 物理块 12
+  逻辑页 2 → 物理块 3
+  ...（物理块不连续，但逻辑上连续）
+</code></pre></div>
+<h3 id="44">4.4 实现：物理块池 + 页表 + 空闲链表<a class="headerlink" href="#44" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MemoryPaged</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_blocks</span><span class="p">,</span> <span class="n">block_size</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_blocks</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="n">Block</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">block_size</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_blocks</span><span class="p">)}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_page_table</span> <span class="o">=</span> <span class="p">{}</span>    <span class="c1"># seq_id → [物理块 ID 列表]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_free_list</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">num_blocks</span><span class="p">))</span>  <span class="c1"># 空闲块</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">allocate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq_id</span><span class="p">,</span> <span class="n">n_tokens</span><span class="p">):</span>
+        <span class="n">n_blocks</span> <span class="o">=</span> <span class="n">ceil</span><span class="p">(</span><span class="n">n_tokens</span> <span class="o">/</span> <span class="n">block_size</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">n_blocks</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_free_list</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>  <span class="c1"># 显存不足</span>
+        <span class="n">blocks</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_free_list</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_blocks</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_page_table</span><span class="p">[</span><span class="n">seq_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">blocks</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq_id</span><span class="p">,</span> <span class="n">n_new</span><span class="p">):</span>  <span class="c1"># 序列增长时追加块</span>
+        <span class="o">...</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">free</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq_id</span><span class="p">):</span>  <span class="c1"># 释放，块归还空闲链表</span>
+        <span class="k">for</span> <span class="n">bid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_page_table</span><span class="p">[</span><span class="n">seq_id</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_free_list</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">bid</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="45">4.5 优势<a class="headerlink" href="#45" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>连续分配</th>
+<th>分页分配</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>显存利用率</td>
+<td>~3-20%</td>
+<td>~80-90%</td>
+</tr>
+<tr>
+<td>碎片</td>
+<td>外碎片严重</td>
+<td>无外碎片（块固定大小）</td>
+</tr>
+<tr>
+<td>并发数</td>
+<td>受预分配限制</td>
+<td>按需分配，并发更多</td>
+</tr>
+<tr>
+<td>增长</td>
+<td>需重新分配整个序列</td>
+<td>追加一个块即可</td>
+</tr>
+<tr>
+<td>共享</td>
+<td>不支持</td>
+<td>可共享 prefix block</td>
+</tr>
+</tbody>
+</table>
+<p>本 demo 实测（256 blocks × 16 tokens，200 请求，生成长度 16-128）：
+- 连续分配利用率：12.6%
+- 分页分配利用率：88.55%（7x 提升）
+- 分页碎片率：20.3%（可接受，块内碎片）</p>
+<h3 id="46">4.6 复杂度<a class="headerlink" href="#46" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>复杂度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>allocate(n)</td>
+<td>O(n / block_size)</td>
+</tr>
+<tr>
+<td>append(n)</td>
+<td>O(n / block_size)</td>
+</tr>
+<tr>
+<td>free</td>
+<td>O(页数)</td>
+</tr>
+<tr>
+<td>访问 token i</td>
+<td>O(1)（页表查物理块 + 块内偏移）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="47">4.7 生产级实现<a class="headerlink" href="#47" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>vLLM</strong>：PagedAttention 的提出者，block_size=16，GPU kernel 直接用页表寻址</li>
+<li><strong>TensorRT-LLM</strong>：类似 PagedAttention 的显存管理，支持 in-flight batching</li>
+<li><strong>TGI</strong>（Text Generation Inference）：HuggingFace 的推理服务，分页 KV cache</li>
+<li><strong>操作系统</strong>：虚拟内存的页表 + TLB + 缺页中断，PagedAttention 借鉴此设计</li>
+</ul>
+<hr />
+<h2 id="5">5. 四种数据结构如何协作<a class="headerlink" href="#5" title="Permanent link">&para;</a></h2>
+<h3 id="51">5.1 推理服务的完整流程<a class="headerlink" href="#51" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>推理请求到达
+  │
+  ▼
+[堆/优先队列]  请求调度：按 SLA/优先级 pop，高优先级先服务
+  │             对比 FIFO：SLA 违约率显著降低
+  ▼
+[一致性哈希环] 负载均衡：分发到多 GPU，节点增减时迁移量小
+  │             对比取模哈希：迁移量从 ~75% 降到 ~25%
+  ▼
+[计算图]       算子融合：合并相邻 element-wise 算子，减少 kernel launch
+  │             每 block kernel 数从 14 降到 11
+  ▼
+[页表]         显存管理：PagedAttention 分块分配 KV cache
+  │             对比连续分配：利用率从 ~13% 提升到 ~89%
+  ▼
+输出 token → 返回客户端
+</code></pre></div>
+<h3 id="52">5.2 协作的必要性<a class="headerlink" href="#52" title="Permanent link">&para;</a></h3>
+<p>四种数据结构解决推理服务的四个不同层面问题：</p>
+<table>
+<thead>
+<tr>
+<th>层面</th>
+<th>数据结构</th>
+<th>解决的问题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>调度层</td>
+<td>堆</td>
+<td>谁先服务？（优先级）</td>
+</tr>
+<tr>
+<td>分发层</td>
+<td>一致性哈希</td>
+<td>发到哪个 GPU？（负载均衡）</td>
+</tr>
+<tr>
+<td>计算层</td>
+<td>计算图</td>
+<td>怎么算得快？（算子融合）</td>
+</tr>
+<tr>
+<td>存储层</td>
+<td>页表</td>
+<td>显存怎么用？（分页管理）</td>
+</tr>
+</tbody>
+</table>
+<p>缺少任何一层都会成为瓶颈：
+- 无堆：VIP 请求被批处理阻塞，SLA 违约
+- 无一致性哈希：扩缩容时大量请求重路由，缓存失效
+- 无算子融合：kernel launch 开销大，小 batch 时 GPU 利用率低
+- 无页表：显存利用率低，并发请求数少</p>
+<h3 id="53">5.3 数据结构间的信息流动<a class="headerlink" href="#53" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>请求 → [堆] pop 出最高优先级请求
+         │
+         ▼ 请求
+       [一致性哈希] get_node(req_id) → 分配到某 GPU
+         │
+         ▼ (GPU, 请求)
+       [计算图] 该 GPU 上的模型图做算子融合，生成优化后的 kernel 序列
+         │
+         ▼ (kernel 序列, 请求)
+       [页表] 为请求的 KV cache 分配物理块，kernel 执行时通过页表寻址
+         │
+         ▼
+       输出 token
+</code></pre></div>
+<hr />
+<h2 id="6">6. 小结<a class="headerlink" href="#6" title="Permanent link">&para;</a></h2>
+<p>本章四种数据结构在大模型推理服务中协作：</p>
+<ol>
+<li><strong>计算图（DAG）</strong>：算子融合的载体，拓扑序贪心合并 element-wise 算子，减少 kernel launch</li>
+<li><strong>堆（优先队列）</strong>：请求调度的核心，O(log n) push/pop，按 SLA 优先级服务</li>
+<li><strong>一致性哈希环</strong>：负载均衡的低迁移方案，虚拟节点保证均匀，节点增减时迁移量 O(K/N)</li>
+<li><strong>页表</strong>：显存管理的分页方案，PagedAttention 按需分配 block，利用率从 ~13% 提升到 ~89%</li>
+</ol>
+<p>它们分别解决调度、分发、计算、存储四个层面的问题，缺少任何一层都会成为推理服务的瓶颈。
+生产级的 vLLM、TensorRT-LLM、Triton 都在这四个方向上做了工程化实现。</p>
+<hr />
+<h2 id="ai">AI 应用<a class="headerlink" href="#ai" title="Permanent link">&para;</a></h2>
+<h1 id="18-ai">第 18 章 · 模型部署与推理服务 — AI 应用<a class="headerlink" href="#18-ai" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>AI 场景：大模型（LLM）部署推理服务的全链路优化。
+数据结构：计算图（算子融合）+ 堆（请求调度）+ 一致性哈希（负载均衡）+ 页表（显存管理）协作。</p>
+</blockquote>
+<hr />
+<h2 id="1">1. 大模型推理服务的挑战<a class="headerlink" href="#1" title="Permanent link">&para;</a></h2>
+<h3 id="11_1">1.1 问题：推理比训练更难服务<a class="headerlink" href="#11_1" title="Permanent link">&para;</a></h3>
+<p>大模型训练是<strong>离线批处理</strong>：固定 batch、固定序列长度、不在乎延迟。
+推理服务是<strong>在线交互</strong>：流式请求、变长生成、毫秒级延迟要求。</p>
+<div class="highlight"><pre><span></span><code>训练:  一个大 batch → 算几十秒 → 没人等
+推理:  用户发请求 → 期望 100ms 内出第一个 token → 等不起
+</code></pre></div>
+<p>推理服务的四大挑战：</p>
+<table>
+<thead>
+<tr>
+<th>挑战</th>
+<th>说明</th>
+<th>本章数据结构</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>算子开销</td>
+<td>几百个算子，kernel launch 开销累积</td>
+<td>计算图（算子融合）</td>
+</tr>
+<tr>
+<td>请求调度</td>
+<td>混合优先级，SLA 保障</td>
+<td>堆（优先队列）</td>
+</tr>
+<tr>
+<td>负载均衡</td>
+<td>多 GPU 分发，扩缩容</td>
+<td>一致性哈希</td>
+</tr>
+<tr>
+<td>显存管理</td>
+<td>KV cache 按需分配</td>
+<td>页表（PagedAttention）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="12-gpu">1.2 为什么 GPU 利用率低？<a class="headerlink" href="#12-gpu" title="Permanent link">&para;</a></h3>
+<p>大模型推理时 GPU 利用率常只有 30-50%，原因：</p>
+<ul>
+<li><strong>kernel launch 开销</strong>：每个算子 launch 一次 kernel，固定开销 ~5-10 μs。
+  小 batch 时，计算时间可能还没 launch 开销长。</li>
+<li><strong>显存带宽瓶颈</strong>：中间张量写回 HBM 再读出，带宽成为瓶颈。</li>
+<li><strong>显存浪费</strong>：连续分配预留 max_seq_len，实际利用率低，并发数上不去。</li>
+<li><strong>请求堆积</strong>：FIFO 调度不区分优先级，VIP 请求被阻塞。</li>
+</ul>
+<p>本章四种数据结构分别解决这四个问题。</p>
+<hr />
+<h2 id="2-kernel-launch">2. 算子融合：减少 kernel launch<a class="headerlink" href="#2-kernel-launch" title="Permanent link">&para;</a></h2>
+<h3 id="21-kernel-launch">2.1 问题：kernel launch 开销<a class="headerlink" href="#21-kernel-launch" title="Permanent link">&para;</a></h3>
+<p>大模型的一个 Transformer block 有 ~14 个算子，12 层就是 ~168 个算子。
+每个算子 launch 一个 GPU kernel：</p>
+<div class="highlight"><pre><span></span><code>168 个 kernel × 7 μs (launch 开销) = 1.18 ms 纯 launch 开销
+</code></pre></div>
+<p>如果 batch=1（单请求），每个 kernel 的计算时间可能只有几十 μs，
+launch 开销占比可达 20-30%。</p>
+<h3 id="22_1">2.2 解决：计算图上合并相邻算子<a class="headerlink" href="#22_1" title="Permanent link">&para;</a></h3>
+<p>算子融合在计算图上把相邻的 element-wise 算子合并成一个 kernel：</p>
+<div class="highlight"><pre><span></span><code>融合前:  MatMul → GELU → MatMul    (3 个 kernel, 2 个中间张量)
+融合后:  MatMul → GELU             (2 个 kernel, GELU 融合进 MatMul)
+         (GELU 在 MatMul kernel 末尾直接算，中间结果不写回 HBM)
+</code></pre></div>
+<p>融合的收益：
+- <strong>减少 kernel 数</strong>：从 168 降到 132（减少 21%）
+- <strong>减少中间张量读写</strong>：element-wise 结果留在寄存器，不写回 HBM
+- <strong>降低延迟</strong>：尤其小 batch 时，launch 开销占比大，融合收益明显</p>
+<h3 id="23">2.3 可融合的算子类型<a class="headerlink" href="#23" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>算子类型</th>
+<th>例子</th>
+<th>可融合？</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>element-wise</td>
+<td>Add, ReLU, Scale, GELU</td>
+<td>是（互相可融合）</td>
+</tr>
+<tr>
+<td>matmul</td>
+<td>MatMul, Linear</td>
+<td>与后续 element-wise 可融合</td>
+</tr>
+<tr>
+<td>reduction</td>
+<td>Softmax, LayerNorm</td>
+<td>与后续 element-wise 可融合</td>
+</tr>
+<tr>
+<td>custom</td>
+<td>Attention</td>
+<td>与后续 Scale 可融合</td>
+</tr>
+</tbody>
+</table>
+<p>本 demo 的融合策略（贪心）：
+1. 按拓扑序扫描
+2. 当前算子是 element-wise 且只有一个前驱
+3. 前驱只有一个消费者 → 融合</p>
+<p>每个 Transformer block 融合 3 个算子（Scale、GELU 等），kernel 从 14 降到 11。</p>
+<h3 id="24">2.4 生产级融合器<a class="headerlink" href="#24" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>XLA</strong>（Google）：TensorFlow/JAX 的编译器，自动融合 element-wise + reduction</li>
+<li><strong>MLIR/TorchInductor</strong>（PyTorch 2.0+）：基于 MLIR 的图融合 + Triton codegen</li>
+<li><strong>TensorRT</strong>（NVIDIA）：融合 conv+bn+relu、matmul+gelu、attention+softmax 等</li>
+<li><strong>Triton</strong>（OpenAI）：DSL 手写 fused kernel，vLLM 的 attention kernel 用 Triton</li>
+</ul>
+<hr />
+<h2 id="3-sla">3. 请求调度：SLA 保障<a class="headerlink" href="#3-sla" title="Permanent link">&para;</a></h2>
+<h3 id="31_1">3.1 问题：混合优先级请求<a class="headerlink" href="#31_1" title="Permanent link">&para;</a></h3>
+<p>推理服务面对不同优先级的请求：</p>
+<div class="highlight"><pre><span></span><code>VIP 用户在线聊天  → 优先级 5, SLA &lt; 100ms
+普通用户在线聊天  → 优先级 3, SLA &lt; 200ms
+后台批处理        → 优先级 1, 无硬性 SLA
+</code></pre></div>
+<p>FIFO 调度（先到先服务）不区分优先级：一个批处理请求排在 VIP 前面，
+VIP 用户等批处理完才能响应，SLA 违约。</p>
+<h3 id="32_1">3.2 解决：堆/优先队列按优先级调度<a class="headerlink" href="#32_1" title="Permanent link">&para;</a></h3>
+<p>优先级调度用堆实现：每次 pop 优先级最高的请求。</p>
+<div class="highlight"><pre><span></span><code>FIFO:       req1(P1) → req2(P5) → req3(P3)  (按到达顺序)
+            VIP 的 req2 要等 req1 算完 → 违约
+
+优先级调度:  req2(P5) → req3(P3) → req1(P1)  (按优先级)
+            VIP 的 req2 先服务 → 不违约
+</code></pre></div>
+<h3 id="33-sla">3.3 SLA 违约率对比<a class="headerlink" href="#33-sla" title="Permanent link">&para;</a></h3>
+<p>本 demo 在过载场景下（服务能力略低于请求速率）：</p>
+<table>
+<thead>
+<tr>
+<th>调度策略</th>
+<th>SLA 违约数</th>
+<th>违约率</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FIFO</td>
+<td>285/300</td>
+<td>95.0%</td>
+</tr>
+<tr>
+<td>优先级调度</td>
+<td>219/300</td>
+<td>73.0%</td>
+</tr>
+</tbody>
+</table>
+<p>优先级调度的违约率更低，且<strong>违约集中在低优先级请求</strong>（可接受），
+高优先级请求几乎不违约。</p>
+<h3 id="34-continuous-batching">3.4 连续批处理（Continuous Batching）<a class="headerlink" href="#34-continuous-batching" title="Permanent link">&para;</a></h3>
+<p>现代推理服务（vLLM）用<strong>连续批处理</strong>：不等一个 batch 全部生成完才接新请求，
+而是在每步生成时动态加入/移除请求。</p>
+<div class="highlight"><pre><span></span><code>传统批处理:  [req1, req2, req3] 全部生成完 → 才接 req4
+            req2 生成 200 token, req1 只生成 50 → req1 等 req2 完才释放
+
+连续批处理:  step 1: [req1, req2, req3]
+            step 2: [req1, req2, req3]  (req1 还在生成)
+            step 3: [req2, req3, req4]  (req1 完了，req4 加入)
+            → GPU 不空等，吞吐大幅提升
+</code></pre></div>
+<p>连续批处理 + 优先级调度 = 高吞吐 + 低延迟。</p>
+<h3 id="35_1">3.5 生产级实现<a class="headerlink" href="#35_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>vLLM</strong>：连续批处理 + 优先级调度 + preemption（高优先级抢占低优先级的显存）</li>
+<li><strong>Triton Inference Server</strong>：多模型多队列，按优先级和模型实例调度</li>
+<li><strong>TensorRT-LLM</strong>：in-flight batching，动态优先级调整</li>
+<li><strong>SGLang</strong>：基于 RadixAttention 的请求调度，共享 prefix 优化</li>
+</ul>
+<hr />
+<h2 id="4-gpu">4. 负载均衡：多 GPU 分发<a class="headerlink" href="#4-gpu" title="Permanent link">&para;</a></h2>
+<h3 id="41-gpu">4.1 问题：多 GPU 分发与扩缩容<a class="headerlink" href="#41-gpu" title="Permanent link">&para;</a></h3>
+<p>大模型推理常需要多 GPU（张量并行 / 流水并行 / 多副本）。请求如何分发到 GPU？</p>
+<div class="highlight"><pre><span></span><code>请求 → ? → GPU 0 / GPU 1 / GPU 2 / GPU 3
+</code></pre></div>
+<p>简单方案：取模哈希 <code>hash(req_id) % N</code>。但扩缩容时 N 变化，几乎所有请求要重路由：</p>
+<div class="highlight"><pre><span></span><code>3 GPU → 4 GPU:  hash % 3 → hash % 4
+  约 75% 的请求映射到不同 GPU → KV cache 全部失效 → 重新计算
+</code></pre></div>
+<h3 id="42">4.2 解决：一致性哈希<a class="headerlink" href="#42" title="Permanent link">&para;</a></h3>
+<p>一致性哈希把 GPU 和请求都映射到环上，请求顺时针找最近 GPU。
+扩缩容时只有相邻区间的请求迁移：</p>
+<div class="highlight"><pre><span></span><code>3 GPU → 4 GPU:  新 GPU 只接管环上一段区间
+  约 25% 的请求迁移（1/4），其余 75% 不动 → KV cache 保留
+</code></pre></div>
+<p>本 demo 实测（3→4 节点，1000 keys）：</p>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>迁移 key 数</th>
+<th>迁移率</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>取模哈希</td>
+<td>763/1000</td>
+<td>76.3%</td>
+</tr>
+<tr>
+<td>一致性哈希</td>
+<td>254/1000</td>
+<td>25.4%</td>
+</tr>
+</tbody>
+</table>
+<p>一致性哈希迁移量是取模的 1/3。</p>
+<h3 id="43">4.3 虚拟节点：解决分布不均<a class="headerlink" href="#43" title="Permanent link">&para;</a></h3>
+<p>节点少时，一致性哈希分布不均。虚拟节点（vnode）解决：
+- 每个真实 GPU 在环上放 150 个虚拟节点
+- 虚拟节点均匀撒在环上 → 请求分布均匀</p>
+<p>本 demo 4 个 GPU 分发 500 请求，分布 {142, 90, 140, 128}（最大/最小 = 1.58），
+虚拟节点数足够时分布更均匀。</p>
+<h3 id="44_1">4.4 生产级实现<a class="headerlink" href="#44_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>vLLM</strong>：多 GPU worker 用 Ray + 一致性哈希分发请求</li>
+<li><strong>Nginx</strong>：<code>upstream</code> 一致性哈希模块（<code>hash $request_uri consistent</code>）</li>
+<li><strong>Redis Cluster</strong>：16384 个 slot 做一致性哈希分片</li>
+<li><strong>Kubernetes</strong>：Service + Endpoints，负载均衡 + 一致性哈希</li>
+</ul>
+<hr />
+<h2 id="5-pagedattention">5. 显存管理：PagedAttention<a class="headerlink" href="#5-pagedattention" title="Permanent link">&para;</a></h2>
+<h3 id="51-kv-cache">5.1 问题：KV cache 的显存浪费<a class="headerlink" href="#51-kv-cache" title="Permanent link">&para;</a></h3>
+<p>大模型推理时，每个请求的 KV cache 随生成长度增长。传统做法：预分配 max_seq_len 的连续显存。</p>
+<div class="highlight"><pre><span></span><code>max_seq_len = 2048, 实际生成 50 token → 利用率 50/2048 = 2.4%
+</code></pre></div>
+<p>多个请求并发时，显存被预分配占满，无法接新请求：
+<div class="highlight"><pre><span></span><code>显存 8GB, 每请求预分配 1GB → 最多 8 个并发
+即使每请求实际只用 0.1GB → 还是只能 8 个并发
+</code></pre></div></p>
+<h3 id="52-kv-cache">5.2 解决：分页分配 KV cache<a class="headerlink" href="#52-kv-cache" title="Permanent link">&para;</a></h3>
+<p>PagedAttention（vLLM 提出）把显存分成固定大小的 block，按需分配：</p>
+<div class="highlight"><pre><span></span><code>block_size = 16 token
+请求生成 50 token → 需要 4 个 block (ceil(50/16)) → 占 64 token 空间
+利用率 = 50/64 = 78%
+</code></pre></div>
+<p>页表维护逻辑页 → 物理页映射，物理页可分散在显存任意位置：</p>
+<div class="highlight"><pre><span></span><code>序列 1 的页表:  逻辑页 0 → 物理块 5
+                逻辑页 1 → 物理块 12
+                逻辑页 2 → 物理块 3
+                (物理块不连续，但 attention kernel 通过页表寻址)
+</code></pre></div>
+<h3 id="53_1">5.3 利用率对比<a class="headerlink" href="#53_1" title="Permanent link">&para;</a></h3>
+<p>本 demo（256 blocks × 16 tokens，200 请求，生成长度 16-128）：</p>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>利用率</th>
+<th>碎片率</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>连续分配（max=512）</td>
+<td>12.6%</td>
+<td>0%（外碎片严重）</td>
+</tr>
+<tr>
+<td>分页分配（block=16）</td>
+<td>88.55%</td>
+<td>20.3%（块内碎片）</td>
+</tr>
+</tbody>
+</table>
+<p>分页分配利用率是连续分配的 <strong>7 倍</strong>。碎片率 20% 是块内碎片（最后一个块没填满），
+可接受。</p>
+<h3 id="54-pagedattention">5.4 PagedAttention 的额外优势<a class="headerlink" href="#54-pagedattention" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>并发数提升</strong>：按需分配，同样显存能服务更多并发请求</li>
+<li><strong>prefix 共享</strong>：相同 system prompt 的请求共享 prefix block，省显存</li>
+<li><strong>无需重分配</strong>：序列增长时追加一个 block，不需要重新分配整个序列</li>
+<li><strong>preemption</strong>：显存不足时，低优先级请求的 block 被换出，高优先级请求继续</li>
+</ul>
+<h3 id="55">5.5 生产级实现<a class="headerlink" href="#55" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>vLLM</strong>：PagedAttention 的提出者，block_size=16，GPU kernel 直接用页表寻址</li>
+<li>论文：<em>Efficient Memory Management for Large Language Model Serving with PagedAttention</em> (SOSP 2023)</li>
+<li><strong>TensorRT-LLM</strong>：类似 PagedAttention 的显存管理，支持 in-flight batching</li>
+<li><strong>TGI</strong>（HuggingFace）：分页 KV cache</li>
+<li><strong>SGLang</strong>：RadixAttention，用 Radix Tree 共享 prefix，更进一步</li>
+</ul>
+<hr />
+<h2 id="6-demo">6. demo 结果解读<a class="headerlink" href="#6-demo" title="Permanent link">&para;</a></h2>
+<h3 id="61">6.1 算子融合<a class="headerlink" href="#61" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>总算子数        : 168 (12 个 Transformer block × 14 算子)
+融合前 kernel 数: 168
+融合后 kernel 数: 132
+融合算子数      : 36 (Scale + GELU + 部分 element-wise 链)
+kernel 减少比例 : 21.4%
+</code></pre></div>
+<p><strong>解读</strong>：每个 block 融合 3 个算子（Scale、GELU 等），kernel 数减少 21%。
+实际生产中 XLA/TensorRT 融合更激进，可减少 30-50%。</p>
+<h3 id="62">6.2 请求调度<a class="headerlink" href="#62" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>SLA 违约对比：FIFO=285/300, 优先级=219/300
+</code></pre></div>
+<p><strong>解读</strong>：过载场景下，优先级调度的违约率更低（73% vs 95%），
+且违约集中在低优先级请求。生产中 vLLM 的 preemption 进一步降低高优先级违约。</p>
+<h3 id="63">6.3 负载均衡<a class="headerlink" href="#63" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>一致性哈希迁移 : 254/1000 (25.4%)
+取模哈希迁移   : 763/1000 (76.3%)
+取模迁移是一致性的 3.0x
+</code></pre></div>
+<p><strong>解读</strong>：3→4 节点扩容时，一致性哈希只迁移 25% 的 key（约 1/N），
+取模哈希迁移 76%。KV cache 保留率直接影响扩缩容时的性能。</p>
+<h3 id="64">6.4 显存管理<a class="headerlink" href="#64" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>分页利用率 : 88.55%
+连续利用率 : 12.60%
+分页/连续利用率比: 7.0x
+</code></pre></div>
+<p><strong>解读</strong>：生成长度远小于 max_seq_len 时，分页分配利用率是连续分配的 7 倍。
+这意味着同样显存能服务 7 倍的并发请求。</p>
+<hr />
+<h2 id="7">7. 生产级推理服务系统<a class="headerlink" href="#7" title="Permanent link">&para;</a></h2>
+<h3 id="71-vllm">7.1 vLLM<a class="headerlink" href="#71-vllm" title="Permanent link">&para;</a></h3>
+<p>vLLM 是当前最流行的开源 LLM 推理服务框架，本章四种数据结构都有体现：</p>
+<table>
+<thead>
+<tr>
+<th>数据结构</th>
+<th>vLLM 实现</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>计算图</td>
+<td>Triton 写 fused attention kernel（算子融合）</td>
+</tr>
+<tr>
+<td>堆</td>
+<td>Engine + Scheduler，按优先级调度请求</td>
+</tr>
+<tr>
+<td>一致性哈希</td>
+<td>多 GPU worker 用 Ray 分发</td>
+</tr>
+<tr>
+<td>页表</td>
+<td>PagedAttention，block_size=16</td>
+</tr>
+</tbody>
+</table>
+<p>核心创新：PagedAttention + 连续批处理，吞吐比传统方案高 2-4 倍。</p>
+<h3 id="72-tensorrt-llm">7.2 TensorRT-LLM<a class="headerlink" href="#72-tensorrt-llm" title="Permanent link">&para;</a></h3>
+<p>NVIDIA 的推理优化框架：
+- 算子融合：TensorRT 的图优化，融合 LayerNorm+MatMul+GELU 等
+- in-flight batching：动态批处理，请求随时加入/移除
+- 显存：类似 PagedAttention 的分页管理
+- 量化：FP8/INT8 量化，进一步降显存</p>
+<h3 id="73-triton-inference-server">7.3 Triton Inference Server<a class="headerlink" href="#73-triton-inference-server" title="Permanent link">&para;</a></h3>
+<p>NVIDIA 的通用推理服务框架：
+- 多模型多队列：按模型和优先级调度
+- 动态 batching：自动组 batch，平衡吞吐和延迟
+- 多 backend：支持 TensorRT、PyTorch、ONNX、vLLM 等</p>
+<h3 id="74-sglang">7.4 SGLang<a class="headerlink" href="#74-sglang" title="Permanent link">&para;</a></h3>
+<p>新兴推理框架，核心创新 RadixAttention：
+- 用 Radix Tree 共享 prefix 的 KV cache
+- 同 system prompt 的请求共享 prefix block，更进一步省显存
+- 结构化生成加速（regex、JSON 约束）</p>
+<hr />
+<h2 id="8">8. 小结<a class="headerlink" href="#8" title="Permanent link">&para;</a></h2>
+<p>大模型推理服务的四个层面问题，分别由四种数据结构解决：</p>
+<ol>
+<li><strong>算子融合（计算图）</strong>：减少 kernel launch，降低延迟。14→11 kernel/block，减少 21%。</li>
+<li><strong>请求调度（堆）</strong>：按 SLA 优先级服务，VIP 优先。违约率 95%→73%。</li>
+<li><strong>负载均衡（一致性哈希）</strong>：扩缩容时低迁移。迁移 76%→25%。</li>
+<li><strong>显存管理（页表）</strong>：按需分配 KV cache，高利用率。利用率 13%→89%。</li>
+</ol>
+<p>生产级的 vLLM、TensorRT-LLM 在这四个方向上做了工程化实现，
+使得大模型推理服务的吞吐和延迟达到可用水平。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.indexes", "navigation.tracking", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

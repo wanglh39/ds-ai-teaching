@@ -1,0 +1,2634 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="从底层实现到生产级应用——数据结构在 AI 系统优化与应用工程中的真实作用">
+      
+      
+        <meta name="author" content="wanglh39">
+      
+      
+        <link rel="canonical" href="https://wanglh39.github.io/ds-ai-teaching/ch19/">
+      
+      
+        <link rel="prev" href="../ch18/">
+      
+      
+        <link rel="next" href="../ch20/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>19 状态机与工作流 - 数据结构 × AI 优化</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+SC:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans SC";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#19" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href=".." title="数据结构 × AI 优化" class="md-header__button md-logo" aria-label="数据结构 × AI 优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            数据结构 × AI 优化
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              19 状态机与工作流
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换至暗色模式"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换至暗色模式" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换至亮色模式"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换至亮色模式" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/wanglh39/ds-ai-teaching" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wanglh39/ds-ai-teaching
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  首页
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../intro/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  项目介绍
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../ch01/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  视角 A·系统优化
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../ch13/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  视角 B·应用工程
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../benchmarks/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  性能汇总
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="数据结构 × AI 优化" class="md-nav__button md-logo" aria-label="数据结构 × AI 优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    数据结构 × AI 优化
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/wanglh39/ds-ai-teaching" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wanglh39/ds-ai-teaching
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    首页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    项目介绍
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    项目介绍
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    设计思路
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../map/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    章节映射
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dual_view/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    双视角说明
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cross_index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    交叉索引
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    视角 A·系统优化
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    视角 A·系统优化
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 动态数组
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch02/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 链表
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch03/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 栈
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch04/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 循环队列
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch05/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05 哈希表
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch06/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 堆
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch07/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    07 Trie
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch08/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    08 KD-Tree
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch09/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    09 图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch10/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10 并查集
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch11/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11 页表/分块内存
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch12/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12 跳表+图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    视角 B·应用工程
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    视角 B·应用工程
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch13/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13 多智能体编排
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch14/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    14 任务调度与批处理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch15/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    15 上下文工程与记忆
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch16/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    16 RAG 与知识检索
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch17/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    17 数据管道与流式处理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch18/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    18 模型部署与推理服务
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    19 状态机与工作流
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    19 状态机与工作流
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要回答的问题
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        扩展专题定位
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#demo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        demo 概览
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        跑法
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        状态
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原理
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch20/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    20 模型压缩
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    性能汇总
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要回答的问题
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        扩展专题定位
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#demo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        demo 概览
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        跑法
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        状态
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原理
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="19">第 19 章 · 状态机与工作流编排（扩展专题）<a class="headerlink" href="#19" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>AI 场景：AI 智能体的状态机驱动工作流（LangGraph 式 StateGraph、ReAct、Plan-and-Execute、Tree-of-Thought）
+数据结构：图（状态转移）+ 栈（ReAct）+ 队列（Plan-Execute）+ 树（ToT）+ 哈希表（state dict）</p>
+</blockquote>
+<h2 id="_1">本章要回答的问题<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>agent 工作流为什么用状态机而不是 if-else？（可维护、可可视化、可并行、可中断）</li>
+<li>ReAct 推理链为什么用栈？（回溯能力，出错 pop 而非重跑）</li>
+<li>Plan-Execute 任务列表为什么用队列？（FIFO 保依赖顺序，动态 replan 入队）</li>
+<li>Tree-of-Thought 为什么用树？（多分支搜索 + 剪枝，指数级缩小搜索空间）</li>
+<li>4 种数据结构如何协奏完成 agent 工作流？</li>
+</ul>
+<h2 id="_2">扩展专题定位<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p>前 12 章是「一个数据结构 → 一个 AI 优化」。第 13 章起是扩展专题：<strong>一个 AI 应用场景 → 多种数据结构协作</strong>。本章展示图、栈、队列、树、哈希表如何协作解决 AI 智能体的工作流编排问题。</p>
+<h2 id="_3">目录<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>19_state_machine/
+├── python/
+│   └── demo.py              # 4 种 agent 工作流模式 demo
+├── docs/
+│   ├── principle.md         # 4 种数据结构原理 + 协作机制
+│   └── ai_application.md    # 状态机与工作流应用（LangGraph / AutoGen / CrewAI）
+├── figures/                 # 性能对比图
+└── README.md
+</code></pre></div>
+<h2 id="demo">demo 概览<a class="headerlink" href="#demo" title="Permanent link">&para;</a></h2>
+<p>模拟 4 种 agent 工作流模式，4 种数据结构协作：</p>
+<div class="highlight"><pre><span></span><code>用户提问到达
+  ├─→ [图/状态转移图]  StateMachine：状态机驱动状态转移
+  ├─→ [栈]             ReActLoop：think→act→observe 推理链 + 回溯
+  ├─→ [队列]           PlanAndExecute：planner 生成任务队列，executor FIFO 执行
+  ├─→ [树]             TreeOfThought：多分支思维搜索 + 剪枝
+  └─→ [哈希表]         状态存储：state dict，所有节点共享读写
+</code></pre></div>
+<ul>
+<li><code>StateMachine</code>：邻接表存状态转移图 + 条件转移守卫函数 + state dict</li>
+<li><code>ReActLoop</code>：栈记录 think→act→observe 链，<code>backtrack()</code> 回溯</li>
+<li><code>PlanAndExecute</code>：<code>deque</code> 任务队列，<code>plan</code> / <code>execute_one</code> / <code>replan</code></li>
+<li><code>TreeOfThought</code>：<code>ThoughtNode</code> 树，BFS/DFS 搜索 + 剪枝标记</li>
+</ul>
+<p>性能对比：
+1. 状态机 vs 硬编码 if-else（新增状态成本 1 行 vs 3 行）
+2. ReAct 栈 vs 无栈（出错恢复 2 步 vs 12 步）
+3. Plan-Execute 队列 vs 栈（执行顺序正确 1 vs 0）
+4. ToT 树搜索 vs 线性枚举（剪枝 58%，访问 25 vs 80 节点）</p>
+<h2 id="_4">跑法<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>19_state_machine/python/demo.py
+</code></pre></div>
+<h2 id="_5">状态<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<hr />
+<h2 id="_6">原理<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<h1 id="19_1">第 19 章 · 状态机与工作流编排 — 数据结构原理<a class="headerlink" href="#19_1" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>本章涉及 4 种数据结构：<strong>图（状态转移图）</strong>、<strong>栈（推理链）</strong>、<strong>队列（任务队列）</strong>、<strong>树（思维树）</strong>，外加 <strong>哈希表（状态存储）</strong>。
+它们在 AI 智能体（agent）的工作流编排中各司其职，协作完成「状态驱动 → 推理循环 → 任务执行 → 思维搜索」的全流程。</p>
+</blockquote>
+<hr />
+<h2 id="1">1. 图（状态转移图）— 状态机的骨架<a class="headerlink" href="#1" title="Permanent link">&para;</a></h2>
+<h3 id="11">1.1 基本概念<a class="headerlink" href="#11" title="Permanent link">&para;</a></h3>
+<p>有限状态机（Finite State Machine, FSM）是建模「状态 + 转移」的经典数学结构：</p>
+<div class="highlight"><pre><span></span><code>FSM = (S, Σ, δ, s₀, F)
+  S   : 状态集合（有限）
+  Σ   : 输入字母表（事件 / 条件）
+  δ   : 转移函数 S × Σ → S
+  s₀  : 初始状态
+  F   : 终止状态集合
+</code></pre></div>
+<p>把 FSM 看成图：
+- <strong>节点</strong> = 状态
+- <strong>边</strong> = 状态转移（带条件）
+- <strong>条件转移</strong> = 带守卫函数（guard）的边</p>
+<div class="highlight"><pre><span></span><code>    has_input        plan_ready       action_done
+    idle ────────→ planning ────────→ acting ────────→ observing
+     ▲                                              │
+     │              need_more_steps                 │
+     │              ┌───────────────────────────────┘
+     │              ▼
+     │           acting ←─────────── observing
+     │                                  │
+     │              task_complete       │  has_error
+     │              ┌───────────────────┘
+     │              ▼
+     │            done                 error
+     │                                  │
+     └────────────── retry ─────────────┘
+</code></pre></div>
+<h3 id="12-agent">1.2 为什么 agent 工作流是状态机<a class="headerlink" href="#12-agent" title="Permanent link">&para;</a></h3>
+<p>AI 智能体的工作流天然是状态机：</p>
+<table>
+<thead>
+<tr>
+<th>状态</th>
+<th>含义</th>
+<th>进入条件</th>
+<th>离开条件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>idle</td>
+<td>等待用户输入</td>
+<td>启动 / 重试</td>
+<td>收到输入</td>
+</tr>
+<tr>
+<td>planning</td>
+<td>生成计划</td>
+<td>收到输入</td>
+<td>计划生成完</td>
+</tr>
+<tr>
+<td>acting</td>
+<td>执行动作</td>
+<td>计划就绪</td>
+<td>动作执行完</td>
+</tr>
+<tr>
+<td>observing</td>
+<td>观察结果</td>
+<td>动作完成</td>
+<td>决定继续 / 完成 / 出错</td>
+</tr>
+<tr>
+<td>done</td>
+<td>任务完成</td>
+<td>观察到完成信号</td>
+<td>—</td>
+</tr>
+<tr>
+<td>error</td>
+<td>出错</td>
+<td>观察到错误</td>
+<td>重试</td>
+</tr>
+</tbody>
+</table>
+<p>把工作流建模为状态机的好处：
+- <strong>可可视化</strong>：状态转移图一目了然，便于调试和理解
+- <strong>可维护</strong>：新增状态只需 <code>add_transition</code>，不改运行逻辑
+- <strong>可并行</strong>：独立的状态分支可以并行执行
+- <strong>可中断</strong>：任何状态都可以暂停、恢复、回滚</p>
+<h3 id="13">1.3 状态转移图的存储<a class="headerlink" href="#13" title="Permanent link">&para;</a></h3>
+<p>状态转移图用<strong>邻接表</strong>存储最自然：</p>
+<div class="highlight"><pre><span></span><code><span class="n">graph</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Transition</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="c1"># graph["idle"] = [Transition("idle", "planning", "has_input", guard_fn)]</span>
+</code></pre></div>
+<p>每个状态对应一个 <code>Transition</code> 列表，转移时遍历出边找第一个 <code>guard</code> 满足的。这就是 LangGraph 的 <code>add_conditional_edges</code> 语义。</p>
+<h3 id="14">1.4 状态存储：哈希表<a class="headerlink" href="#14" title="Permanent link">&para;</a></h3>
+<p>状态机的「当前状态 + 所有状态变量」用一个<strong>哈希表</strong>（dict）存储：</p>
+<div class="highlight"><pre><span></span><code><span class="n">state</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"current"</span><span class="p">:</span> <span class="s2">"planning"</span><span class="p">,</span>   <span class="c1"># 当前状态</span>
+    <span class="s2">"has_input"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>       <span class="c1"># 状态变量</span>
+    <span class="s2">"plan_ready"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s2">"steps_done"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="o">...</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>这就是 LangGraph 的 <strong>state dict</strong>——所有节点共享读写同一个状态字典，节点间通过状态变量传递信息。哈希表的选择是因为：
+- <strong>O(1) 读写</strong>：状态变量按名访问
+- <strong>动态 schema</strong>：不同节点可以往 state 里塞不同字段
+- <strong>可序列化</strong>：dict 天然可以 JSON 序列化，用于持久化 / 跨进程传递</p>
+<hr />
+<h2 id="2-react">2. 栈 — ReAct 推理链的回溯<a class="headerlink" href="#2-react" title="Permanent link">&para;</a></h2>
+<h3 id="21-react">2.1 ReAct 模式<a class="headerlink" href="#21-react" title="Permanent link">&para;</a></h3>
+<p>ReAct（Reasoning + Acting）是 agent 最经典的推理模式，每一步：</p>
+<div class="highlight"><pre><span></span><code>think    : LLM 推理，决定下一步做什么
+  ↓
+act      : 执行动作（调用工具 / 检索 / 计算）
+  ↓
+observe  : 观察动作结果
+  ↓
+（循环，直到得出答案）
+</code></pre></div>
+<p>一个完整的 ReAct 轨迹：</p>
+<div class="highlight"><pre><span></span><code>think #1: 任务=计算巴黎人口+100万，需要先查巴黎人口
+act   #2: search(巴黎人口)
+observe #3: 巴黎人口约 210 万
+think #4: 210 万 + 100 万 = 310 万，但需要验证单位
+act   #5: calculate(210 + 100)
+observe #6: 310
+think #7: 单位是万，所以答案是 310 万
+act   #8: format_answer(310万)
+observe #9: 格式错误：缺少单位说明    ← 出错！
+</code></pre></div>
+<h3 id="22">2.2 为什么推理链用栈<a class="headerlink" href="#22" title="Permanent link">&para;</a></h3>
+<p>推理链用<strong>栈</strong>而不是列表 / 队列，关键在于<strong>回溯能力</strong>：</p>
+<div class="highlight"><pre><span></span><code>出错时：
+  栈：pop 出错的 act + observe（2 步），从上一个 think 重新推理
+  无栈：只能从头重跑整个流程（12 步）
+</code></pre></div>
+<p>栈的 LIFO 特性正好匹配「最近的一步最可能需要撤销」：
+- <code>push(think/act/observe)</code>：每步压栈
+- <code>pop()</code>：回溯撤销最近一步
+- <code>top()</code>：查看当前步，决定下一步</p>
+<h3 id="23">2.3 嵌套子任务的栈<a class="headerlink" href="#23" title="Permanent link">&para;</a></h3>
+<p>栈还支持<strong>嵌套子任务</strong>。主任务执行到一半发现需要先解决一个子问题：</p>
+<div class="highlight"><pre><span></span><code>主任务 think → act → [发现需要子任务]
+  压栈：子任务 think → act → observe → think → ... → 答案
+  弹栈：回到主任务，用子任务结果继续
+</code></pre></div>
+<p>栈的深度 = 嵌套层数。这是递归推理的自然结构，列表 / 队列无法表达嵌套。</p>
+<h3 id="24-vs">2.4 栈 vs 无栈的代价<a class="headerlink" href="#24-vs" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>能力</th>
+<th>栈</th>
+<th style="text-align: right;">无栈线性</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>回溯</td>
+<td><code>pop()</code> O(1)</td>
+<td style="text-align: right;">不支持</td>
+</tr>
+<tr>
+<td>出错恢复</td>
+<td>2 步（pop + 重推理）</td>
+<td style="text-align: right;">12 步（重跑全流程）</td>
+</tr>
+<tr>
+<td>嵌套子任务</td>
+<td>压栈 / 弹栈</td>
+<td style="text-align: right;">无法表达</td>
+</tr>
+<tr>
+<td>内存</td>
+<td>O(推理深度)</td>
+<td style="text-align: right;">O(总步数)</td>
+</tr>
+</tbody>
+</table>
+<p>栈的代价是多了一层抽象，但换来回溯和嵌套能力——这是 agent 处理复杂、易出错任务的关键。</p>
+<hr />
+<h2 id="3-plan-and-execute">3. 队列 — Plan-and-Execute 的任务调度<a class="headerlink" href="#3-plan-and-execute" title="Permanent link">&para;</a></h2>
+<h3 id="31-plan-and-execute">3.1 Plan-and-Execute 模式<a class="headerlink" href="#31-plan-and-execute" title="Permanent link">&para;</a></h3>
+<p>复杂任务先<strong>拆解</strong>再<strong>执行</strong>：</p>
+<div class="highlight"><pre><span></span><code>planner  : LLM 把大任务拆成有序子任务列表
+  ↓
+executor : 逐个执行子任务，收集结果
+  ↓
+replan   : 执行结果不理想时，动态重新规划
+</code></pre></div>
+<p>示例：</p>
+<div class="highlight"><pre><span></span><code>任务：写一篇关于 X 的研究报告
+planner 生成：
+  1. 理解问题
+  2. 收集数据
+  3. 分析数据
+  4. 生成方案
+  5. 验证方案
+executor 逐个执行（FIFO）...
+执行到第 3 步发现数据不够 → replan：追加 "3.5.补充数据" "3.6.交叉验证"
+</code></pre></div>
+<h3 id="32">3.2 为什么任务列表用队列<a class="headerlink" href="#32" title="Permanent link">&para;</a></h3>
+<p>任务列表用<strong>队列（FIFO）</strong>而不是栈（LIFO），关键在于<strong>依赖顺序</strong>：</p>
+<div class="highlight"><pre><span></span><code>计划：1.理解 → 2.收集 → 3.分析 → 4.生成 → 5.验证
+
+队列(FIFO)：1 → 2 → 3 → 4 → 5  ✓ 按计划顺序，依赖正确
+栈  (LIFO)：5 → 4 → 3 → 2 → 1  ✗ 反序，先验证再理解，依赖全乱
+</code></pre></div>
+<p>planner 生成的任务有<strong>依赖关系</strong>：后面的任务依赖前面的结果。FIFO 保证先规划的任务先执行，依赖顺序正确。</p>
+<h3 id="33">3.3 动态重新规划<a class="headerlink" href="#33" title="Permanent link">&para;</a></h3>
+<p>队列支持<strong>动态入队</strong>：执行中发现新任务，<code>append</code> 到队尾：</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">replan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_tasks</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">new_tasks</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Task</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>  <span class="c1"># 追加到队尾</span>
+</code></pre></div>
+<p>这是 Plan-Execute 区别于静态流水线的核心能力——执行中根据结果动态调整计划。队列的「队尾入队、队头出队」正好匹配「新任务排到后面、先规划的任务先执行」。</p>
+<h3 id="34-vs">3.4 队列 vs 栈的代价<a class="headerlink" href="#34-vs" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>能力</th>
+<th>队列 (FIFO)</th>
+<th style="text-align: right;">栈 (LIFO)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>执行顺序</td>
+<td>按计划顺序</td>
+<td style="text-align: right;">反序</td>
+</tr>
+<tr>
+<td>依赖正确</td>
+<td>✓</td>
+<td style="text-align: right;">✗</td>
+</tr>
+<tr>
+<td>动态重规划</td>
+<td>append 到队尾</td>
+<td style="text-align: right;">push 到栈顶（会先执行）</td>
+</tr>
+<tr>
+<td>公平性</td>
+<td>先来先服务</td>
+<td style="text-align: right;">后来先服务</td>
+</tr>
+</tbody>
+</table>
+<p>栈做 Plan-Execute 的问题：动态重规划时新任务 <code>push</code> 到栈顶，会<strong>立即执行</strong>，打断当前流程；队列 <code>append</code> 到队尾，新任务<strong>排到后面</strong>，不打断当前执行。</p>
+<hr />
+<h2 id="4-tree-of-thought">4. 树 — Tree-of-Thought 的分支搜索<a class="headerlink" href="#4-tree-of-thought" title="Permanent link">&para;</a></h2>
+<h3 id="41-tree-of-thought">4.1 Tree-of-Thought 模式<a class="headerlink" href="#41-tree-of-thought" title="Permanent link">&para;</a></h3>
+<p>复杂推理时，不只走一条思维链，而是<strong>分支多个方向</strong>，评估每个方向的潜力，搜索最优思维路径：</p>
+<div class="highlight"><pre><span></span><code>                    根问题
+                  /    |    \
+              分支1   分支2   分支3
+              /  \    |    /  \
+           d2-1 d2-2 d2-1 d2-1 d2-2
+            ...
+</code></pre></div>
+<p>每一步：
+1. <strong>生成</strong>：当前思维展开 k 个候选下一步
+2. <strong>评估</strong>：给每个候选打分
+3. <strong>剪枝</strong>：低分分支直接砍掉
+4. <strong>搜索</strong>：BFS / DFS 遍历思维树找最优叶</p>
+<h3 id="42">4.2 为什么思维搜索用树<a class="headerlink" href="#42" title="Permanent link">&para;</a></h3>
+<p>思维搜索用<strong>树</strong>而不是线性列表，因为：</p>
+<ul>
+<li><strong>层次结构</strong>：思维从粗到细，第 1 层是大方向，第 2 层是具体方案，第 3 层是细节……天然形成树</li>
+<li><strong>分支</strong>：每个思维节点有多个候选下一步，需要全部探索</li>
+<li><strong>剪枝</strong>：低分子树整棵砍掉，不展开——树结构让「砍子树」是 O(1) 的标记</li>
+<li><strong>回溯</strong>：DFS 用栈回溯，BFS 用队列逐层，都依赖树结构</li>
+</ul>
+<h3 id="43-bfs-vs-dfs">4.3 BFS vs DFS 搜索思维树<a class="headerlink" href="#43-bfs-vs-dfs" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>BFS（广度优先）：用队列，逐层搜索
+  优点：找浅层最优解快
+  缺点：内存 O(宽度^深度)，深树爆炸
+
+DFS（深度优先）：用栈，一条路走到底再回溯
+  优点：内存 O(深度)，深树友好
+  缺点：可能深挖一个差分支
+</code></pre></div>
+<p>ToT 通常用 <strong>BFS + 评分 + 剪枝</strong>（beam search 变体）：每层保留 top-k 高分节点，其余剪枝。这平衡了广度和深度。</p>
+<h3 id="44">4.4 剪枝的价值<a class="headerlink" href="#44" title="Permanent link">&para;</a></h3>
+<p>剪枝是 ToT 高效的关键。设 <code>branching=3, max_depth=4</code>：</p>
+<div class="highlight"><pre><span></span><code>不剪枝：3^4 = 81 个叶节点，全展开 1+3+9+27+81 = 121 节点
+剪枝（阈值 0.3，约剪掉 30%）：展开 ~40 节点，节省 ~67%
+</code></pre></div>
+<p>剪枝让搜索空间从指数爆炸降到可控规模。树结构让剪枝是「标记子树不展开」，O(1) 操作。</p>
+<h3 id="45-vs">4.5 树 vs 线性的代价<a class="headerlink" href="#45-vs" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>能力</th>
+<th>树</th>
+<th style="text-align: right;">线性枚举</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>分支探索</td>
+<td>✓</td>
+<td style="text-align: right;">✗（只走一条路）</td>
+</tr>
+<tr>
+<td>剪枝</td>
+<td>标记子树 O(1)</td>
+<td style="text-align: right;">不支持</td>
+</tr>
+<tr>
+<td>找最优解</td>
+<td>BFS/DFS 搜索</td>
+<td style="text-align: right;">枚举所有可能</td>
+</tr>
+<tr>
+<td>内存</td>
+<td>O(分支×深度)</td>
+<td style="text-align: right;">O(候选总数)</td>
+</tr>
+</tbody>
+</table>
+<p>线性枚举要遍历所有可能才能找最优，树 + 剪枝只展开有潜力的分支，搜索空间指数级缩小。</p>
+<hr />
+<h2 id="5">5. 四种数据结构如何协作<a class="headerlink" href="#5" title="Permanent link">&para;</a></h2>
+<h3 id="51">5.1 各司其职<a class="headerlink" href="#51" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>用户提问
+  │
+  ▼
+[图/状态转移图]  StateMachine：状态机驱动状态转移
+  │                idle→planning→acting→observing→done
+  │                决定「现在该做什么」
+  ▼
+[栈]             ReActLoop：think→act→observe 推理链
+  │                在 acting 状态内，用栈记录推理 + 回溯
+  │                决定「这一步具体怎么做」
+  ▼
+[队列]           PlanAndExecute：planner 生成任务队列
+  │                在 planning 状态，把任务拆成有序子任务
+  │                executor FIFO 执行，支持 replan
+  ▼
+[树]             TreeOfThought：多分支思维搜索
+  │                在 think 步骤，分支多个思维方向
+  │                BFS/DFS + 剪枝找最优
+  ▼
+[哈希表]         状态存储：state dict
+  │                所有节点共享读写状态变量
+  │                LangGraph 的 state dict
+  ▼
+输出答案
+</code></pre></div>
+<h3 id="52">5.2 协作的层次<a class="headerlink" href="#52" title="Permanent link">&para;</a></h3>
+<p>四种数据结构在<strong>不同层次</strong>解决问题：</p>
+<table>
+<thead>
+<tr>
+<th>层次</th>
+<th>数据结构</th>
+<th>解决什么</th>
+<th>对应模式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>工作流层</td>
+<td>图</td>
+<td>状态转移拓扑</td>
+<td>LangGraph StateGraph</td>
+</tr>
+<tr>
+<td>推理层</td>
+<td>栈</td>
+<td>单步推理 + 回溯</td>
+<td>ReAct</td>
+</tr>
+<tr>
+<td>任务层</td>
+<td>队列</td>
+<td>任务拆解 + 调度</td>
+<td>Plan-and-Execute</td>
+</tr>
+<tr>
+<td>思维层</td>
+<td>树</td>
+<td>多分支搜索</td>
+<td>Tree-of-Thought</td>
+</tr>
+<tr>
+<td>存储层</td>
+<td>哈希表</td>
+<td>状态变量共享</td>
+<td>state dict</td>
+</tr>
+</tbody>
+</table>
+<p>它们不是替代关系，而是<strong>嵌套关系</strong>：
+- 状态机（图）的某个状态内，可以跑 ReAct 循环（栈）
+- ReAct 的 think 步骤，可以用 ToT（树）搜索多个思维方向
+- Plan-Execute（队列）的每个任务，本身可以是一个子状态机
+- 所有结构共享同一个 state dict（哈希表）</p>
+<h3 id="53">5.3 数据结构间的信息流动<a class="headerlink" href="#53" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>用户输入 → [哈希表] state["input"] = question
+              │
+              ▼
+[图] 状态机读 state，决定转移到 planning
+              │
+              ▼ state["current"] = "planning"
+[队列] planner 读 state["input"]，生成任务队列 [t1, t2, t3, ...]
+              │
+              ▼ 逐个 execute
+[栈] 每个任务内跑 ReAct：think→act→observe 压栈
+              │
+              ▼ think 步骤
+[树] ToT 分支多个思维，BFS+剪枝找最优 thought
+              │
+              ▼ 最优 thought 写回 state
+[栈] 用最优 thought 继续 act→observe
+              │
+              ▼ 任务完成，队列出队下一个
+[队列] 继续下一个任务...
+              │
+              ▼ 所有任务完成
+[图] 状态机转移到 done
+              │
+              ▼
+输出答案
+</code></pre></div>
+<hr />
+<h2 id="6">6. 小结<a class="headerlink" href="#6" title="Permanent link">&para;</a></h2>
+<p>本章四种数据结构在 AI 智能体工作流中协作：</p>
+<ol>
+<li><strong>图（状态转移图）</strong>：状态机的骨架，邻接表存转移拓扑，条件转移用守卫函数，对应 LangGraph StateGraph</li>
+<li><strong>栈（推理链）</strong>：ReAct 的回溯结构，LIFO 匹配「最近一步最可能撤销」，支持嵌套子任务</li>
+<li><strong>队列（任务队列）</strong>：Plan-Execute 的调度结构，FIFO 保依赖顺序，支持动态 replan 入队</li>
+<li><strong>树（思维树）</strong>：ToT 的分支搜索结构，BFS/DFS + 剪枝找最优思维，指数级缩小搜索空间</li>
+<li><strong>哈希表（状态存储）</strong>：state dict，所有节点共享读写，O(1) 访问，可序列化</li>
+</ol>
+<p>它们分别解决工作流、推理、任务、思维、存储五个层面的问题，通过 state dict 传递信息，嵌套组合完成复杂 agent 工作流。生产级的 LangGraph、AutoGen、CrewAI 都在这五个方向上做了工程化实现。</p>
+<hr />
+<h2 id="ai">AI 应用<a class="headerlink" href="#ai" title="Permanent link">&para;</a></h2>
+<h1 id="19-ai">第 19 章 · 状态机与工作流编排 — AI 应用<a class="headerlink" href="#19-ai" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>AI 场景：AI 智能体（agent）的状态机驱动工作流编排。
+数据结构：图（状态转移）+ 栈（ReAct）+ 队列（Plan-Execute）+ 树（ToT）+ 哈希表（state dict）协作。</p>
+</blockquote>
+<hr />
+<h2 id="1-ai">1. AI 智能体工作流的挑战<a class="headerlink" href="#1-ai" title="Permanent link">&para;</a></h2>
+<h3 id="11-agent-llm">1.1 问题：agent 不是单次 LLM 调用<a class="headerlink" href="#11-agent-llm" title="Permanent link">&para;</a></h3>
+<p>早期的 LLM 应用是「单次调用」：输入 prompt → 输出回答。但真实任务需要<strong>多步推理 + 工具调用 + 状态管理</strong>：</p>
+<div class="highlight"><pre><span></span><code>简单任务：用户问 "1+1=?" → LLM 直接答 "2"
+复杂任务：用户问 "分析 A 公司财报并对比 B 公司"
+  → 需要多次调用工具（搜索 / 检索 / 计算）
+  → 需要中间状态管理（收集了什么 / 还缺什么）
+  → 需要错误恢复（工具调用失败 / 结果不符预期）
+  → 需要动态规划（发现新信息要调整计划）
+</code></pre></div>
+<p>这就是 <strong>AI 智能体（agent）</strong>：能自主推理、调用工具、管理状态、动态调整的 LLM 系统。</p>
+<h3 id="12-agent_1">1.2 agent 工作流的四大挑战<a class="headerlink" href="#12-agent_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>挑战</th>
+<th>说明</th>
+<th>本章数据结构</th>
+<th>对应模式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>状态管理</td>
+<td>多步推理的中间状态</td>
+<td>图 + 哈希表</td>
+<td>StateGraph</td>
+</tr>
+<tr>
+<td>推理回溯</td>
+<td>出错后恢复</td>
+<td>栈</td>
+<td>ReAct</td>
+</tr>
+<tr>
+<td>任务调度</td>
+<td>复杂任务拆解</td>
+<td>队列</td>
+<td>Plan-Execute</td>
+</tr>
+<tr>
+<td>思维搜索</td>
+<td>多方向探索</td>
+<td>树</td>
+<td>Tree-of-Thought</td>
+</tr>
+</tbody>
+</table>
+<h3 id="13_1">1.3 为什么需要状态机驱动<a class="headerlink" href="#13_1" title="Permanent link">&para;</a></h3>
+<p>硬编码的 agent 工作流（一串 if-else）有几个痛点：</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 硬编码：难以维护</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">agent</span><span class="p">(</span><span class="n">question</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">has_input</span><span class="p">(</span><span class="n">question</span><span class="p">):</span>
+        <span class="n">plan</span> <span class="o">=</span> <span class="n">generate_plan</span><span class="p">(</span><span class="n">question</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">plan</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">plan</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">execute</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
+                    <span class="c1"># 错误处理嵌套深...</span>
+                    <span class="k">if</span> <span class="n">should_retry</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
+                        <span class="n">plan</span> <span class="o">=</span> <span class="n">replan</span><span class="p">(</span><span class="n">question</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+                        <span class="c1"># 又一层嵌套...</span>
+</code></pre></div>
+<p>痛点：
+- <strong>状态隐式</strong>：当前在哪一步、为什么在这里，全靠函数调用栈隐式表达，难以可视化
+- <strong>扩展困难</strong>：新增一个状态（如 "reflecting"）要改 if-else 嵌套，容易引入 bug
+- <strong>无法中断</strong>：跑到一半想暂停、恢复、回滚，几乎不可能
+- <strong>无法并行</strong>：独立的状态分支想并行执行，if-else 结构不支持</p>
+<p>状态机驱动解决这些痛点：状态显式、扩展加一行、可中断、可并行。</p>
+<hr />
+<h2 id="2-langgraph-stategraph">2. LangGraph 的 StateGraph 原理<a class="headerlink" href="#2-langgraph-stategraph" title="Permanent link">&para;</a></h2>
+<h3 id="21-langgraph">2.1 LangGraph 是什么<a class="headerlink" href="#21-langgraph" title="Permanent link">&para;</a></h3>
+<p><a href="https://github.com/langchain-ai/langgraph">LangGraph</a> 是 LangChain 团队推出的 agent 工作流引擎，核心抽象是 <strong>StateGraph</strong>：把 agent 工作流建模为状态机。</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">langgraph.graph</span><span class="w"> </span><span class="kn">import</span> <span class="n">StateGraph</span>
+
+<span class="n">graph</span> <span class="o">=</span> <span class="n">StateGraph</span><span class="p">(</span><span class="n">StateDict</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">"planning"</span><span class="p">,</span> <span class="n">planning_node</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">"acting"</span><span class="p">,</span> <span class="n">acting_node</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">"observing"</span><span class="p">,</span> <span class="n">observing_node</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="s2">"planning"</span><span class="p">,</span> <span class="s2">"acting"</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add_conditional_edges</span><span class="p">(</span><span class="s2">"observing"</span><span class="p">,</span> <span class="n">router_fn</span><span class="p">,</span> <span class="p">{</span>
+    <span class="s2">"continue"</span><span class="p">:</span> <span class="s2">"acting"</span><span class="p">,</span>
+    <span class="s2">"done"</span><span class="p">:</span> <span class="n">END</span><span class="p">,</span>
+    <span class="s2">"error"</span><span class="p">:</span> <span class="s2">"error_handler"</span><span class="p">,</span>
+<span class="p">})</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">set_entry_point</span><span class="p">(</span><span class="s2">"planning"</span><span class="p">)</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">compile</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="22-stategraph">2.2 StateGraph 的数据结构<a class="headerlink" href="#22-stategraph" title="Permanent link">&para;</a></h3>
+<p>LangGraph 内部用两类数据结构：</p>
+<p><strong>状态转移图（图）</strong>：
+- <code>nodes: dict[str, callable]</code> — 节点表，每个节点是一个处理函数
+- <code>edges: dict[str, list[Edge]]</code> — 邻接表，每个节点的出边
+- <code>conditional_edges: dict[str, tuple[router_fn, dict[str, str]]]</code> — 条件转移</p>
+<p><strong>状态存储（哈希表）</strong>：
+- <code>state: TypedDict</code> — 所有节点共享读写的状态字典
+- 每个节点接收 state、返回 state 的更新部分
+- LangGraph 自动合并更新（可配置 reducer）</p>
+<h3 id="23_1">2.3 状态转移的执行<a class="headerlink" href="#23_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_state</span><span class="p">):</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">input_state</span>
+    <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">entry_point</span>
+    <span class="k">while</span> <span class="n">current</span> <span class="o">!=</span> <span class="n">END</span><span class="p">:</span>
+        <span class="c1"># 执行当前节点</span>
+        <span class="n">update</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">current</span><span class="p">](</span><span class="n">state</span><span class="p">)</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">merge</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">update</span><span class="p">)</span>
+        <span class="c1"># 决定下一个节点</span>
+        <span class="k">if</span> <span class="n">current</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">conditional_edges</span><span class="p">:</span>
+            <span class="n">router_fn</span><span class="p">,</span> <span class="n">mapping</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conditional_edges</span><span class="p">[</span><span class="n">current</span><span class="p">]</span>
+            <span class="n">decision</span> <span class="o">=</span> <span class="n">router_fn</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="n">mapping</span><span class="p">[</span><span class="n">decision</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="n">current</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">target</span>
+    <span class="k">return</span> <span class="n">state</span>
+</code></pre></div>
+<p>这就是本章 <code>StateMachine.step()</code> 的生产级版本。核心是<strong>图驱动状态转移 + 哈希表存状态</strong>。</p>
+<h3 id="24-stategraph">2.4 StateGraph 的优势<a class="headerlink" href="#24-stategraph" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>硬编码 if-else</th>
+<th>StateGraph</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>可视化</td>
+<td>难（要手画）</td>
+<td>✓ <code>graph.draw()</code> 自动画</td>
+</tr>
+<tr>
+<td>新增状态</td>
+<td>改 if-else 嵌套</td>
+<td><code>add_node</code> + <code>add_edge</code> 两行</td>
+</tr>
+<tr>
+<td>中断 / 恢复</td>
+<td>不支持</td>
+<td>✓ state 可序列化，任意点恢复</td>
+</tr>
+<tr>
+<td>并行</td>
+<td>难</td>
+<td>✓ <code>add_branch</code> 自动并行</td>
+</tr>
+<tr>
+<td>错误处理</td>
+<td>try-except 嵌套</td>
+<td>条件转移到 "error_handler" 节点</td>
+</tr>
+<tr>
+<td>持久化</td>
+<td>难</td>
+<td>✓ state dict 存数据库</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-react-reasoning-acting">3. ReAct 模式（Reasoning + Acting）<a class="headerlink" href="#3-react-reasoning-acting" title="Permanent link">&para;</a></h2>
+<h3 id="31-react">3.1 ReAct 论文与思想<a class="headerlink" href="#31-react" title="Permanent link">&para;</a></h3>
+<p>ReAct 是 Yao et al. (2022) 提出的 agent 推理模式，核心思想：<strong>让 LLM 交替推理（Reasoning）和行动（Acting）</strong>，而不是一次性生成答案。</p>
+<div class="highlight"><pre><span></span><code>Question: 科罗拉多山脉的海拔比阿巴拉契亚山脉高多少？
+
+Thought 1: 我需要先查两个山脉的海拔
+Action 1: Search[科罗拉多山脉海拔]
+Observation 1: 最高峰 Mt Elbert, 4401 米
+Thought 2: 现在查阿巴拉契亚
+Action 2: Search[阿巴拉契亚山脉海拔]
+Observation 2: 最高峰 Mt Mitchell, 2037 米
+Thought 3: 4401 - 2037 = 2364 米
+Action 3: Finish[2364 米]
+</code></pre></div>
+<h3 id="32-react">3.2 ReAct 的栈结构<a class="headerlink" href="#32-react" title="Permanent link">&para;</a></h3>
+<p>ReAct 的推理链是<strong>栈</strong>结构，本章 <code>ReActLoop</code> 实现：</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ReActLoop</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ReActStep</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># 推理栈</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">think</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thought</span><span class="p">):</span>  <span class="c1"># push</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">act</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>     <span class="c1"># push</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">observe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span> <span class="c1"># push</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">backtrack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>       <span class="c1"># pop，回溯</span>
+</code></pre></div>
+<p>栈的关键作用是<strong>回溯</strong>：当 <code>observe</code> 发现错误时，<code>pop</code> 掉错误的 <code>act + observe</code>，从上一个 <code>think</code> 重新推理。无栈的线性流程只能从头重跑。</p>
+<h3 id="33-react">3.3 ReAct 的生产实现<a class="headerlink" href="#33-react" title="Permanent link">&para;</a></h3>
+<p>生产级 ReAct（如 LangChain 的 <code>AgentExecutor</code>）在栈基础上加了：
+- <strong>最大迭代数限制</strong>：防止死循环
+- <strong>工具调用超时</strong>：单个 act 不超过 N 秒
+- <strong>中间结果持久化</strong>：栈内容可序列化到数据库，支持中断恢复
+- <strong>多轮对话上下文</strong>：栈 + 对话历史合并管理</p>
+<h3 id="34-react">3.4 ReAct 的局限<a class="headerlink" href="#34-react" title="Permanent link">&para;</a></h3>
+<p>ReAct 是<strong>单链推理</strong>——每次只走一条思维路径。遇到分叉决策（"先查 A 还是先查 B？"）只能选一个，错了再回溯。这引出了 Tree-of-Thought。</p>
+<hr />
+<h2 id="4-plan-and-execute">4. Plan-and-Execute 模式<a class="headerlink" href="#4-plan-and-execute" title="Permanent link">&para;</a></h2>
+<h3 id="41-plan-execute">4.1 Plan-Execute 的思想<a class="headerlink" href="#41-plan-execute" title="Permanent link">&para;</a></h3>
+<p>Plan-and-Execute 是 LangChain 官方推荐的 agent 架构（2024），核心：<strong>先规划再执行</strong>，区别于 ReAct 的「边想边做」。</p>
+<div class="highlight"><pre><span></span><code>ReAct:        think→act→observe→think→act→...（每步现想）
+Plan-Execute: plan([t1,t2,t3,...]) → execute(t1) → execute(t2) → ...
+              （先全规划好，再逐个执行）
+</code></pre></div>
+<h3 id="42_1">4.2 为什么用队列<a class="headerlink" href="#42_1" title="Permanent link">&para;</a></h3>
+<p>Plan-Execute 的任务列表是<strong>队列</strong>，本章 <code>PlanAndExecute</code> 实现：</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PlanAndExecute</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">:</span> <span class="n">deque</span><span class="p">[</span><span class="n">Task</span><span class="p">]</span> <span class="o">=</span> <span class="n">deque</span><span class="p">()</span>  <span class="c1"># 任务队列</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_names</span><span class="p">):</span>  <span class="c1"># planner 生成，入队</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">task_names</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Task</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">execute_one</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># executor，队头出队</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">replan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_tasks</span><span class="p">):</span>  <span class="c1"># 动态重规划，追加到队尾</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">new_tasks</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Task</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+</code></pre></div>
+<p>队列 vs 栈的关键区别：
+- <strong>队列 FIFO</strong>：先规划的任务先执行，保依赖顺序（<code>理解→收集→分析→生成→验证</code>）
+- <strong>栈 LIFO</strong>：反序执行，先验证再理解，依赖全乱
+- <strong>动态重规划</strong>：队列 append 到队尾，新任务排后面不打断；栈 push 到栈顶，新任务立即执行打断当前</p>
+<h3 id="43-plan-execute-vs-react">4.3 Plan-Execute vs ReAct<a class="headerlink" href="#43-plan-execute-vs-react" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>ReAct</th>
+<th>Plan-Execute</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>规划时机</td>
+<td>每步现想</td>
+<td>一次性规划</td>
+</tr>
+<tr>
+<td>执行结构</td>
+<td>栈（推理链）</td>
+<td>队列（任务队列）</td>
+</tr>
+<tr>
+<td>错误恢复</td>
+<td>回溯 pop</td>
+<td>replan 重新规划</td>
+</tr>
+<tr>
+<td>适合任务</td>
+<td>探索性强、难预估</td>
+<td>可拆解、步骤明确</td>
+</tr>
+<tr>
+<td>LLM 调用</td>
+<td>多（每步都调）</td>
+<td>少（planner 调一次）</td>
+</tr>
+</tbody>
+</table>
+<p>Plan-Execute 的优势是 <strong>planner 只调一次 LLM</strong>（生成全计划），executor 可以用更便宜的模型执行单步，成本低。劣势是<strong>计划可能不准</strong>，需要 replan。</p>
+<h3 id="44-plan-execute">4.4 生产级 Plan-Execute<a class="headerlink" href="#44-plan-execute" title="Permanent link">&para;</a></h3>
+<p>LangChain 的 <code>PlanAndExecute</code> 架构：
+- <strong>Planner</strong>：用强模型（GPT-4）生成结构化任务列表
+- <strong>Executor</strong>：用便宜模型（GPT-3.5）逐个执行
+- <strong>Replanner</strong>：执行后评估，需要时调强模型重新规划
+- <strong>State</strong>：用 state dict 跨步骤传递中间结果</p>
+<hr />
+<h2 id="5-tree-of-thought">5. Tree-of-Thought 模式<a class="headerlink" href="#5-tree-of-thought" title="Permanent link">&para;</a></h2>
+<h3 id="51-tot">5.1 ToT 论文与思想<a class="headerlink" href="#51-tot" title="Permanent link">&para;</a></h3>
+<p>Tree-of-Thought（Yao et al. 2023）是 ReAct 的升级：<strong>不只走一条思维链，而是分支多个方向，搜索最优思维路径</strong>。</p>
+<div class="highlight"><pre><span></span><code>ReAct:  think → act → observe → think → ... （一条链）
+ToT:    think ─┬─ 分支1 → 分支1.1 → ...
+              ├─ 分支2 → 分支2.1 → ...   （多分支树）
+              └─ 分支3 → 分支3.1 → ...
+</code></pre></div>
+<h3 id="52-tot">5.2 ToT 的四个步骤<a class="headerlink" href="#52-tot" title="Permanent link">&para;</a></h3>
+<p>每个思维节点：</p>
+<ol>
+<li><strong>Thought Decomposition</strong>：把当前思维拆成多个候选下一步</li>
+<li><strong>State Evaluation</strong>：给每个候选打分（用 LLM 评估潜力）</li>
+<li><strong>Search Algorithm</strong>：BFS / DFS / beam search 遍历思维树</li>
+<li><strong>Pruning</strong>：低分分支直接剪掉，不展开</li>
+</ol>
+<h3 id="53-tot">5.3 ToT 的树结构<a class="headerlink" href="#53-tot" title="Permanent link">&para;</a></h3>
+<p>本章 <code>TreeOfThought</code> 实现：</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ThoughtNode</span><span class="p">:</span>
+    <span class="n">thought</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">score</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">children</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="s2">"ThoughtNode"</span><span class="p">]</span>
+    <span class="n">pruned</span><span class="p">:</span> <span class="nb">bool</span>  <span class="c1"># 剪枝标记</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TreeOfThought</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_thought</span><span class="p">):</span>  <span class="c1"># 构建思维树</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bfs_best</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># BFS 搜索最优叶</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dfs_best</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># DFS 搜索最优叶</span>
+</code></pre></div>
+<p>树结构让<strong>剪枝是 O(1) 的标记</strong>——把 <code>child.pruned = True</code>，搜索时跳过整棵子树。</p>
+<h3 id="54-tot">5.4 ToT 的搜索策略<a class="headerlink" href="#54-tot" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>BFS（广度优先）：逐层搜索，找浅层最优解
+  适合：最优解在浅层
+  内存：O(宽度^深度)，深树爆炸
+
+DFS（深度优先）：一条路走到底再回溯
+  适合：深树、内存敏感
+  内存：O(深度)
+
+Beam Search：每层保留 top-k，其余剪枝
+  适合：分支多、需要平衡广度深度
+  内存：O(k × 深度)
+</code></pre></div>
+<p>ToT 通常用 <strong>BFS + beam search + 剪枝</strong>，在探索和利用间平衡。</p>
+<h3 id="55-tot-vs-react-vs-cot">5.5 ToT vs ReAct vs CoT<a class="headerlink" href="#55-tot-vs-react-vs-cot" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>思维结构</th>
+<th>搜索</th>
+<th>适合任务</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CoT</td>
+<td>一条链</td>
+<td>无</td>
+<td>简单推理</td>
+</tr>
+<tr>
+<td>ReAct</td>
+<td>一条链 + 回溯</td>
+<td>栈回溯</td>
+<td>工具调用</td>
+</tr>
+<tr>
+<td>ToT</td>
+<td>多分支树</td>
+<td>BFS/DFS + 剪枝</td>
+<td>复杂决策（24 点、创意写作、战略规划）</td>
+</tr>
+</tbody>
+</table>
+<p>ToT 在需要<strong>探索多个方向</strong>的任务上显著优于 ReAct（论文中 24 点游戏从 4% 提升到 74%），但代价是 <strong>LLM 调用次数多</strong>（每个分支都要评估）。</p>
+<hr />
+<h2 id="6-vs-if-else">6. 状态机 vs 硬编码 if-else 的优势<a class="headerlink" href="#6-vs-if-else" title="Permanent link">&para;</a></h2>
+<h3 id="61">6.1 可维护性<a class="headerlink" href="#61" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 硬编码：新增一个 "reflecting" 状态要改 3 处</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">agent</span><span class="p">(</span><span class="n">question</span><span class="p">):</span>
+    <span class="n">plan</span> <span class="o">=</span> <span class="n">generate_plan</span><span class="p">(</span><span class="n">question</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">plan</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">execute</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
+            <span class="c1"># 改 1：这里加 if should_reflect</span>
+            <span class="k">if</span> <span class="n">should_reflect</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
+                <span class="n">reflection</span> <span class="o">=</span> <span class="n">reflect</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>  <span class="c1"># 改 2：新逻辑</span>
+                <span class="k">if</span> <span class="n">reflection</span><span class="o">.</span><span class="n">needs_replan</span><span class="p">:</span>   <span class="c1"># 改 3：嵌套</span>
+                    <span class="n">plan</span> <span class="o">=</span> <span class="n">replan</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+
+<span class="c1"># 状态机：新增 "reflecting" 状态只需 2 行</span>
+<span class="n">sm</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">"reflecting"</span><span class="p">,</span> <span class="n">reflect_node</span><span class="p">)</span>
+<span class="n">sm</span><span class="o">.</span><span class="n">add_conditional_edges</span><span class="p">(</span><span class="s2">"observing"</span><span class="p">,</span> <span class="n">router</span><span class="p">,</span> <span class="p">{</span><span class="s2">"reflect"</span><span class="p">:</span> <span class="s2">"reflecting"</span><span class="p">,</span> <span class="o">...</span><span class="p">})</span>
+</code></pre></div>
+<h3 id="62">6.2 可可视化<a class="headerlink" href="#62" title="Permanent link">&para;</a></h3>
+<p>状态机可以自动画出状态转移图，便于调试和沟通：</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># LangGraph</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">draw_mermaid_png</span><span class="p">()</span>  <span class="c1"># 生成 Mermaid 图</span>
+
+<span class="c1"># 本章 demo</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">sm</span><span class="o">.</span><span class="n">graph</span><span class="p">)</span>  <span class="c1"># 邻接表一目了然</span>
+</code></pre></div>
+<p>硬编码的 if-else 流程要手画，且容易和代码脱节。</p>
+<h3 id="63">6.3 可并行<a class="headerlink" href="#63" title="Permanent link">&para;</a></h3>
+<p>状态机可以识别<strong>独立分支</strong>自动并行：</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># LangGraph：branch 自动并行</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add_branch</span><span class="p">(</span><span class="s2">"planning"</span><span class="p">,</span> <span class="p">[</span><span class="s2">"research_a"</span><span class="p">,</span> <span class="s2">"research_b"</span><span class="p">,</span> <span class="s2">"research_c"</span><span class="p">])</span>
+<span class="c1"># research_a / b / c 并行执行，全部完成后汇合</span>
+</code></pre></div>
+<p>硬编码的串行 if-else 无法自动并行，要手动开线程 / asyncio。</p>
+<h3 id="64">6.4 可中断 / 恢复<a class="headerlink" href="#64" title="Permanent link">&para;</a></h3>
+<p>状态机的 state dict 可序列化，任意点可暂停恢复：</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># LangGraph：checkpoint 到数据库</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">checkpointer</span><span class="o">=</span><span class="n">SqliteSaver</span><span class="p">(</span><span class="o">...</span><span class="p">))</span>
+<span class="c1"># 中断后从任意 checkpoint 恢复</span>
+<span class="n">config</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"configurable"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"thread_id"</span><span class="p">:</span> <span class="s2">"thread-1"</span><span class="p">}}</span>
+<span class="n">app</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>  <span class="c1"># 从上次中断处继续</span>
+</code></pre></div>
+<p>硬编码跑到一半想暂停，函数调用栈全丢，无法恢复。</p>
+<hr />
+<h2 id="7-demo">7. demo 结果解读<a class="headerlink" href="#7-demo" title="Permanent link">&para;</a></h2>
+<h3 id="71-vs">7.1 状态机 vs 硬编码<a class="headerlink" href="#71-vs" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>状态机状态数: 6, 转移数: 7
+新增状态成本: 状态机 1 行 vs 硬编码 3 行
+</code></pre></div>
+<p>状态机耗时略高于硬编码（多了图遍历），但<strong>新增状态成本 1 行 vs 3 行</strong>，可维护性显著更优。这是用一点运行时开销换可维护性的典型权衡。</p>
+<h3 id="72-react-vs">7.2 ReAct 栈 vs 无栈<a class="headerlink" href="#72-react-vs" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>回溯能力: 栈=1, 无栈=0
+出错恢复: 栈 2 步 vs 无栈 12 步
+</code></pre></div>
+<p>栈支持回溯，出错只需 pop 2 步重新推理；无栈只能从头重跑 12 步。对于易出错的 agent 任务（工具调用常失败），栈的回溯能力是关键。</p>
+<h3 id="73-plan-execute-vs">7.3 Plan-Execute 队列 vs 栈<a class="headerlink" href="#73-plan-execute-vs" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>执行顺序正确: 队列=1, 栈=0
+动态重规划: 队列=1, 栈=0
+</code></pre></div>
+<p>队列 FIFO 保依赖顺序（<code>理解→收集→分析→生成→验证</code>），栈 LIFO 反序执行破坏依赖。动态重规划时队列 append 到队尾不打断，栈 push 到栈顶立即打断。</p>
+<h3 id="74-tot-vs">7.4 ToT 树搜索 vs 线性<a class="headerlink" href="#74-tot-vs" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>展开节点: 8, 剪枝: 11 (58%)
+访问数: BFS=25, DFS=25, 线性=80
+</code></pre></div>
+<p>ToT 剪枝掉 58% 的节点，BFS/DFS 只访问 25 节点 vs 线性 80 节点。树 + 剪枝让搜索空间从线性枚举的 80 降到 25，节省 ~69%。</p>
+<hr />
+<h2 id="8">8. 生产级实现<a class="headerlink" href="#8" title="Permanent link">&para;</a></h2>
+<h3 id="81-langgraphlangchain">8.1 LangGraph（LangChain）<a class="headerlink" href="#81-langgraphlangchain" title="Permanent link">&para;</a></h3>
+<p>LangGraph 是状态机驱动 agent 的代表：
+- <strong>StateGraph</strong>：图 + 哈希表（本章 StateMachine 的生产版）
+- <strong>条件转移</strong>：<code>add_conditional_edges</code> + router_fn
+- <strong>持久化</strong>：SqliteSaver / PostgresSaver checkpoint
+- <strong>并行</strong>：<code>add_branch</code> 自动并行分支
+- <strong>人机协作</strong>：<code>interrupt_before</code> / <code>interrupt_after</code> 暂停等人输入
+- <strong>流式</strong>：state 更新流式输出</p>
+<h3 id="82-autogenmicrosoft">8.2 AutoGen（Microsoft）<a class="headerlink" href="#82-autogenmicrosoft" title="Permanent link">&para;</a></h3>
+<p>AutoGen 用<strong>对话图</strong>编排多 agent：
+- 每个 agent 是一个节点
+- agent 间的消息传递是边
+- 支持嵌套对话（agent 内部再开子对话，对应栈）
+- <code>GroupChat</code> 用图定义 agent 发言顺序</p>
+<h3 id="83-crewai">8.3 CrewAI<a class="headerlink" href="#83-crewai" title="Permanent link">&para;</a></h3>
+<p>CrewAI 用<strong>任务队列</strong>编排 agent 团队：
+- <code>Crew</code> = 一组 agent + 一组 task
+- task 间可定义依赖（队列保顺序）
+- 支持 <code>process="hierarchical"</code>（manager agent 分配任务，对应 Plan-Execute）
+- 每个 task 内部可以跑 ReAct</p>
+<h3 id="84-llamaindex-workflows">8.4 LlamaIndex Workflows<a class="headerlink" href="#84-llamaindex-workflows" title="Permanent link">&para;</a></h3>
+<p>LlamaIndex 的 <code>Workflow</code> 用<strong>事件驱动</strong>编排：
+- 每步 emit 事件，下一步监听事件触发
+- 事件队列（本章 PlanAndExecute 队列的变体）
+- 支持并发事件、条件事件</p>
+<h3 id="85">8.5 各引擎的数据结构对照<a class="headerlink" href="#85" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>引擎</th>
+<th>工作流结构</th>
+<th>推理结构</th>
+<th>任务结构</th>
+<th>状态存储</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LangGraph</td>
+<td>图（StateGraph）</td>
+<td>栈（ReAct）</td>
+<td>队列（Plan-Execute）</td>
+<td>哈希表（state dict）</td>
+</tr>
+<tr>
+<td>AutoGen</td>
+<td>图（对话图）</td>
+<td>栈（嵌套对话）</td>
+<td>—</td>
+<td>哈希表（context）</td>
+</tr>
+<tr>
+<td>CrewAI</td>
+<td>—</td>
+<td>栈（ReAct）</td>
+<td>队列（task list）</td>
+<td>哈希表（context）</td>
+</tr>
+<tr>
+<td>LlamaIndex</td>
+<td>图（事件图）</td>
+<td>—</td>
+<td>队列（事件队列）</td>
+<td>哈希表（context）</td>
+</tr>
+</tbody>
+</table>
+<p>它们都用了<strong>图 + 栈 + 队列 + 哈希表</strong>的组合，只是侧重不同。LangGraph 最完整地实现了状态机驱动，是本章 demo 的主要参照。</p>
+<hr />
+<h2 id="9">9. 小结<a class="headerlink" href="#9" title="Permanent link">&para;</a></h2>
+<p>AI 智能体的工作流编排是「一个场景 → 多种数据结构协作」的典型例子：</p>
+<ol>
+<li><strong>状态机（图 + 哈希表）</strong>：工作流的骨架，状态显式、可可视化、可中断、可并行</li>
+<li><strong>ReAct（栈）</strong>：单步推理的回溯结构，出错 pop 而非重跑，支持嵌套子任务</li>
+<li><strong>Plan-Execute（队列）</strong>：任务拆解的调度结构，FIFO 保依赖，支持动态 replan</li>
+<li><strong>Tree-of-Thought（树）</strong>：多分支思维搜索，BFS/DFS + 剪枝，指数级缩小搜索空间</li>
+</ol>
+<p>四种数据结构在不同层次各司其职，通过 state dict 传递信息，嵌套组合完成复杂 agent 工作流。LangGraph、AutoGen、CrewAI 等生产级引擎都基于这套数据结构组合，证明了它的工程有效性。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.indexes", "navigation.tracking", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

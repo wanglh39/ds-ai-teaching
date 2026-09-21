@@ -1,0 +1,2660 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="从底层实现到生产级应用——数据结构在 AI 系统优化与应用工程中的真实作用">
+      
+      
+        <meta name="author" content="wanglh39">
+      
+      
+        <link rel="canonical" href="https://wanglh39.github.io/ds-ai-teaching/ch13/">
+      
+      
+        <link rel="prev" href="../ch12/">
+      
+      
+        <link rel="next" href="../ch14/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>13 多智能体编排 - 数据结构 × AI 优化</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+SC:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans SC";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#13" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href=".." title="数据结构 × AI 优化" class="md-header__button md-logo" aria-label="数据结构 × AI 优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            数据结构 × AI 优化
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              13 多智能体编排
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换至暗色模式"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换至暗色模式" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换至亮色模式"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换至亮色模式" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/wanglh39/ds-ai-teaching" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wanglh39/ds-ai-teaching
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  首页
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../intro/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  项目介绍
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../ch01/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  视角 A·系统优化
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+    
+  
+  视角 B·应用工程
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../benchmarks/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  性能汇总
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="数据结构 × AI 优化" class="md-nav__button md-logo" aria-label="数据结构 × AI 优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    数据结构 × AI 优化
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/wanglh39/ds-ai-teaching" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wanglh39/ds-ai-teaching
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    首页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    项目介绍
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    项目介绍
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    设计思路
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../map/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    章节映射
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dual_view/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    双视角说明
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cross_index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    交叉索引
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    视角 A·系统优化
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    视角 A·系统优化
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 动态数组
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch02/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 链表
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch03/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 栈
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch04/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 循环队列
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch05/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05 哈希表
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch06/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 堆
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch07/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    07 Trie
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch08/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    08 KD-Tree
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch09/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    09 图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch10/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10 并查集
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch11/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11 页表/分块内存
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch12/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12 跳表+图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    视角 B·应用工程
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    视角 B·应用工程
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13 多智能体编排
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13 多智能体编排
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要回答的问题
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        扩展专题定位
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#demo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        demo 概览
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        跑法
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        状态
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原理
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch14/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    14 任务调度与批处理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch15/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    15 上下文工程与记忆
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch16/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    16 RAG 与知识检索
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch17/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    17 数据管道与流式处理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch18/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    18 模型部署与推理服务
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch19/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    19 状态机与工作流
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch20/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    20 模型压缩
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    性能汇总
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要回答的问题
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        扩展专题定位
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#demo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        demo 概览
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        跑法
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        状态
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原理
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="13">第 13 章 · 多智能体编排（扩展专题）<a class="headerlink" href="#13" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>AI 场景：多个 AI agent 协作完成复杂任务（LangGraph / AutoGen / CrewAI）
+数据结构：DAG + 队列 + 堆 + 并查集（4 种协作）</p>
+</blockquote>
+<h2 id="_1">本章要回答的问题<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>多个 AI agent 协作时，谁先执行？（DAG 拓扑排序）</li>
+<li>agent 之间怎么传消息？（队列）</li>
+<li>多个 agent 就绪时，谁优先？（堆）</li>
+<li>agent 怎么分组共享上下文？（并查集）</li>
+<li>4 种数据结构如何协奏？</li>
+</ul>
+<h2 id="_2">扩展专题定位<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p>前 12 章是「一个数据结构 → 一个 AI 优化」。第 13 章起是扩展专题：<strong>一个 AI 应用场景 → 多种数据结构协作</strong>。本章展示 DAG、队列、堆、并查集如何协作解决多智能体编排问题。</p>
+<h2 id="_3">目录<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>13_multi_agent/
+├── python/
+│   └── demo.py              # 多 agent 编排 demo（4 种数据结构协作）
+├── docs/
+│   ├── principle.md         # 4 种数据结构原理 + 协作机制
+│   └── ai_application.md    # 多智能体编排应用（LangGraph/AutoGen/CrewAI）
+├── figures/                 # 性能对比图
+└── README.md
+</code></pre></div>
+<h2 id="demo">demo 概览<a class="headerlink" href="#demo" title="Permanent link">&para;</a></h2>
+<p>模拟"写技术博客"的 8 agent 工作流：</p>
+<div class="highlight"><pre><span></span><code>search → research → outline → draft ┬→ citation ┐
+                                  └→ polish    ┴→ review → publish
+</code></pre></div>
+<p>4 种数据结构协作：
+- <code>AgentDAG</code>：邻接表 + 拓扑排序，决定执行顺序
+- <code>MessageQueue</code>：队列，agent 间消息传递
+- <code>PriorityScheduler</code>：堆，优先级调度
+- <code>AgentGroups</code>：并查集，agent 分组管理</p>
+<p>性能对比：
+1. 有依赖排序 vs 无依赖乱序（2.59x 尝试次数差异）
+2. 优先级调度 vs FIFO（23.5x 关键任务延迟差异）
+3. 4 种数据结构随规模增长的耗时</p>
+<h2 id="_4">跑法<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>13_multi_agent/python/demo.py
+</code></pre></div>
+<h2 id="_5">状态<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<p>✅ 已完成</p>
+<hr />
+<h2 id="_6">原理<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<h1 id="dag">多智能体编排的数据结构原理：DAG + 队列 + 堆 + 并查集<a class="headerlink" href="#dag" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>本文档讲清「多 agent 编排为什么需要 4 种数据结构协作」。AI 应用（LangGraph/AutoGen/CrewAI 多智能体系统）见 <code>ai_application.md</code>。前 12 章是「一个数据结构 → 一个 AI 优化」，本章是扩展专题：<strong>一个 AI 应用场景 → 多种数据结构协作</strong>。</p>
+</blockquote>
+<h2 id="0-4">0. 为什么是 4 种数据结构<a class="headerlink" href="#0-4" title="Permanent link">&para;</a></h2>
+<p>多智能体系统（Multi-Agent System）的核心问题是：<strong>多个 AI agent 如何协作完成一个复杂任务</strong>。这一个问题分解出 4 个子问题，每个子问题对应一种数据结构：</p>
+<table>
+<thead>
+<tr>
+<th>子问题</th>
+<th>数据结构</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>agent 之间有依赖，谁先执行？</td>
+<td><strong>DAG + 拓扑排序</strong></td>
+<td>决定合法执行顺序</td>
+</tr>
+<tr>
+<td>agent 之间要传消息，怎么传？</td>
+<td><strong>队列</strong></td>
+<td>FIFO 消息传递</td>
+</tr>
+<tr>
+<td>agent 有优先级，谁先调度？</td>
+<td><strong>堆</strong></td>
+<td>优先级调度</td>
+</tr>
+<tr>
+<td>agent 要分组，谁和谁一组？</td>
+<td><strong>并查集</strong></td>
+<td>动态分组管理</td>
+</tr>
+</tbody>
+</table>
+<p>这 4 种数据结构不是独立工作，而是<strong>协奏</strong>：DAG 决定哪些 agent 就绪 → 堆从就绪 agent 里选优先级最高的 → 执行后通过队列把结果传给后继 → 并查集维护 agent 分组用于上下文共享。</p>
+<h2 id="1-dag-agent-dag">1. DAG 与拓扑排序：agent 依赖必须用 DAG<a class="headerlink" href="#1-dag-agent-dag" title="Permanent link">&para;</a></h2>
+<h3 id="11-agent">1.1 agent 依赖关系是图<a class="headerlink" href="#11-agent" title="Permanent link">&para;</a></h3>
+<p>多 agent 工作流里，agent 之间常有依赖：写作 agent 要等研究 agent 完成，审核 agent 要等写作 agent 完成。把 agent 看成顶点，依赖关系看成有向边，整个工作流是一个<strong>有向图</strong>。</p>
+<div class="highlight"><pre><span></span><code>写技术博客的工作流：
+
+    search → research → outline → draft ┬→ citation ┐
+                                      └→ polish    ┴→ review → publish
+
+  search   = 搜索资料
+  research = 整理研究
+  outline  = 写大纲
+  draft    = 写初稿
+  citation = 加引用
+  polish   = 润色
+  review   = 审核
+  publish  = 发布
+</code></pre></div>
+<h3 id="12-dag">1.2 为什么必须是 DAG<a class="headerlink" href="#12-dag" title="Permanent link">&para;</a></h3>
+<p><strong>DAG</strong>（Directed Acyclic Graph，有向无环图）= 没有环的有向图。agent 依赖图<strong>必须</strong>是 DAG，因为：</p>
+<ul>
+<li>如果有环 <code>A → B → C → A</code>，那么 A 等 C 完成、C 等 B 完成、B 等 A 完成 → <strong>死锁</strong>，没人能执行</li>
+<li>DAG 保证至少有一个无前置的 agent（源点），可以从源点开始执行</li>
+<li>DAG 的拓扑排序给出一个<strong>合法的全局执行顺序</strong>：每个 agent 的所有前置都在它之前</li>
+</ul>
+<div class="highlight"><pre><span></span><code>有环（死锁）：          DAG（可执行）：
+
+    A → B → C            A → B → C
+    ↑       │            ↑       │
+    └───────┘            └→ D ───┘
+
+  A 等 C，C 等 A        A 无前置，先执行 A
+  → 死锁                → B、D 就绪 → C → 拓扑排序可行
+</code></pre></div>
+<h3 id="13-kahn">1.3 拓扑排序：Kahn 算法<a class="headerlink" href="#13-kahn" title="Permanent link">&para;</a></h3>
+<p><strong>拓扑排序</strong>（Topological Sort）把 DAG 的顶点排成线性序列，使所有有向边 $(u,v)$ 都满足 $u$ 在 $v$ 前面。<strong>Kahn 算法</strong>用 BFS 实现：</p>
+<div class="highlight"><pre><span></span><code>1. 计算每个顶点的入度（前置数）
+2. 把入度为 0 的顶点入队（无前置，可立即执行）
+3. while 队列非空：
+       u = 出队
+       加入排序结果
+       for u 的每个后继 v：
+           v 的入度 -= 1（u 完成了，v 少一个前置）
+           if v 的入度 == 0：
+               v 入队（v 的前置都完成了，可执行）
+4. 如果结果长度 &lt; 顶点数 → 有环，无法排序
+</code></pre></div>
+<p><strong>复杂度</strong> $O(|V| + |E|)$：每个顶点入队/出队一次，每条边在删边时检查一次。</p>
+<h3 id="14-agent">1.4 拓扑层级：同层 agent 可并行<a class="headerlink" href="#14-agent" title="Permanent link">&para;</a></h3>
+<p>拓扑排序给出<strong>一个</strong>合法顺序，但不是唯一的。更细粒度的结构是<strong>拓扑层级</strong>：</p>
+<ul>
+<li>第 0 层 = 无前置的 agent（源点）</li>
+<li>第 $k$ 层 = 所有前置都在 $0..k-1$ 层的 agent</li>
+</ul>
+<p><strong>同一层的 agent 无依赖关系，可以并行执行</strong>。层级数 = 关键路径长度 = 最少串行步数。</p>
+<div class="highlight"><pre><span></span><code>博客工作流的拓扑层级：
+
+  层 0: [search]           ← 最先执行
+  层 1: [research]
+  层 2: [outline]
+  层 3: [draft]
+  层 4: [citation, polish]  ← 同层，可并行
+  层 5: [review]
+  层 6: [publish]          ← 最后执行
+
+  关键路径长度 = 7 步（即使无限并行，最少也要 7 步）
+</code></pre></div>
+<h3 id="15-vs">1.5 邻接表 vs 邻接矩阵<a class="headerlink" href="#15-vs" title="Permanent link">&para;</a></h3>
+<p>DAG 用<strong>邻接表</strong>存储（<code>dict[str, list[str]]</code>），原因：</p>
+<ul>
+<li>agent 依赖图是<strong>稀疏</strong>的：每个 agent 通常只依赖几个 agent，远小于总 agent 数</li>
+<li>拓扑排序只遍历实际存在的边 $O(|V|+|E|)$，邻接矩阵要扫整个 $O(|V|^2)$</li>
+<li>动态增删 agent/依赖：邻接表 $O(1)$，邻接矩阵要重新分配 $O(|V|^2)$</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AgentDAG</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_succ</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># u → [后继...]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pred</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># v → [前置...]</span>
+</code></pre></div>
+<p>存两种邻接表：<code>_succ</code> 用于拓扑排序时遍历后继，<code>_pred</code> 用于查前置和算入度。</p>
+<h2 id="2-fifo">2. 队列与消息传递：FIFO 的公平性<a class="headerlink" href="#2-fifo" title="Permanent link">&para;</a></h2>
+<h3 id="21-agent">2.1 agent 间为什么需要消息传递<a class="headerlink" href="#21-agent" title="Permanent link">&para;</a></h3>
+<p>agent 不是孤立执行的：研究 agent 的输出要传给写作 agent，写作 agent 的输出要传给审核 agent。这是<strong>生产者-消费者</strong>模式：</p>
+<ul>
+<li>生产者 agent 完成后，把结果<strong>发送</strong>给消费者 agent</li>
+<li>消费者 agent <strong>等待</strong>所有前置的消息到达后才执行</li>
+</ul>
+<h3 id="22">2.2 为什么用队列<a class="headerlink" href="#22" title="Permanent link">&para;</a></h3>
+<p>每个 agent 维护一个<strong>FIFO 队列</strong>接收消息。FIFO（First In First Out）保证：</p>
+<ul>
+<li><strong>公平性</strong>：先发的消息先被处理，不会饿死早期消息</li>
+<li><strong>保序性</strong>：消息的处理顺序和发送顺序一致，便于调试</li>
+<li><strong>无饥饿</strong>：每条消息最终都会被处理，不会有消息永远等在队列里</li>
+</ul>
+<div class="highlight"><pre><span></span><code>agent A 的消息队列（FIFO）：
+
+  发送顺序：search → A, research → A, outline → A
+  队列：    [search 的结果, research 的结果, outline 的结果]
+  接收顺序：search 的结果 → research 的结果 → outline 的结果（同发送顺序）
+</code></pre></div>
+<h3 id="23-deque">2.3 实现：deque + 全局时钟<a class="headerlink" href="#23-deque" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MessageQueue</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_queues</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">deque</span><span class="p">[</span><span class="n">Message</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># 每 agent 一个 deque</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clock</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># 全局时钟，给消息编号</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">,</span> <span class="n">receiver</span><span class="p">,</span> <span class="n">content</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="n">Message</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">receiver</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clock</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clock</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_queues</span><span class="p">[</span><span class="n">receiver</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>  <span class="c1"># 投递到 receiver 的队列</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">recv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_queues</span><span class="p">[</span><span class="n">agent</span><span class="p">]</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>  <span class="c1"># FIFO 取最早的消息</span>
+</code></pre></div>
+<p><code>collections.deque</code> 的 <code>append</code> 和 <code>popleft</code> 都是 $O(1)$，适合队列。全局时钟给消息一个全序编号，便于追溯。</p>
+<h3 id="24">2.4 队列在编排里的两个角色<a class="headerlink" href="#24" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>消息传递</strong>：agent 间传中间结果（上面的例子）</li>
+<li><strong>就绪队列</strong>：拓扑排序的 Kahn 算法里，入度为 0 的 agent 入队等待调度。这是 DAG 和队列的协作点。</li>
+</ol>
+<h2 id="3">3. 堆与优先级调度：关键任务先执行<a class="headerlink" href="#3" title="Permanent link">&para;</a></h2>
+<h3 id="31">3.1 为什么需要优先级<a class="headerlink" href="#31" title="Permanent link">&para;</a></h3>
+<p>不是所有 agent 同等重要。在博客工作流里：</p>
+<ul>
+<li><code>review</code>（审核）、<code>publish</code>（发布）是<strong>关键任务</strong>：用户在等最终结果</li>
+<li><code>search</code>、<code>research</code>、<code>outline</code>、<code>draft</code> 是<strong>主干任务</strong>：必须完成但用户不直接看到</li>
+<li><code>citation</code>、<code>polish</code> 是<strong>辅助任务</strong>：锦上添花，可延迟</li>
+</ul>
+<p>如果多个 agent 同时就绪，<strong>先执行哪个</strong>？FIFO 队列不区分优先级，关键任务可能排在大量低优任务后面。<strong>堆</strong>（Heap）解决这个问题。</p>
+<h3 id="32">3.2 最小堆做优先级调度<a class="headerlink" href="#32" title="Permanent link">&para;</a></h3>
+<p>用<strong>最小堆</strong>（<code>heapq</code>），priority 值小的先执行（1=高 &gt; 2=中 &gt; 3=低）：</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@dataclass</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Task</span><span class="p">:</span>
+    <span class="n">priority</span><span class="p">:</span> <span class="nb">int</span>   <span class="c1"># 1=高, 2=中, 3=低（先比这个）</span>
+    <span class="n">seq</span><span class="p">:</span> <span class="nb">int</span>        <span class="c1"># 同优先级内 FIFO 的插入序号（再比这个）</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">compare</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">PriorityScheduler</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_heap</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Task</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">push</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">priority</span><span class="p">):</span>
+        <span class="n">heapq</span><span class="o">.</span><span class="n">heappush</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_heap</span><span class="p">,</span> <span class="n">Task</span><span class="p">(</span><span class="n">priority</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seq</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">heapq</span><span class="o">.</span><span class="n">heappop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_heap</span><span class="p">)</span>  <span class="c1"># 返回优先级最高（priority 值最小）的任务</span>
+</code></pre></div>
+<p><strong>复杂度</strong>：<code>push</code> 和 <code>pop</code> 都是 $O(\log n)$。比 FIFO 的 $O(1)$ 慢，但保证了关键任务先执行。</p>
+<h3 id="33-seq-fifo">3.3 <code>seq</code> 字段：同优先级 FIFO<a class="headerlink" href="#33-seq-fifo" title="Permanent link">&para;</a></h3>
+<p><code>Task</code> 的比较顺序是 <code>(priority, seq)</code>：先比优先级，同优先级再比 <code>seq</code>（插入序号）。这保证<strong>同优先级的任务 FIFO</strong>——先 push 的先执行。没有 <code>seq</code> 的话，同优先级任务的执行顺序不确定（堆不稳定）。</p>
+<h3 id="34-vs-fifo">3.4 优先级 vs FIFO：关键任务延迟<a class="headerlink" href="#34-vs-fifo" title="Permanent link">&para;</a></h3>
+<p>构造场景：50 个独立任务同时就绪，5 个高优后到达（push 顺序：低优先、高优后）：</p>
+<table>
+<thead>
+<tr>
+<th>调度器</th>
+<th>关键任务执行位置</th>
+<th>延迟总和</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>优先级调度（堆）</td>
+<td>[0, 1, 2, 3, 4]</td>
+<td>10 步</td>
+</tr>
+<tr>
+<td>FIFO 调度（队列）</td>
+<td>[45, 46, 47, 48, 49]</td>
+<td>235 步</td>
+</tr>
+</tbody>
+</table>
+<p>优先级调度让后到达的高优任务<strong>插队</strong>到最前面，延迟仅 10 步；FIFO 让高优任务排在 45 个低优后面，延迟 235 步——<strong>23.5x 差距</strong>。</p>
+<h3 id="35">3.5 堆在编排里的位置<a class="headerlink" href="#35" title="Permanent link">&para;</a></h3>
+<p>堆不是替代队列，而是在"多个就绪 agent"时<strong>选择先执行哪个</strong>。工作流：</p>
+<div class="highlight"><pre><span></span><code>1. DAG 维护入度，决定哪些 agent 就绪
+2. 就绪 agent 进入堆（按优先级排序）   ← 堆在这里
+3. 堆 pop 出优先级最高的 agent 执行
+4. 执行后通过队列把结果传给后继        ← 队列在这里
+5. 后继入度 -1，新的就绪 agent 进堆
+</code></pre></div>
+<h2 id="4-agent-o1">4. 并查集与 agent 分组：近 O(1) 动态合并<a class="headerlink" href="#4-agent-o1" title="Permanent link">&para;</a></h2>
+<h3 id="41-agent">4.1 agent 为什么要分组<a class="headerlink" href="#41-agent" title="Permanent link">&para;</a></h3>
+<p>多 agent 系统里，agent 按职能分组：</p>
+<ul>
+<li><strong>研究组</strong>：search、research、citation（共享资料库）</li>
+<li><strong>写作组</strong>：outline、draft、polish（共享写作风格）</li>
+<li><strong>审核组</strong>：review、publish（共享审核标准）</li>
+</ul>
+<p>同组 agent 可以<strong>共享上下文/缓存</strong>（如研究组共享搜索结果），跨组通信需要序列化（如研究组把结果传给写作组）。分组还用于：权限控制（同组 agent 互信）、负载均衡（同组 agent 可替换）、计费（按组计费）。</p>
+<h3 id="42">4.2 为什么用并查集<a class="headerlink" href="#42" title="Permanent link">&para;</a></h3>
+<p>分组的核心操作：</p>
+<ul>
+<li><code>union(a, b)</code>：把 a 和 b 分到同一组</li>
+<li><code>find(a)</code>：a 属于哪个组（返回组代表）</li>
+<li><code>same_group(a, b)</code>：a 和 b 是否同组</li>
+</ul>
+<p>这些操作<strong>高频</strong>且需要<strong>动态合并</strong>（运行时可能合并两个组）。并查集（Union-Find）是这些操作的最优数据结构：</p>
+<ul>
+<li><code>union</code> 和 <code>find</code> 都是 $O(\alpha(n))$ ≈ $O(1)$（$\alpha$ 是反阿克曼函数，增长极慢，$n=10^{80}$ 时 $\alpha &lt; 5$）</li>
+<li>比把分组存成 <code>dict[str, set[str]]</code> 然后 union 时合并两个 set $O(n)$ 快得多</li>
+<li>支持动态合并：随时 union 两个 agent，不需要重建分组</li>
+</ul>
+<h3 id="43">4.3 实现：路径压缩 + 按秩合并<a class="headerlink" href="#43" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AgentGroups</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># agent → 父节点</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rank</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>    <span class="c1"># 树的高度（秩）</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">find</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent</span><span class="p">):</span>
+        <span class="c1"># 路径压缩：把查找路径上的节点直接指向根</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">agent</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">[</span><span class="n">root</span><span class="p">]</span> <span class="o">!=</span> <span class="n">root</span><span class="p">:</span>
+            <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">[</span><span class="n">root</span><span class="p">]</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">[</span><span class="n">agent</span><span class="p">]</span> <span class="o">!=</span> <span class="n">root</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">[</span><span class="n">agent</span><span class="p">],</span> <span class="n">agent</span> <span class="o">=</span> <span class="n">root</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">[</span><span class="n">agent</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">root</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">union</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+        <span class="n">ra</span><span class="p">,</span> <span class="n">rb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ra</span> <span class="o">==</span> <span class="n">rb</span><span class="p">:</span> <span class="k">return</span>  <span class="c1"># 已同组</span>
+        <span class="c1"># 按秩合并：矮树挂到高树下</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rank</span><span class="p">[</span><span class="n">ra</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rank</span><span class="p">[</span><span class="n">rb</span><span class="p">]:</span>
+            <span class="n">ra</span><span class="p">,</span> <span class="n">rb</span> <span class="o">=</span> <span class="n">rb</span><span class="p">,</span> <span class="n">ra</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">[</span><span class="n">rb</span><span class="p">]</span> <span class="o">=</span> <span class="n">ra</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rank</span><span class="p">[</span><span class="n">ra</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rank</span><span class="p">[</span><span class="n">rb</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rank</span><span class="p">[</span><span class="n">ra</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+</code></pre></div>
+<p>两个优化让并查集达到 $O(\alpha(n))$：</p>
+<ul>
+<li><strong>路径压缩</strong>：<code>find</code> 时把路径上的节点直接指向根，下次 <code>find</code> 是 $O(1)$</li>
+<li><strong>按秩合并</strong>：<code>union</code> 时矮树挂到高树下，避免树变深</li>
+</ul>
+<h3 id="44">4.4 并查集在编排里的位置<a class="headerlink" href="#44" title="Permanent link">&para;</a></h3>
+<p>并查集不参与执行调度，而是<strong>管理 agent 的组织结构</strong>：</p>
+<ul>
+<li>启动时按职能 <code>union</code> 出初始分组</li>
+<li>运行时可能动态合并组（如研究组和写作组合并成一个"内容组"）</li>
+<li>查询 <code>same_group</code> 决定通信方式（同组共享内存，跨组序列化）</li>
+</ul>
+<h2 id="5">5. 四种数据结构如何协作<a class="headerlink" href="#5" title="Permanent link">&para;</a></h2>
+<h3 id="51">5.1 协作流程<a class="headerlink" href="#51" title="Permanent link">&para;</a></h3>
+<p>一个完整的多 agent 工作流执行，4 种数据结构协同工作：</p>
+<div class="highlight"><pre><span></span><code>                    ┌─────────────────────────────────────────┐
+                    │           AgentGroups（并查集）           │
+                    │   管理 agent 分组，决定通信方式           │
+                    │   同组共享上下文，跨组序列化              │
+                    └─────────────────────────────────────────┘
+                                      │
+                                      │ 查询分组
+                                      ▼
+┌──────────────┐    就绪    ┌──────────────────┐    执行    ┌──────────────┐
+│  AgentDAG    │ ─────────→ │ PriorityScheduler│ ─────────→ │  执行 agent  │
+│ （邻接表）    │            │ （堆）            │            │              │
+│ 维护入度      │            │ 选优先级最高      │            │  产出结果    │
+│ 决定就绪      │            │ 的就绪 agent      │            │              │
+└──────────────┘            └──────────────────┘            └──────────────┘
+                                      ▲                          │
+                                      │ 入度 -1                   │ 发消息
+                                      │                          ▼
+                                      │                 ┌──────────────┐
+                                      └─────────────────│ MessageQueue │
+                                                        │ （队列）      │
+                                                        │ 传结果给后继  │
+                                                        └──────────────┘
+</code></pre></div>
+<h3 id="52">5.2 一次执行的步骤<a class="headerlink" href="#52" title="Permanent link">&para;</a></h3>
+<p>以博客工作流为例，执行 <code>draft</code> agent：</p>
+<ol>
+<li><strong>DAG</strong>：<code>draft</code> 的前置 <code>[outline]</code> 都执行完了，入度变 0，<code>draft</code> 就绪</li>
+<li><strong>堆</strong>：<code>draft</code> 进入 <code>PriorityScheduler</code>，priority=2（中）</li>
+<li><strong>堆</strong>：如果 <code>citation</code>（priority=3）和 <code>polish</code>（priority=3）也在堆里，<code>draft</code> 先出堆（priority 2 &lt; 3）</li>
+<li><strong>执行</strong>：<code>draft</code> 运行，产出"初稿"</li>
+<li><strong>队列</strong>：<code>draft</code> 通过 <code>MessageQueue</code> 把"初稿"发给后继 <code>citation</code> 和 <code>polish</code></li>
+<li><strong>DAG</strong>：<code>citation</code> 和 <code>polish</code> 的入度各 -1，变 0，进入堆</li>
+<li><strong>并查集</strong>：<code>draft</code> 属于"写作组"，和 <code>outline</code>、<code>polish</code> 同组，共享写作风格缓存</li>
+</ol>
+<h3 id="53">5.3 各数据结构的复杂度<a class="headerlink" href="#53" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>数据结构</th>
+<th>核心操作</th>
+<th>复杂度</th>
+<th>在编排里的角色</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DAG（邻接表）</td>
+<td>拓扑排序</td>
+<td>$O(|V|+|E|)$</td>
+<td>决定执行顺序</td>
+</tr>
+<tr>
+<td>队列（deque）</td>
+<td>push/pop</td>
+<td>$O(1)$</td>
+<td>消息传递</td>
+</tr>
+<tr>
+<td>堆（heapq）</td>
+<td>push/pop</td>
+<td>$O(\log n)$</td>
+<td>优先级调度</td>
+</tr>
+<tr>
+<td>并查集</td>
+<td>union/find</td>
+<td>$O(\alpha(n))$≈$O(1)$</td>
+<td>动态分组</td>
+</tr>
+</tbody>
+</table>
+<h3 id="54">5.4 为什么不能只用一种<a class="headerlink" href="#54" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>只用 DAG</strong>：知道顺序但无法传消息、无法按优先级、无法分组</li>
+<li><strong>只用队列</strong>：能传消息但不知道谁先执行（可能死锁）、无优先级、无分组</li>
+<li><strong>只用堆</strong>：有优先级但不知道依赖关系（可能前置未完成就执行）、无消息传递、无分组</li>
+<li><strong>只用并查集</strong>：能分组但无执行顺序、无消息传递、无优先级</li>
+</ul>
+<p>4 种数据结构各管一个维度，<strong>组合起来</strong>才完整描述多 agent 编排：DAG 管"什么时候能执行"，堆管"先执行谁"，队列管"执行完怎么传"，并查集管"谁和谁一组"。</p>
+<h2 id="6">6. 生产级框架的数据结构选择<a class="headerlink" href="#6" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>框架</th>
+<th>编排核心</th>
+<th>用到的数据结构</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LangGraph</strong></td>
+<td>图编排（StateGraph）</td>
+<td>DAG + 拓扑排序（条件边）</td>
+</tr>
+<tr>
+<td><strong>AutoGen</strong></td>
+<td>消息路由（GroupChat）</td>
+<td>队列（消息传递）+ 路由表</td>
+</tr>
+<tr>
+<td><strong>CrewAI</strong></td>
+<td>角色分组（Crew）</td>
+<td>并查集（角色分组）+ 任务队列</td>
+</tr>
+<tr>
+<td><strong>Celery</strong></td>
+<td>任务队列</td>
+<td>堆（优先级）+ 队列（FIFO）</td>
+</tr>
+</tbody>
+</table>
+<p>生产级框架通常用 2-3 种数据结构的组合，本章 demo 展示了 4 种全协作的完整图景。</p>
+<h2 id="7">7. 小结<a class="headerlink" href="#7" title="Permanent link">&para;</a></h2>
+<p>多智能体编排是 4 种数据结构的<strong>协奏</strong>：</p>
+<ul>
+<li><strong>DAG + 拓扑排序</strong> → 合法执行顺序（消除死锁和重做）</li>
+<li><strong>队列</strong> → agent 间消息传递（FIFO 公平）</li>
+<li><strong>堆</strong> → 优先级调度（保障关键任务先执行）</li>
+<li><strong>并查集</strong> → 动态分组（近 $O(1)$ 合并）</li>
+</ul>
+<p>每种数据结构解决编排的一个维度，组合起来完整描述"多个 AI agent 如何协作完成复杂任务"。这正是扩展专题的精神：<strong>不是一种数据结构优化一个 AI 算法，而是多种数据结构协作解决一个 AI 应用问题</strong>。</p>
+<hr />
+<h2 id="ai">AI 应用<a class="headerlink" href="#ai" title="Permanent link">&para;</a></h2>
+<h1 id="ai-langgraph-autogen-crewai">多智能体编排的 AI 应用：LangGraph / AutoGen / CrewAI<a class="headerlink" href="#ai-langgraph-autogen-crewai" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>本文档讲清「多 agent 编排在 AI 里干什么」。原理见 <code>principle.md</code>。核心：多个 AI agent 协作完成复杂任务（如写一篇技术博客），需要 4 种数据结构协作——DAG 决定执行顺序、队列传消息、堆做优先级调度、并查集管分组。</p>
+</blockquote>
+<h2 id="1">1. 多智能体系统的背景<a class="headerlink" href="#1" title="Permanent link">&para;</a></h2>
+<h3 id="11-agent-agent">1.1 从单 agent 到多 agent<a class="headerlink" href="#11-agent-agent" title="Permanent link">&para;</a></h3>
+<p>单个 LLM agent 能力有限：一个 agent 既要搜索资料、又要写文章、又要审核，上下文塞不下、角色混乱、错误难定位。<strong>多智能体系统</strong>（Multi-Agent System）把复杂任务拆成多个 agent，每个 agent 专注一个职能：</p>
+<div class="highlight"><pre><span></span><code>单 agent（什么都做）：          多 agent（各司其职）：
+
+  [一个巨大的 prompt]            [search agent] → 搜索资料
+  → 上下文爆炸                    [research agent] → 整理研究
+  → 角色混乱                      [outline agent] → 写大纲
+  → 错误难定位                    [draft agent] → 写初稿
+                                  [review agent] → 审核
+                                  → 上下文聚焦、角色清晰、可调试
+</code></pre></div>
+<h3 id="12">1.2 主流框架<a class="headerlink" href="#12" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>框架</th>
+<th>出品</th>
+<th>编排核心</th>
+<th>典型用法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LangGraph</strong></td>
+<td>LangChain</td>
+<td>图编排（StateGraph）</td>
+<td>把 agent 编排成状态机/图</td>
+</tr>
+<tr>
+<td><strong>AutoGen</strong></td>
+<td>Microsoft</td>
+<td>消息路由（GroupChat）</td>
+<td>agent 间对话式协作</td>
+</tr>
+<tr>
+<td><strong>CrewAI</strong></td>
+<td>开源</td>
+<td>角色分组（Crew）</td>
+<td>角色分工 + 任务委派</td>
+</tr>
+<tr>
+<td><strong>MetaGPT</strong></td>
+<td>开源</td>
+<td>SOP 标准作业流程</td>
+<td>模拟软件公司团队</td>
+</tr>
+</tbody>
+</table>
+<p>这些框架底层都用到了本章讲的 4 种数据结构，只是封装和侧重点不同。</p>
+<h3 id="13_1">1.3 为什么需要数据结构<a class="headerlink" href="#13_1" title="Permanent link">&para;</a></h3>
+<p>agent 多了之后，<strong>编排</strong>（orchestration）成为核心问题：</p>
+<ul>
+<li><strong>谁先执行？</strong> agent 有依赖（写作要等研究），不能乱序</li>
+<li><strong>怎么传消息？</strong> agent 之间要传中间结果</li>
+<li><strong>谁优先？</strong> 多个就绪 agent，关键任务先执行</li>
+<li><strong>怎么分组？</strong> 同职能 agent 共享上下文，跨组通信要序列化</li>
+</ul>
+<p>这 4 个问题分别对应 DAG、队列、堆、并查集。</p>
+<h2 id="2-agent-dag">2. agent 依赖图为什么是 DAG<a class="headerlink" href="#2-agent-dag" title="Permanent link">&para;</a></h2>
+<h3 id="21">2.1 依赖关系天然形成有向图<a class="headerlink" href="#21" title="Permanent link">&para;</a></h3>
+<p>多 agent 工作流里，agent 之间有明确的依赖：</p>
+<div class="highlight"><pre><span></span><code>写技术博客：
+  search → research → outline → draft → {citation, polish} → review → publish
+
+数据分析报告：
+  fetch → clean → analyze → {visualize, summarize} → report → send
+
+代码审查：
+  parse → {lint, test, security_scan} → aggregate → comment → merge
+</code></pre></div>
+<p>把 agent 看成顶点，依赖看成有向边，这就是<strong>有向图</strong>。</p>
+<h3 id="22_1">2.2 循环依赖 = 死锁<a class="headerlink" href="#22_1" title="Permanent link">&para;</a></h3>
+<p>如果依赖图有环 <code>A → B → C → A</code>：</p>
+<ul>
+<li>A 等 C 完成</li>
+<li>C 等 B 完成</li>
+<li>B 等 A 完成</li>
+<li>→ <strong>死锁</strong>，三个 agent 互相等待，没人能执行</li>
+</ul>
+<p>所以 agent 依赖图<strong>必须是无环的</strong>，即 <strong>DAG</strong>（Directed Acyclic Graph）。</p>
+<h3 id="23">2.3 现实中的循环依赖怎么处理<a class="headerlink" href="#23" title="Permanent link">&para;</a></h3>
+<p>有时 agent 之间确实需要"循环"（如审核 agent 发现问题要退回写作 agent 修改）。这不是真正的循环依赖，而是<strong>迭代</strong>：</p>
+<div class="highlight"><pre><span></span><code>线性 DAG（无审核退回）：       带退回的迭代（展开成 DAG）：
+
+  draft → review                draft → review ──→ 通过 → publish
+                                   ↑      │
+                                   └── 不通过（重做 draft）
+
+  审核退回 = 把 draft → review → draft 的"环"展开成多次迭代
+  每次迭代是一个 DAG，迭代次数有上限（避免无限循环）
+</code></pre></div>
+<p>LangGraph 的 <code>conditional edges</code> 支持这种"条件退回"：审核 agent 根据结果决定走 <code>publish</code> 还是回到 <code>draft</code>，每次决策是一个新的 DAG 执行。</p>
+<h2 id="3_1">3. 拓扑排序决定执行顺序<a class="headerlink" href="#3_1" title="Permanent link">&para;</a></h2>
+<h3 id="31_1">3.1 为什么不能随机顺序执行<a class="headerlink" href="#31_1" title="Permanent link">&para;</a></h3>
+<p>随机顺序执行会导致 <strong>agent 在依赖未满足时执行</strong>：</p>
+<ul>
+<li>写作 agent 在研究 agent 之前执行 → 没有资料，写空内容</li>
+<li>审核 agent 在写作 agent 之前执行 → 没有初稿，审什么？</li>
+</ul>
+<p>demo 的性能对比显示：<strong>乱序执行导致 2.59x 的尝试次数</strong>（200 次试验，8 个 agent，拓扑排序 1600 次尝试，乱序 4151 次尝试，多出 2551 次无效尝试）。</p>
+<h3 id="32_1">3.2 拓扑排序给出合法顺序<a class="headerlink" href="#32_1" title="Permanent link">&para;</a></h3>
+<p><strong>Kahn 算法</strong>（BFS 拓扑排序）：</p>
+<ol>
+<li>找所有入度为 0 的 agent（无前置，可立即执行）</li>
+<li>执行它们，把后继的入度 -1</li>
+<li>新的入度 0 的 agent 进入下一轮</li>
+<li>重复直到所有 agent 执行完</li>
+</ol>
+<p>demo 的博客工作流拓扑排序结果：</p>
+<div class="highlight"><pre><span></span><code>合法执行顺序 = [search, research, outline, draft, citation, polish, review, publish]
+</code></pre></div>
+<h3 id="33">3.3 拓扑层级：同层并行<a class="headerlink" href="#33" title="Permanent link">&para;</a></h3>
+<p>更细粒度的是<strong>拓扑层级</strong>——同层 agent 无依赖，可并行：</p>
+<div class="highlight"><pre><span></span><code>层 0: [search]           ← 串行
+层 1: [research]
+层 2: [outline]
+层 3: [draft]
+层 4: [citation, polish]  ← 可并行（2 个 agent 同时跑）
+层 5: [review]
+层 6: [publish]
+</code></pre></div>
+<p>关键路径长度 = 7 步。即使无限并行，最少也要 7 步（因为 <code>search → research → outline → draft → review → publish</code> 是必须串行的关键路径）。<code>citation</code> 和 <code>polish</code> 在层 4 可并行，省 1 步。</p>
+<h3 id="34-langgraph">3.4 LangGraph 的图编排<a class="headerlink" href="#34-langgraph" title="Permanent link">&para;</a></h3>
+<p>LangGraph 的 <code>StateGraph</code> 本质就是 DAG + 拓扑排序：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">langgraph.graph</span><span class="w"> </span><span class="kn">import</span> <span class="n">StateGraph</span>
+
+<span class="n">graph</span> <span class="o">=</span> <span class="n">StateGraph</span><span class="p">(</span><span class="n">State</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">"search"</span><span class="p">,</span> <span class="n">search_agent</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">"research"</span><span class="p">,</span> <span class="n">research_agent</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">"draft"</span><span class="p">,</span> <span class="n">draft_agent</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="s2">"search"</span><span class="p">,</span> <span class="s2">"research"</span><span class="p">)</span>  <span class="c1"># DAG 边</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="s2">"research"</span><span class="p">,</span> <span class="s2">"draft"</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">compile</span><span class="p">()</span>  <span class="c1"># 编译时做拓扑排序</span>
+</code></pre></div>
+<p><code>compile()</code> 时 LangGraph 检查是否有环（必须是 DAG），并计算拓扑序用于执行。</p>
+<h2 id="4-agent">4. agent 间通信的消息队列<a class="headerlink" href="#4-agent" title="Permanent link">&para;</a></h2>
+<h3 id="41">4.1 消息传递的必要性<a class="headerlink" href="#41" title="Permanent link">&para;</a></h3>
+<p>agent 不是孤立执行的：研究 agent 的输出要传给写作 agent。这是<strong>生产者-消费者</strong>模式：</p>
+<div class="highlight"><pre><span></span><code>search agent（生产者）          research agent（消费者）
+  │                                │
+  └─── 消息队列 ──────────────────→│
+       "搜索结果: [...]"           │ 读取消息，整理研究
+</code></pre></div>
+<h3 id="42-fifo">4.2 FIFO 队列的公平性<a class="headerlink" href="#42-fifo" title="Permanent link">&para;</a></h3>
+<p>每个 agent 维护一个 FIFO 队列接收消息。FIFO 保证：</p>
+<ul>
+<li><strong>先发的先处理</strong>：search 先于 research 发消息，research 先处理 search 的消息</li>
+<li><strong>无饥饿</strong>：每条消息最终都被处理</li>
+<li><strong>保序</strong>：便于调试和追溯</li>
+</ul>
+<p>demo 的消息队列实现：</p>
+<div class="highlight"><pre><span></span><code><span class="n">mq</span> <span class="o">=</span> <span class="n">MessageQueue</span><span class="p">()</span>
+<span class="n">mq</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">"search"</span><span class="p">,</span> <span class="s2">"research"</span><span class="p">,</span> <span class="s2">"搜索结果: [论文A, 论文B]"</span><span class="p">)</span>
+<span class="n">mq</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">"research"</span><span class="p">,</span> <span class="s2">"outline"</span><span class="p">,</span> <span class="s2">"研究综述: ..."</span><span class="p">)</span>
+<span class="c1"># research agent 接收</span>
+<span class="n">msg</span> <span class="o">=</span> <span class="n">mq</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="s2">"research"</span><span class="p">)</span>  <span class="c1"># → search 的消息（先发的先收）</span>
+</code></pre></div>
+<h3 id="43-autogen">4.3 AutoGen 的消息路由<a class="headerlink" href="#43-autogen" title="Permanent link">&para;</a></h3>
+<p>AutoGen 的 <code>GroupChat</code> 用消息队列做 agent 间对话：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">autogen</span><span class="w"> </span><span class="kn">import</span> <span class="n">GroupChat</span>
+
+<span class="n">chat</span> <span class="o">=</span> <span class="n">GroupChat</span><span class="p">(</span>
+    <span class="n">agents</span><span class="o">=</span><span class="p">[</span><span class="n">search_agent</span><span class="p">,</span> <span class="n">research_agent</span><span class="p">,</span> <span class="n">draft_agent</span><span class="p">],</span>
+    <span class="n">messages</span><span class="o">=</span><span class="p">[],</span>
+<span class="p">)</span>
+<span class="c1"># search_agent 发消息 → 进队列 → 路由给 research_agent</span>
+<span class="c1"># research_agent 回复 → 进队列 → 路由给下一个 agent</span>
+</code></pre></div>
+<p>AutoGen 的路由比简单 FIFO 复杂：有 <code>round_robin</code>（轮询）、<code>manual</code>（手动指定下一个）、<code>random</code>（随机）、<code>auto</code>（LLM 决定）等策略。但底层都是消息队列 + 路由函数。</p>
+<h3 id="44_1">4.4 消息的两种模式<a class="headerlink" href="#44_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>同步消息</strong>：发送方等接收方处理完才继续（如 RPC）。适合强依赖。</li>
+<li><strong>异步消息</strong>：发送方不等，继续执行。适合解耦。</li>
+</ul>
+<p>多 agent 编排通常用<strong>异步消息</strong>：search agent 发完消息就结束，不等 research agent 处理。research agent 从队列取消息时 search 已经完成了。这解耦了 agent，提高并行度。</p>
+<h2 id="5_1">5. 任务优先级调度<a class="headerlink" href="#5_1" title="Permanent link">&para;</a></h2>
+<h3 id="51_1">5.1 为什么需要优先级<a class="headerlink" href="#51_1" title="Permanent link">&para;</a></h3>
+<p>不是所有 agent 同等重要：</p>
+<table>
+<thead>
+<tr>
+<th>优先级</th>
+<th>agent</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>高（1）</td>
+<td>review, publish</td>
+<td>用户在等最终结果，关键路径</td>
+</tr>
+<tr>
+<td>中（2）</td>
+<td>search, research, outline, draft</td>
+<td>主干任务，必须完成但用户不直接看</td>
+</tr>
+<tr>
+<td>低（3）</td>
+<td>citation, polish</td>
+<td>辅助任务，可延迟</td>
+</tr>
+</tbody>
+</table>
+<p>多个就绪 agent 时，<strong>先执行哪个</strong>？FIFO 不区分优先级，关键任务可能排在低优后面。</p>
+<h3 id="52_1">5.2 堆做优先级调度<a class="headerlink" href="#52_1" title="Permanent link">&para;</a></h3>
+<p>最小堆（<code>heapq</code>）保证每次 $O(\log n)$ 取出优先级最高的任务：</p>
+<div class="highlight"><pre><span></span><code><span class="n">scheduler</span> <span class="o">=</span> <span class="n">PriorityScheduler</span><span class="p">()</span>
+<span class="n">scheduler</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="s2">"search"</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">scheduler</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="s2">"review"</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>   <span class="c1"># 高优</span>
+<span class="n">scheduler</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="s2">"polish"</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>   <span class="c1"># 低优</span>
+
+<span class="n">next_task</span> <span class="o">=</span> <span class="n">scheduler</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>  <span class="c1"># → review（priority=1 最小，最高优）</span>
+</code></pre></div>
+<h3 id="53-demo">5.3 demo 的对比结果<a class="headerlink" href="#53-demo" title="Permanent link">&para;</a></h3>
+<p>构造场景：50 个独立任务同时就绪，5 个高优后到达（push 顺序：低优先、高优后）：</p>
+<table>
+<thead>
+<tr>
+<th>调度器</th>
+<th>关键任务执行位置</th>
+<th>延迟总和</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>优先级调度（堆）</td>
+<td>[0, 1, 2, 3, 4]</td>
+<td>10 步</td>
+</tr>
+<tr>
+<td>FIFO 调度（队列）</td>
+<td>[45, 46, 47, 48, 49]</td>
+<td>235 步</td>
+</tr>
+</tbody>
+</table>
+<p><strong>优先级调度让后到达的高优任务插队到最前面</strong>，延迟仅 10 步；FIFO 让高优任务排在 45 个低优后面，延迟 235 步——<strong>23.5x 差距</strong>。</p>
+<h3 id="54_1">5.4 优先级反转问题<a class="headerlink" href="#54_1" title="Permanent link">&para;</a></h3>
+<p>纯优先级调度有<strong>优先级反转</strong>问题：低优任务持有高优任务需要的资源，导致高优任务被低优任务间接阻塞。解决方案：</p>
+<ul>
+<li><strong>优先级继承</strong>：低优任务临时继承高优任务的优先级</li>
+<li><strong>优先级天花板</strong>：持有资源的任务优先级提升到可能等待它的最高优先级</li>
+</ul>
+<p>多 agent 编排里，资源主要是共享上下文。同组 agent（并查集同组）共享上下文，跨组通信时要注意优先级反转。</p>
+<h3 id="55-celery">5.5 Celery 的优先级队列<a class="headerlink" href="#55-celery" title="Permanent link">&para;</a></h3>
+<p>生产级任务队列 Celery 用堆做优先级调度：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">celery</span><span class="w"> </span><span class="kn">import</span> <span class="n">Celery</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">Celery</span><span class="p">()</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="n">priority</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># 高优</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">review_task</span><span class="p">(</span><span class="n">doc</span><span class="p">):</span> <span class="o">...</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="n">priority</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>  <span class="c1"># 低优</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">polish_task</span><span class="p">(</span><span class="n">doc</span><span class="p">):</span> <span class="o">...</span>
+</code></pre></div>
+<p>Celery 的 <code>priority</code> 参数底层映射到 RabbitMQ 的优先级队列，用堆实现。</p>
+<h2 id="6-agent">6. agent 分组与并查集<a class="headerlink" href="#6-agent" title="Permanent link">&para;</a></h2>
+<h3 id="61">6.1 为什么分组<a class="headerlink" href="#61" title="Permanent link">&para;</a></h3>
+<p>agent 按职能分组，同组 agent 可以<strong>共享上下文/缓存</strong>：</p>
+<div class="highlight"><pre><span></span><code>研究组：[search, research, citation]
+  → 共享资料库（search 找到的论文 research 直接用，不用重新搜）
+
+写作组：[outline, draft, polish]
+  → 共享写作风格（outline 定的风格 draft 沿用）
+
+审核组：[review, publish]
+  → 共享审核标准
+</code></pre></div>
+<p>跨组通信需要<strong>序列化</strong>（如研究组把结果传给写作组，要转成消息），同组通信可以<strong>共享内存</strong>（快得多）。</p>
+<h3 id="62">6.2 并查集的动态合并<a class="headerlink" href="#62" title="Permanent link">&para;</a></h3>
+<p>分组不是静态的，运行时可能<strong>动态合并</strong>：</p>
+<ul>
+<li>初始：研究组、写作组、审核组（3 组）</li>
+<li>发现研究和写作需要紧密协作 → 合并成"内容组"（2 组）</li>
+<li>再合并审核 → 全在一个组（1 组）</li>
+</ul>
+<p>并查集的 <code>union</code> 操作 $O(\alpha(n))$ ≈ $O(1)$，让动态合并几乎免费。如果用 <code>dict[str, set[str]]</code> 存分组，合并两个组要遍历其中一个 set $O(n)$。</p>
+<h3 id="63-demo">6.3 demo 的分组结果<a class="headerlink" href="#63-demo" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>组 search:  [citation, research, search]   ← 研究组
+组 outline: [draft, outline, polish]       ← 写作组
+组 review:  [publish, review]              ← 审核组
+
+跨组检查：
+  search 与 research 同组？True   ← 同组，共享资料库
+  search 与 draft 同组？False     ← 跨组，要序列化
+  review 与 publish 同组？True    ← 同组，共享审核标准
+</code></pre></div>
+<h3 id="64-crewai">6.4 CrewAI 的角色分组<a class="headerlink" href="#64-crewai" title="Permanent link">&para;</a></h3>
+<p>CrewAI 的 <code>Crew</code> 本质是并查集分组 + 任务委派：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">crewai</span><span class="w"> </span><span class="kn">import</span> <span class="n">Crew</span><span class="p">,</span> <span class="n">Agent</span>
+
+<span class="n">researcher</span> <span class="o">=</span> <span class="n">Agent</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s2">"研究员"</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+<span class="n">writer</span> <span class="o">=</span> <span class="n">Agent</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s2">"作家"</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+<span class="n">reviewer</span> <span class="o">=</span> <span class="n">Agent</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s2">"审核员"</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+
+<span class="n">crew</span> <span class="o">=</span> <span class="n">Crew</span><span class="p">(</span>
+    <span class="n">agents</span><span class="o">=</span><span class="p">[</span><span class="n">researcher</span><span class="p">,</span> <span class="n">writer</span><span class="p">,</span> <span class="n">reviewer</span><span class="p">],</span>
+    <span class="n">tasks</span><span class="o">=</span><span class="p">[</span><span class="n">research_task</span><span class="p">,</span> <span class="n">write_task</span><span class="p">,</span> <span class="n">review_task</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="c1"># 同 role 的 agent 自动同组，共享角色上下文</span>
+</code></pre></div>
+<p>CrewAI 按 <code>role</code> 字段分组，同 role 的 agent 共享角色设定（system prompt、工具集、记忆）。</p>
+<h2 id="7-demo">7. demo 结果解读<a class="headerlink" href="#7-demo" title="Permanent link">&para;</a></h2>
+<h3 id="71">7.1 工作流结构<a class="headerlink" href="#71" title="Permanent link">&para;</a></h3>
+<p>demo 模拟"写技术博客"的 8 agent 工作流：</p>
+<div class="highlight"><pre><span></span><code>search → research → outline → draft ┬→ citation ┐
+                                  └→ polish    ┴→ review → publish
+</code></pre></div>
+<ul>
+<li>8 个 agent，8 条依赖边，3 个分组，3 个优先级</li>
+<li>拓扑层级 7 层（关键路径 7 步），层 4 的 <code>citation</code> 和 <code>polish</code> 可并行</li>
+</ul>
+<h3 id="72">7.2 性能对比结果<a class="headerlink" href="#72" title="Permanent link">&para;</a></h3>
+<p><strong>对比 1：拓扑排序 vs 乱序</strong>（200 次试验）：</p>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>总尝试次数</th>
+<th>重试次数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>有依赖排序</td>
+<td>1600</td>
+<td>0</td>
+</tr>
+<tr>
+<td>无依赖乱序</td>
+<td>4151</td>
+<td>2551</td>
+</tr>
+</tbody>
+</table>
+<p>乱序导致 2.59x 尝试次数，拓扑排序消除 2551 次无效尝试。</p>
+<p><strong>对比 2：优先级 vs FIFO</strong>（50 个独立任务，5 个高优后到达）：</p>
+<table>
+<thead>
+<tr>
+<th>调度器</th>
+<th>关键任务执行位置</th>
+<th>延迟总和</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>优先级调度</td>
+<td>[0,1,2,3,4]</td>
+<td>10 步</td>
+</tr>
+<tr>
+<td>FIFO 调度</td>
+<td>[45,46,47,48,49]</td>
+<td>235 步</td>
+</tr>
+</tbody>
+</table>
+<p>FIFO 让关键任务多等 23.5x。</p>
+<p><strong>对比 3：4 种数据结构随规模增长</strong>（n=100 到 10000）：</p>
+<table>
+<thead>
+<tr>
+<th>规模</th>
+<th>DAG 拓扑排序</th>
+<th>队列</th>
+<th>堆</th>
+<th>并查集</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>100</td>
+<td>0.056ms</td>
+<td>0.007ms</td>
+<td>0.025ms</td>
+<td>0.151ms</td>
+</tr>
+<tr>
+<td>1000</td>
+<td>1.10ms</td>
+<td>0.116ms</td>
+<td>0.381ms</td>
+<td>2.56ms</td>
+</tr>
+<tr>
+<td>10000</td>
+<td>10.55ms</td>
+<td>1.30ms</td>
+<td>4.18ms</td>
+<td>24.27ms</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>DAG 拓扑排序 $O(V+E)$：线性增长</li>
+<li>队列 $O(1)$：增长最慢</li>
+<li>堆 $O(\log n)$：比队列稍慢</li>
+<li>并查集 $O(\alpha(n))$：几乎 $O(1)$，但 Python 实现常数较大</li>
+</ul>
+<h3 id="73">7.3 协作的体现<a class="headerlink" href="#73" title="Permanent link">&para;</a></h3>
+<p>demo 的 <code>[6] 完整工作流模拟</code> 展示了 4 种数据结构协作：</p>
+<div class="highlight"><pre><span></span><code>[search] 组=search 优先级=2 收到 0 条消息 → 发给 ['research']
+[research] 组=search 优先级=2 收到 1 条消息 → 发给 ['outline']
+[outline] 组=outline 优先级=2 收到 1 条消息 → 发给 ['draft']
+[draft] 组=outline 优先级=2 收到 1 条消息 → 发给 ['citation', 'polish']
+[citation] 组=search 优先级=3 收到 1 条消息 → 发给 ['review']
+[polish] 组=outline 优先级=3 收到 1 条消息 → 发给 ['review']
+[review] 组=review 优先级=1 收到 2 条消息 → 发给 ['publish']
+[publish] 组=review 优先级=1 收到 1 条消息 → 发给 （无后继，完成）
+</code></pre></div>
+<p>每行都涉及 4 种数据结构：
+- <strong>执行顺序</strong>由 DAG 拓扑排序决定
+- <strong>"收到 N 条消息"</strong>来自消息队列
+- <strong>优先级</strong>来自堆调度
+- <strong>"组=X"</strong>来自并查集</p>
+<h2 id="8">8. 生产级框架的实现<a class="headerlink" href="#8" title="Permanent link">&para;</a></h2>
+<h3 id="81-langgraph">8.1 LangGraph：图编排<a class="headerlink" href="#81-langgraph" title="Permanent link">&para;</a></h3>
+<p>LangGraph 的核心是 <code>StateGraph</code>，本质是 DAG + 条件边：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">langgraph.graph</span><span class="w"> </span><span class="kn">import</span> <span class="n">StateGraph</span><span class="p">,</span> <span class="n">END</span>
+
+<span class="n">graph</span> <span class="o">=</span> <span class="n">StateGraph</span><span class="p">(</span><span class="n">State</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">"search"</span><span class="p">,</span> <span class="n">search_agent</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">"draft"</span><span class="p">,</span> <span class="n">draft_agent</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s2">"review"</span><span class="p">,</span> <span class="n">review_agent</span><span class="p">)</span>
+
+<span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="s2">"search"</span><span class="p">,</span> <span class="s2">"draft"</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add_conditional_edges</span><span class="p">(</span>
+    <span class="s2">"review"</span><span class="p">,</span>
+    <span class="k">lambda</span> <span class="n">state</span><span class="p">:</span> <span class="s2">"pass"</span> <span class="k">if</span> <span class="n">state</span><span class="p">[</span><span class="s2">"approved"</span><span class="p">]</span> <span class="k">else</span> <span class="s2">"redo"</span><span class="p">,</span>
+    <span class="p">{</span><span class="s2">"pass"</span><span class="p">:</span> <span class="n">END</span><span class="p">,</span> <span class="s2">"redo"</span><span class="p">:</span> <span class="s2">"draft"</span><span class="p">},</span>  <span class="c1"># 条件边：审核退回</span>
+<span class="p">)</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">compile</span><span class="p">()</span>  <span class="c1"># 编译时拓扑排序</span>
+</code></pre></div>
+<ul>
+<li><code>add_edge</code>：DAG 边</li>
+<li><code>add_conditional_edges</code>：条件边（审核退回 = 迭代展开成 DAG）</li>
+<li><code>compile()</code>：检查无环 + 拓扑排序</li>
+</ul>
+<h3 id="82-autogen">8.2 AutoGen：消息路由<a class="headerlink" href="#82-autogen" title="Permanent link">&para;</a></h3>
+<p>AutoGen 的 <code>GroupChat</code> 用消息队列 + 路由函数：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">autogen</span><span class="w"> </span><span class="kn">import</span> <span class="n">GroupChat</span><span class="p">,</span> <span class="n">GroupChatManager</span>
+
+<span class="n">groupchat</span> <span class="o">=</span> <span class="n">GroupChat</span><span class="p">(</span>
+    <span class="n">agents</span><span class="o">=</span><span class="p">[</span><span class="n">search_agent</span><span class="p">,</span> <span class="n">research_agent</span><span class="p">,</span> <span class="n">draft_agent</span><span class="p">],</span>
+    <span class="n">messages</span><span class="o">=</span><span class="p">[],</span>
+    <span class="n">speaker_selection_method</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span>  <span class="c1"># LLM 决定下一个发言者</span>
+<span class="p">)</span>
+<span class="n">manager</span> <span class="o">=</span> <span class="n">GroupChatManager</span><span class="p">(</span><span class="n">groupchat</span><span class="o">=</span><span class="n">groupchat</span><span class="p">)</span>
+<span class="c1"># agent 间通过消息队列对话，manager 路由消息</span>
+</code></pre></div>
+<ul>
+<li><code>messages</code>：消息队列</li>
+<li><code>speaker_selection_method</code>：路由策略（<code>auto</code>/<code>round_robin</code>/<code>manual</code>/<code>random</code>）</li>
+<li>底层：每个 agent 一个消息队列，manager 路由消息</li>
+</ul>
+<h3 id="83-crewai">8.3 CrewAI：角色分组<a class="headerlink" href="#83-crewai" title="Permanent link">&para;</a></h3>
+<p>CrewAI 的 <code>Crew</code> 用并查集按角色分组 + 任务队列：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">crewai</span><span class="w"> </span><span class="kn">import</span> <span class="n">Crew</span><span class="p">,</span> <span class="n">Agent</span><span class="p">,</span> <span class="n">Task</span>
+
+<span class="n">researcher</span> <span class="o">=</span> <span class="n">Agent</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s2">"研究员"</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="s2">"找到资料"</span><span class="p">,</span> <span class="n">backstory</span><span class="o">=</span><span class="s2">"..."</span><span class="p">)</span>
+<span class="n">writer</span> <span class="o">=</span> <span class="n">Agent</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s2">"作家"</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="s2">"写文章"</span><span class="p">,</span> <span class="n">backstory</span><span class="o">=</span><span class="s2">"..."</span><span class="p">)</span>
+
+<span class="n">crew</span> <span class="o">=</span> <span class="n">Crew</span><span class="p">(</span>
+    <span class="n">agents</span><span class="o">=</span><span class="p">[</span><span class="n">researcher</span><span class="p">,</span> <span class="n">writer</span><span class="p">],</span>
+    <span class="n">tasks</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">Task</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">"研究 X"</span><span class="p">,</span> <span class="n">agent</span><span class="o">=</span><span class="n">researcher</span><span class="p">),</span>
+        <span class="n">Task</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">"写关于 X 的文章"</span><span class="p">,</span> <span class="n">agent</span><span class="o">=</span><span class="n">writer</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="n">process</span><span class="o">=</span><span class="s2">"sequential"</span><span class="p">,</span>  <span class="c1"># 按任务顺序执行（拓扑排序）</span>
+<span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">crew</span><span class="o">.</span><span class="n">kickoff</span><span class="p">()</span>
+</code></pre></div>
+<ul>
+<li><code>role</code>：分组依据（同 role 同组）</li>
+<li><code>tasks</code>：任务列表（按顺序执行 = 拓扑排序）</li>
+<li><code>process</code>：<code>sequential</code>（串行）/ <code>hierarchical"</code>（有 manager agent 调度）</li>
+</ul>
+<h3 id="84">8.4 数据结构映射<a class="headerlink" href="#84" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>框架</th>
+<th>DAG</th>
+<th>队列</th>
+<th>堆</th>
+<th>并查集</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LangGraph</td>
+<td>✅ StateGraph</td>
+<td>✅ 状态传递</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>AutoGen</td>
+<td>❌</td>
+<td>✅ GroupChat</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>CrewAI</td>
+<td>✅ 任务顺序</td>
+<td>✅ 任务结果</td>
+<td>❌</td>
+<td>✅ 角色分组</td>
+</tr>
+<tr>
+<td>本章 demo</td>
+<td>✅ AgentDAG</td>
+<td>✅ MessageQueue</td>
+<td>✅ PriorityScheduler</td>
+<td>✅ AgentGroups</td>
+</tr>
+</tbody>
+</table>
+<p>本章 demo 是唯一同时用 4 种数据结构的完整实现，展示它们如何协作。</p>
+<h2 id="9">9. 扩展：更复杂的编排场景<a class="headerlink" href="#9" title="Permanent link">&para;</a></h2>
+<h3 id="91-agent">9.1 动态 agent 加入<a class="headerlink" href="#91-agent" title="Permanent link">&para;</a></h3>
+<p>运行时可能动态加入 agent（如审核 agent 发现需要补充资料，启动一个新的 search agent）。这要求：</p>
+<ul>
+<li><strong>DAG</strong> 支持动态加边（邻接表 $O(1)$ 加边）</li>
+<li><strong>堆</strong> 支持动态 push（$O(\log n)$）</li>
+<li><strong>并查集</strong> 支持动态 union（$O(\alpha(n))$）</li>
+<li>消息队列天然支持动态</li>
+</ul>
+<p>demo 的数据结构都支持动态操作，这是邻接表（而非邻接矩阵）、并查集（而非分组 dict）的优势。</p>
+<h3 id="92-agent">9.2 agent 失败与重试<a class="headerlink" href="#92-agent" title="Permanent link">&para;</a></h3>
+<p>agent 可能失败（LLM 超时、工具报错）。处理方式：</p>
+<ul>
+<li><strong>重试</strong>：同一个 agent 重新执行（不改变 DAG 结构）</li>
+<li><strong>降级</strong>：换一个更简单 agent 替代（动态改 DAG）</li>
+<li><strong>跳过</strong>：标记 agent 失败，后继用默认值继续（DAG 里标记节点状态）</li>
+</ul>
+<p>这需要 DAG 维护<strong>节点状态</strong>（pending/running/done/failed），拓扑排序时跳过 failed 节点。</p>
+<h3 id="93-agent">9.3 agent 并行执行<a class="headerlink" href="#93-agent" title="Permanent link">&para;</a></h3>
+<p>同层 agent 可并行。生产级用 <code>asyncio</code> 或线程池：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">execute_level</span><span class="p">(</span><span class="n">level_agents</span><span class="p">):</span>
+    <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">run_agent</span><span class="p">(</span><span class="n">a</span><span class="p">))</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">level_agents</span><span class="p">]</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">results</span>
+</code></pre></div>
+<p>拓扑层级（<code>topological_levels</code>）天然给出并行分组，每层内并行，层间串行。</p>
+<h2 id="10">10. 小结<a class="headerlink" href="#10" title="Permanent link">&para;</a></h2>
+<p>多智能体编排是 4 种数据结构的协奏：</p>
+<ul>
+<li><strong>DAG + 拓扑排序</strong> → 合法执行顺序（消除死锁，2.59x 少尝试）</li>
+<li><strong>消息队列</strong> → agent 间通信（FIFO 公平，无饥饿）</li>
+<li><strong>堆</strong> → 优先级调度（关键任务先执行，23.5x 少延迟）</li>
+<li><strong>并查集</strong> → 动态分组（近 $O(1)$ 合并，共享上下文）</li>
+</ul>
+<p>生产级框架 LangGraph（图编排）、AutoGen（消息路由）、CrewAI（角色分组）各自侧重不同数据结构，但本质都是这 4 种的组合。本章 demo 完整展示了 4 种数据结构如何协作解决一个 AI 应用问题——这正是扩展专题的精神：<strong>一个 AI 场景 → 多种数据结构协作</strong>。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.indexes", "navigation.tracking", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

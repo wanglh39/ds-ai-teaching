@@ -1,0 +1,2444 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="从底层实现到生产级应用——数据结构在 AI 系统优化与应用工程中的真实作用">
+      
+      
+        <meta name="author" content="wanglh39">
+      
+      
+        <link rel="canonical" href="https://wanglh39.github.io/ds-ai-teaching/ch04/">
+      
+      
+        <link rel="prev" href="../ch03/">
+      
+      
+        <link rel="next" href="../ch05/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>04 循环队列 - 数据结构 × AI 优化</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+SC:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans SC";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#04" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href=".." title="数据结构 × AI 优化" class="md-header__button md-logo" aria-label="数据结构 × AI 优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            数据结构 × AI 优化
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              04 循环队列
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换至暗色模式"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换至暗色模式" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换至亮色模式"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换至亮色模式" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/wanglh39/ds-ai-teaching" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wanglh39/ds-ai-teaching
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  首页
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../intro/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  项目介绍
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../ch01/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  视角 A·系统优化
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../ch13/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  视角 B·应用工程
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../benchmarks/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  性能汇总
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="数据结构 × AI 优化" class="md-nav__button md-logo" aria-label="数据结构 × AI 优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    数据结构 × AI 优化
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/wanglh39/ds-ai-teaching" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wanglh39/ds-ai-teaching
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    首页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    项目介绍
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    项目介绍
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    设计思路
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../map/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    章节映射
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dual_view/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    双视角说明
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cross_index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    交叉索引
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    视角 A·系统优化
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    视角 A·系统优化
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 动态数组
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch02/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 链表
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch03/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 栈
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 循环队列
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 循环队列
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要回答的问题
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        状态
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原理
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch05/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05 哈希表
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch06/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 堆
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch07/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    07 Trie
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch08/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    08 KD-Tree
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch09/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    09 图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch10/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10 并查集
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch11/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11 页表/分块内存
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch12/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12 跳表+图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    视角 B·应用工程
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    视角 B·应用工程
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch13/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13 多智能体编排
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch14/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    14 任务调度与批处理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch15/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    15 上下文工程与记忆
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch16/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    16 RAG 与知识检索
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch17/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    17 数据管道与流式处理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch18/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    18 模型部署与推理服务
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch19/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    19 状态机与工作流
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch20/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    20 模型压缩
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    性能汇总
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要回答的问题
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        状态
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原理
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="04">第 04 章 · 循环队列<a class="headerlink" href="#04" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>数据结构：循环队列（固定大小 + 头尾指针）
+AI 优化：Ring-AllReduce 分布式通信 + 批处理调度</p>
+</blockquote>
+<h2 id="_1">本章要回答的问题<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Ring-AllReduce 为什么是带宽最优的通信拓扑？</li>
+<li>环形队列怎么对应到环形通信拓扑？</li>
+<li>树形通信 vs 环形通信的通信量差多少？</li>
+</ul>
+<h2 id="_2">目录<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>04_queue/
+├── c/                   # 循环队列的 C 实现
+├── python/              # Ring-AllReduce 模拟 demo
+├── docs/
+│   ├── principle.md
+│   └── ai_application.md
+└── figures/
+</code></pre></div>
+<h2 id="_3">状态<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p>🚧 待填充</p>
+<hr />
+<h2 id="_4">原理<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<h1 id="_5">循环队列原理<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>本文档讲清「循环队列是什么、为什么要循环、怎么判满判空、C 实现细节」。AI 应用见 <code>ai_application.md</code>。</p>
+</blockquote>
+<h2 id="1">1. 队列的定义<a class="headerlink" href="#1" title="Permanent link">&para;</a></h2>
+<p>队列是先进先出（FIFO, First In First Out）的线性表：</p>
+<div class="highlight"><pre><span></span><code>入队: enqueue(1), enqueue(2), enqueue(3)
+队列: [1, 2, 3]  ← 队头(出)    队尾(入) →
+出队: dequeue() → 1, dequeue() → 2, dequeue() → 3
+</code></pre></div>
+<p>两个核心操作：
+- <code>enqueue(v)</code>：在队尾插入，$O(1)$
+- <code>dequeue()</code>：从队头删除，$O(1)$</p>
+<p><strong>FIFO 是队列的本质</strong>：最先放进去的最先出来。这与栈的 LIFO 恰好相反。</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>为什么 FIFO</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>排队取号</td>
+<td>先来的先服务</td>
+</tr>
+<tr>
+<td>打印队列</td>
+<td>先提交的先打印</td>
+</tr>
+<tr>
+<td>BFS 广度优先搜索</td>
+<td>先发现的节点先扩展</td>
+</tr>
+<tr>
+<td>操作系统任务调度</td>
+<td>先到的任务先调度（FCFS）</td>
+</tr>
+<tr>
+<td><strong>分布式通信</strong></td>
+<td><strong>梯度按顺序聚合，环形传递</strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="2">2. 数组队列的假溢出<a class="headerlink" href="#2" title="Permanent link">&para;</a></h2>
+<p>最朴素的数组队列：用一个数组，<code>head</code> 指向队头，<code>tail</code> 指向队尾下一个空位。</p>
+<div class="highlight"><pre><span></span><code><span class="nl">enqueue</span><span class="p">:</span><span class="w"> </span><span class="n">data</span><span class="p">[</span><span class="n">tail</span><span class="o">++</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v</span><span class="p">;</span>
+<span class="nl">dequeue</span><span class="p">:</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">data</span><span class="p">[</span><span class="n">head</span><span class="o">++</span><span class="p">];</span>
+</code></pre></div>
+<p>问题：<code>head</code> 和 <code>tail</code> 只增不减，前面出队腾出的空间无法复用。</p>
+<div class="highlight"><pre><span></span><code>容量 5 的数组队列：
+[1, 2, 3, 4, 5]   head=0, tail=5
+dequeue 3 次 → head=3, tail=5
+[_, _, _, 4, 5]   剩余 2 个元素，但 tail 已到末尾
+enqueue(6) → tail=6 越界！明明前面有 3 个空位却用不了
+</code></pre></div>
+<p>这就是<strong>假溢出</strong>：数组前端有空位，但 <code>tail</code> 指针已经走到数组末尾，无法继续入队。</p>
+<h3 id="21">2.1 解决方案一：搬移<a class="headerlink" href="#21" title="Permanent link">&para;</a></h3>
+<p>每次出队后把所有元素前移，保持 <code>head=0</code>：</p>
+<div class="highlight"><pre><span></span><code>dequeue → 所有元素前移一位，tail--
+</code></pre></div>
+<ul>
+<li>代价：每次 <code>dequeue</code> 变成 $O(n)$（要搬移 $n-1$ 个元素）</li>
+<li>不可接受：队列的核心优势就是 $O(1)$ 入队出队</li>
+</ul>
+<h3 id="22">2.2 解决方案二：循环队列（回绕）<a class="headerlink" href="#22" title="Permanent link">&para;</a></h3>
+<p>让 <code>head</code> 和 <code>tail</code> 在到数组末尾时<strong>回绕到开头</strong>，把数组看成一个环：</p>
+<div class="highlight"><pre><span></span><code>容量 5 的循环队列：
+[1, 2, 3, 4, 5]   head=0, tail=0（判满见下文）
+dequeue 3 次 → head=3
+[_, _, _, 4, 5]
+enqueue(6) → data[0]=6, tail=(5+1)%5=0? 不对...
+</code></pre></div>
+<p>关键：用<strong>取模运算</strong>实现回绕：</p>
+<div class="highlight"><pre><span></span><code><span class="n">tail</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">tail</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">capacity</span><span class="p">;</span><span class="w">  </span><span class="c1">// 到末尾后回到 0</span>
+<span class="n">head</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">head</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">capacity</span><span class="p">;</span>
+</code></pre></div>
+<p>这样数组前端的空间就能被复用，入队出队都是 $O(1)$。</p>
+<h2 id="3">3. 循环队列的定义<a class="headerlink" href="#3" title="Permanent link">&para;</a></h2>
+<p>循环队列 = 固定大小数组 + 头尾指针 + 取模回绕。</p>
+<div class="highlight"><pre><span></span><code>逻辑视图（环）:
+        data[0]
+       /        \
+   data[4]      data[1]
+       \        /
+       data[3] - data[2]
+
+物理视图（数组）:
+[data[0], data[1], data[2], data[3], data[4]]
+  ↑ tail                ↑ head
+  （回绕后 tail 可在 head 左边）
+</code></pre></div>
+<ul>
+<li><code>head</code>：队头下标，<code>dequeue</code> 从这里取</li>
+<li><code>tail</code>：队尾下一个空位下标，<code>enqueue</code> 写到这里</li>
+<li><code>capacity</code>：数组物理大小</li>
+<li>入队：<code>data[tail] = v; tail = (tail+1) % capacity;</code></li>
+<li>出队：<code>v = data[head]; head = (head+1) % capacity;</code></li>
+</ul>
+<h2 id="4">4. 判满判空：两种方案<a class="headerlink" href="#4" title="Permanent link">&para;</a></h2>
+<p>回绕带来一个麻烦：<strong>队空和队满时，<code>head == tail</code> 都成立</strong>。</p>
+<div class="highlight"><pre><span></span><code>队空: head == tail（没有元素）
+队满: head == tail（元素填满一圈，tail 追上了 head）
+</code></pre></div>
+<p>光看 <code>head == tail</code> 无法区分空和满。两种解决方案：</p>
+<h3 id="41">4.1 方案一：浪费一个槽位（本章实现）<a class="headerlink" href="#41" title="Permanent link">&para;</a></h3>
+<p>让 <code>tail</code> 永远指向「下一个空位」，队满时 <code>tail</code> 停在 <code>head</code> 前一格，即：</p>
+<div class="highlight"><pre><span></span><code><span class="nl">判满</span><span class="p">:</span><span class="w"> </span><span class="p">(</span><span class="n">tail</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">capacity</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">head</span>
+<span class="nl">判空</span><span class="p">:</span><span class="w"> </span><span class="n">head</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">tail</span>
+</code></pre></div>
+<ul>
+<li>容量 <code>capacity</code> 的数组最多存 <code>capacity - 1</code> 个元素</li>
+<li>代价：浪费 1 个槽位</li>
+<li>好处：无需额外字段，$O(1)$ 判断</li>
+</ul>
+<div class="highlight"><pre><span></span><code>capacity=5 的数组，最多存 4 个：
+[_, 2, 3, 4, 5]   head=1, tail=0
+判满: (0+1)%5 == 1 == head → 满
+判空: head=1 != tail=0 → 非空
+</code></pre></div>
+<h3 id="42-size">4.2 方案二：额外 size 字段<a class="headerlink" href="#42-size" title="Permanent link">&para;</a></h3>
+<p>维护一个 <code>size</code> 字段记录当前元素数：</p>
+<div class="highlight"><pre><span></span><code><span class="nl">判满</span><span class="p">:</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">capacity</span>
+<span class="nl">判空</span><span class="p">:</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span>
+</code></pre></div>
+<ul>
+<li>不浪费槽位，可存 <code>capacity</code> 个</li>
+<li>代价：每次入队出队都要更新 <code>size</code>（一次整数加减，几乎无开销）</li>
+<li>好处：<code>size</code> 查询也是 $O(1)$，且语义清晰</li>
+</ul>
+<h3 id="43">4.3 两种方案对比<a class="headerlink" href="#43" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>浪费一个槽位</th>
+<th>额外 size 字段</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>实际容量</td>
+<td>capacity - 1</td>
+<td>capacity</td>
+</tr>
+<tr>
+<td>额外空间</td>
+<td>1 个槽位</td>
+<td>1 个 size_t（8 字节）</td>
+</tr>
+<tr>
+<td>判满判空</td>
+<td>比较 head/tail</td>
+<td>比较 size</td>
+</tr>
+<tr>
+<td>size 查询</td>
+<td><code>(tail-head+cap)%cap</code></td>
+<td>直接返回 size</td>
+</tr>
+<tr>
+<td>实现复杂度</td>
+<td>略高（取模算 size）</td>
+<td>略低</td>
+</tr>
+</tbody>
+</table>
+<p>本章采用<strong>方案一</strong>（浪费一个槽位），因为它更经典，且能展示取模回绕的核心思想。生产代码里两种都常见。</p>
+<h2 id="5-c">5. C 实现逐行讲解<a class="headerlink" href="#5-c" title="Permanent link">&para;</a></h2>
+<h3 id="51-queueh">5.1 结构体（queue.h）<a class="headerlink" href="#51-queueh" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="p">;</span><span class="w">    </span><span class="c1">// 固定大小数组</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">head</span><span class="p">;</span><span class="w">     </span><span class="c1">// 队头下标</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">tail</span><span class="p">;</span><span class="w">     </span><span class="c1">// 队尾下一个空位下标</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">capacity</span><span class="p">;</span><span class="w"> </span><span class="c1">// 数组物理大小（含浪费的槽位）</span>
+<span class="p">}</span><span class="w"> </span><span class="n">DQueue</span><span class="p">;</span>
+</code></pre></div>
+<ul>
+<li><code>data</code> 是动态分配的数组（<code>init</code> 时分配，<code>free</code> 时释放）</li>
+<li><code>capacity</code> 是数组物理大小，用户期望存 <code>n</code> 个元素时实际分配 <code>n+1</code></li>
+<li><code>head</code>/<code>tail</code> 是环形下标，取模回绕</li>
+</ul>
+<h3 id="52-queuec">5.2 初始化（queue.c）<a class="headerlink" href="#52-queuec" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">dsq_init</span><span class="p">(</span><span class="n">DQueue</span><span class="w"> </span><span class="o">*</span><span class="n">q</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">capacity</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">capacity</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="n">capacity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">        </span><span class="c1">// 防御：容量至少 1</span>
+<span class="w">    </span><span class="n">q</span><span class="o">-&gt;</span><span class="n">capacity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">capacity</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">             </span><span class="c1">// 多分配 1 个槽位（浪费法）</span>
+<span class="w">    </span><span class="n">q</span><span class="o">-&gt;</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">capacity</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="kt">double</span><span class="p">));</span>
+<span class="w">    </span><span class="n">q</span><span class="o">-&gt;</span><span class="n">head</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">q</span><span class="o">-&gt;</span><span class="n">tail</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<ul>
+<li>用户传 <code>capacity=5</code>，实际 <code>q-&gt;capacity=6</code>，可存 5 个元素</li>
+<li><code>head == tail == 0</code> 表示空队</li>
+<li>若 <code>malloc</code> 失败返回 <code>NULL</code>，后续操作会段错误；生产代码应检查（这里为简洁省略）</li>
+</ul>
+<h3 id="53-enqueue">5.3 入队（enqueue）<a class="headerlink" href="#53-enqueue" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">bool</span><span class="w"> </span><span class="nf">dsq_enqueue</span><span class="p">(</span><span class="n">DQueue</span><span class="w"> </span><span class="o">*</span><span class="n">q</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">tail</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">q</span><span class="o">-&gt;</span><span class="n">capacity</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">q</span><span class="o">-&gt;</span><span class="n">head</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w">  </span><span class="c1">// 满</span>
+<span class="w">    </span><span class="n">q</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">tail</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v</span><span class="p">;</span><span class="w">                                       </span><span class="c1">// 写入队尾</span>
+<span class="w">    </span><span class="n">q</span><span class="o">-&gt;</span><span class="n">tail</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">tail</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">q</span><span class="o">-&gt;</span><span class="n">capacity</span><span class="p">;</span><span class="w">                      </span><span class="c1">// tail 回绕前进</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<ul>
+<li>先判满：<code>(tail+1) % capacity == head</code> 表示再写一个就追上 head</li>
+<li>写入 <code>data[tail]</code>，然后 <code>tail</code> 取模前进</li>
+<li>返回 <code>false</code> 表示队满，调用方可选择丢弃或等待</li>
+</ul>
+<h3 id="54-dequeue">5.4 出队（dequeue）<a class="headerlink" href="#54-dequeue" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">bool</span><span class="w"> </span><span class="nf">dsq_dequeue</span><span class="p">(</span><span class="n">DQueue</span><span class="w"> </span><span class="o">*</span><span class="n">q</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="o">*</span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">head</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">q</span><span class="o">-&gt;</span><span class="n">tail</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w">                       </span><span class="c1">// 空</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="n">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">q</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">head</span><span class="p">];</span><span class="w">                           </span><span class="c1">// 读出队头</span>
+<span class="w">    </span><span class="n">q</span><span class="o">-&gt;</span><span class="n">head</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">head</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">q</span><span class="o">-&gt;</span><span class="n">capacity</span><span class="p">;</span><span class="w">                      </span><span class="c1">// head 回绕前进</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<ul>
+<li>先判空：<code>head == tail</code></li>
+<li>读出 <code>data[head]</code>（若 <code>out</code> 非 NULL），然后 <code>head</code> 取模前进</li>
+<li>返回 <code>false</code> 表示队空</li>
+</ul>
+<h3 id="55">5.5 查询操作<a class="headerlink" href="#55" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">bool</span><span class="w"> </span><span class="nf">dsq_empty</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">DQueue</span><span class="w"> </span><span class="o">*</span><span class="n">q</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">q</span><span class="o">-&gt;</span><span class="n">head</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">q</span><span class="o">-&gt;</span><span class="n">tail</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">size_t</span><span class="w"> </span><span class="nf">dsq_size</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">DQueue</span><span class="w"> </span><span class="o">*</span><span class="n">q</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">tail</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">q</span><span class="o">-&gt;</span><span class="n">head</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">q</span><span class="o">-&gt;</span><span class="n">capacity</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">q</span><span class="o">-&gt;</span><span class="n">capacity</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">size_t</span><span class="w"> </span><span class="nf">dsq_capacity</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">DQueue</span><span class="w"> </span><span class="o">*</span><span class="n">q</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">q</span><span class="o">-&gt;</span><span class="n">capacity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">q</span><span class="o">-&gt;</span><span class="n">capacity</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">  </span><span class="c1">// 扣除浪费的槽位</span>
+<span class="p">}</span>
+</code></pre></div>
+<ul>
+<li><code>size</code> 的计算：<code>(tail - head + capacity) % capacity</code></li>
+<li><code>tail &gt;= head</code> 时：<code>tail - head</code></li>
+<li><code>tail &lt; head</code> 时（回绕过）：<code>tail - head + capacity</code></li>
+<li>加 <code>capacity</code> 再取模统一了两种情况</li>
+<li><code>capacity</code> 对外报告的是「可存元素数」，即物理大小减 1</li>
+</ul>
+<h3 id="56">5.6 释放<a class="headerlink" href="#56" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">dsq_free</span><span class="p">(</span><span class="n">DQueue</span><span class="w"> </span><span class="o">*</span><span class="n">q</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">free</span><span class="p">(</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">);</span>
+<span class="w">    </span><span class="n">q</span><span class="o">-&gt;</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="w">    </span><span class="n">q</span><span class="o">-&gt;</span><span class="n">head</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">q</span><span class="o">-&gt;</span><span class="n">tail</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">q</span><span class="o">-&gt;</span><span class="n">capacity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<ul>
+<li>释放数组，指针置 NULL 防悬空</li>
+<li>所有字段归零，结构体回到安全状态</li>
+</ul>
+<h2 id="6">6. 回绕的正确性：一次完整追踪<a class="headerlink" href="#6" title="Permanent link">&para;</a></h2>
+<p>以 <code>capacity=4</code>（用户期望存 4 个，物理 <code>q-&gt;capacity=5</code>）为例：</p>
+<div class="highlight"><pre><span></span><code>操作              data[]          head  tail  size  判满判空
+init(4)           [_,_,_,_,_]      0     0     0    空(head==tail)
+enqueue(1)        [1,_,_,_,_]      0     1     1
+enqueue(2)        [1,2,_,_,_]      0     2     2
+enqueue(3)        [1,2,3,_,_]      0     3     3
+enqueue(4)        [1,2,3,4,_]      0     4     4    (4+1)%5=0==head → 满
+enqueue(5) → 失败（满）
+dequeue → 1       [_,2,3,4,_]      1     4     3
+enqueue(5)        [_,2,3,4,5]      1     0     4    tail 回绕到 0，(0+1)%5=1==head → 满
+dequeue → 2       [_,_,3,4,5]      2     0     3
+dequeue → 3       [_,_,_,4,5]      3     0     2
+enqueue(6)        [6,_,_,4,5]      3     1     3    tail 回绕，写到 data[0]
+dequeue → 4       [6,_,_,_,5]      4     1     2
+dequeue → 5       [6,_,_,_,_]      0     1     1    head 回绕到 0
+dequeue → 6       [_,_,_,_,_]      1     1     0    空(head==tail)
+</code></pre></div>
+<p>关键观察：
+1. <code>head</code> 和 <code>tail</code> 都能在数组里「转圈」
+2. 元素 5、6 都写到了数组前端（复用了出队腾出的空间）
+3. 出队顺序 1,2,3,4,5,6 严格 FIFO
+4. 满时恰好存了 4 个（= 用户期望容量），空时 <code>head==tail</code></p>
+<h2 id="7">7. 复杂度分析<a class="headerlink" href="#7" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>时间复杂度</th>
+<th>空间复杂度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>init</code></td>
+<td>$O(n)$（分配并零初始化可选）</td>
+<td>$O(n)$</td>
+</tr>
+<tr>
+<td><code>enqueue</code></td>
+<td>$O(1)$</td>
+<td>$O(1)$</td>
+</tr>
+<tr>
+<td><code>dequeue</code></td>
+<td>$O(1)$</td>
+<td>$O(1)$</td>
+</tr>
+<tr>
+<td><code>peek</code></td>
+<td>$O(1)$</td>
+<td>$O(1)$</td>
+</tr>
+<tr>
+<td><code>empty</code> / <code>size</code></td>
+<td>$O(1)$</td>
+<td>$O(1)$</td>
+</tr>
+<tr>
+<td><code>free</code></td>
+<td>$O(1)$</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>所有操作都是 $O(1)$，这是循环队列的核心优势</li>
+<li>空间是 $O(n)$，$n$ 是容量，固定不变</li>
+<li>取模运算 <code>% capacity</code> 在 <code>capacity</code> 是 2 的幂时可优化为位运算 <code>&amp; (capacity-1)</code>（很多生产实现要求容量是 2 的幂）</li>
+</ul>
+<h2 id="8">8. 与链表队列的对比<a class="headerlink" href="#8" title="Permanent link">&para;</a></h2>
+<h3 id="81">8.1 链表队列<a class="headerlink" href="#81" title="Permanent link">&para;</a></h3>
+<p>用带头尾指针的单链表：</p>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">Node</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">val</span><span class="p">;</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">Node</span><span class="w"> </span><span class="o">*</span><span class="n">next</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="n">Node</span><span class="p">;</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Node</span><span class="w"> </span><span class="o">*</span><span class="n">head</span><span class="p">;</span><span class="w">  </span><span class="c1">// 队头</span>
+<span class="w">    </span><span class="n">Node</span><span class="w"> </span><span class="o">*</span><span class="n">tail</span><span class="p">;</span><span class="w">  </span><span class="c1">// 队尾</span>
+<span class="p">}</span><span class="w"> </span><span class="n">LQueue</span><span class="p">;</span>
+</code></pre></div>
+<ul>
+<li><code>enqueue</code>：在 <code>tail</code> 后插入节点，<code>tail</code> 后移，$O(1)$</li>
+<li><code>dequeue</code>：取 <code>head</code> 节点，<code>head</code> 后移，释放节点，$O(1)$</li>
+<li>容量无上限（受内存限制）</li>
+</ul>
+<h3 id="82">8.2 对比表<a class="headerlink" href="#82" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>循环队列（数组）</th>
+<th>链表队列</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>入队出队</td>
+<td>$O(1)$</td>
+<td>$O(1)$</td>
+</tr>
+<tr>
+<td>容量</td>
+<td>固定（预分配）</td>
+<td>动态（按需分配）</td>
+</tr>
+<tr>
+<td>内存</td>
+<td>连续，缓存友好</td>
+<td>每节点一次 malloc，缓存差</td>
+</tr>
+<tr>
+<td>内存开销</td>
+<td>仅数据本身</td>
+<td>每节点多一个指针（8 字节）</td>
+</tr>
+<tr>
+<td>扩容</td>
+<td>不支持（固定大小）</td>
+<td>天然支持</td>
+</tr>
+<tr>
+<td>假溢出</td>
+<td>回绕解决</td>
+<td>无此问题</td>
+</tr>
+<tr>
+<td>判满</td>
+<td>有容量限制</td>
+<td>无（除非内存耗尽）</td>
+</tr>
+<tr>
+<td>适用场景</td>
+<td>容量已知、高频操作</td>
+<td>容量未知、稀疏</td>
+</tr>
+</tbody>
+</table>
+<h3 id="83">8.3 选择建议<a class="headerlink" href="#83" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>容量已知 + 高频</strong>：循环队列（缓存友好、无 malloc 开销）</li>
+<li>例：批处理调度（一批 N 个任务）、环形缓冲区（音频/视频流）</li>
+<li><strong>容量未知 + 稀疏</strong>：链表队列</li>
+<li>例：BFS 的待访问队列（规模不确定）</li>
+<li><strong>既要容量灵活又要缓存友好</strong>：动态数组队列（扩容时搬移，均摊 $O(1)$）</li>
+</ul>
+<h2 id="9">9. 常见陷阱<a class="headerlink" href="#9" title="Permanent link">&para;</a></h2>
+<h3 id="91">9.1 判满判空混淆<a class="headerlink" href="#91" title="Permanent link">&para;</a></h3>
+<p>用 <code>head == tail</code> 判满会误判空队为满。必须区分两种方案，本章用「浪费一个槽位」法：</p>
+<div class="highlight"><pre><span></span><code><span class="nl">判满</span><span class="p">:</span><span class="w"> </span><span class="p">(</span><span class="n">tail</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">capacity</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">head</span><span class="w">   </span><span class="c1">// 不是 head == tail</span>
+<span class="nl">判空</span><span class="p">:</span><span class="w"> </span><span class="n">head</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">tail</span>
+</code></pre></div>
+<h3 id="92-size">9.2 size 计算的负数问题<a class="headerlink" href="#92-size" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">tail</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">head</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">capacity</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">capacity</span><span class="p">;</span>
+</code></pre></div>
+<p>若直接写 <code>(tail - head) % capacity</code>，当 <code>tail &lt; head</code> 时（回绕过），<code>tail - head</code> 是负数（无符号下是大正数），取模结果错误。加 <code>capacity</code> 再取模保证非负。</p>
+<h3 id="93-0-1">9.3 容量为 0 或 1<a class="headerlink" href="#93-0-1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>capacity=0</code>：取模 <code>% 0</code> 是未定义行为，<code>init</code> 里做了防御（至少 1）</li>
+<li><code>capacity=1</code>：浪费一个槽位后实际存 0 个，是无用队列；<code>init</code> 里 <code>capacity+1=2</code>，可存 1 个</li>
+</ul>
+<h3 id="94">9.4 取模性能<a class="headerlink" href="#94" title="Permanent link">&para;</a></h3>
+<p><code>%</code> 运算比加减法慢。优化：让 <code>capacity</code> 是 2 的幂，用 <code>&amp; (capacity-1)</code> 替代 <code>% capacity</code>。很多生产实现（如 Linux 内核的 <code>kfifo</code>）要求容量是 2 的幂。</p>
+<h2 id="10">10. 小结<a class="headerlink" href="#10" title="Permanent link">&para;</a></h2>
+<p>循环队列的核心思想：</p>
+<ol>
+<li><strong>固定数组 + 头尾指针</strong>：空间连续，缓存友好</li>
+<li><strong>取模回绕</strong>：解决假溢出，复用前端空间，入队出队 $O(1)$</li>
+<li><strong>浪费一个槽位</strong>：区分空和满，无需额外字段</li>
+<li><strong>FIFO 语义</strong>：先进先出，匹配排队、调度、环形通信等场景</li>
+</ol>
+<p>下一章的 AI 应用将展示：循环队列的「环形」结构如何天然对应到分布式训练的 Ring-AllReduce 通信拓扑，实现带宽最优的梯度同步。</p>
+<hr />
+<h2 id="ai">AI 应用<a class="headerlink" href="#ai" title="Permanent link">&para;</a></h2>
+<h1 id="ring-allreduce">Ring-AllReduce：循环队列与带宽最优的分布式通信<a class="headerlink" href="#ring-allreduce" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>本文档讲清「分布式训练为什么需要 AllReduce、树形通信的瓶颈、Ring-AllReduce 为什么带宽最优、循环队列怎么对应到环形拓扑」。原理见 <code>principle.md</code>。</p>
+</blockquote>
+<h2 id="1_1">1. 分布式训练的通信问题<a class="headerlink" href="#1_1" title="Permanent link">&para;</a></h2>
+<h3 id="11">1.1 数据并行<a class="headerlink" href="#11" title="Permanent link">&para;</a></h3>
+<p>大模型训练通常用<strong>数据并行</strong>：把同一个模型复制 $n$ 份（$n$ 个 worker/GPU），每个 worker 拿不同的数据批次，各自算梯度，然后<strong>同步梯度</strong>再一起更新。</p>
+<div class="highlight"><pre><span></span><code>worker 0: batch 0 → 前向 → 反向 → grad_0
+worker 1: batch 1 → 前向 → 反向 → grad_1
+...
+worker n-1: batch n-1 → 前向 → 反向 → grad_{n-1}
+
+同步：所有 worker 得到相同的 sum = grad_0 + grad_1 + ... + grad_{n-1}
+更新：每个 worker 用 sum 更新自己的参数
+</code></pre></div>
+<h3 id="12">1.2 梯度同步是通信瓶颈<a class="headerlink" href="#12" title="Permanent link">&para;</a></h3>
+<ul>
+<li>一个 LLM 有几十亿参数，梯度向量 <code>grad</code> 可能是几个 GB</li>
+<li>每次迭代都要同步一次梯度</li>
+<li>$n$ 个 worker 之间如何高效交换几个 GB 的数据？这就是 <strong>AllReduce</strong> 问题</li>
+</ul>
+<h3 id="13-allreduce">1.3 AllReduce 的定义<a class="headerlink" href="#13-allreduce" title="Permanent link">&para;</a></h3>
+<p><strong>AllReduce</strong>：每个节点有一个向量 $v_i$，通信结束后<strong>所有节点都得到</strong> $\sum_i v_i$。</p>
+<div class="highlight"><pre><span></span><code>输入:  v_0, v_1, ..., v_{n-1}  （每个节点一个）
+输出:  所有节点都得到 S = v_0 + v_1 + ... + v_{n-1}
+</code></pre></div>
+<p>关键约束：<strong>每个节点都要拿到完整的和</strong>（不只是某一个节点）。这比 Reduce（只有根节点拿到结果）要求更高。</p>
+<h2 id="2-allreduce">2. 树形 AllReduce<a class="headerlink" href="#2-allreduce" title="Permanent link">&para;</a></h2>
+<h3 id="21_1">2.1 思路<a class="headerlink" href="#21_1" title="Permanent link">&para;</a></h3>
+<p>用一棵二叉树组织节点，分两阶段：</p>
+<p><strong>阶段一：Reduce（自底向上聚合）</strong>
+- 叶节点把自己的梯度发给父节点
+- 父节点把收到的子节点梯度加到自己梯度上，再发给父节点
+- $\log_2 n$ 步后，根节点拿到所有梯度的和</p>
+<p><strong>阶段二：Broadcast（自顶向下广播）</strong>
+- 根节点把和发给两个子节点
+- 子节点再发给自己的子节点
+- $\log_2 n$ 步后，所有节点都拿到和</p>
+<div class="highlight"><pre><span></span><code>n=4 的树形 AllReduce:
+
+阶段一 Reduce（2 步）:
+     [v0+v1+v2+v3]          根节点最终拿到和
+      /         \
+  [v0+v1]     [v2+v3]        第 1 步：子节点聚合
+   /  \        /  \
+  v0   v1    v2   v3         叶节点
+
+阶段二 Broadcast（2 步）:
+     [S]
+      /         \
+  [S]           [S]           第 1 步：根广播
+   /  \        /  \
+  S    S      S    S          第 2 步：子节点广播
+</code></pre></div>
+<h3 id="22_1">2.2 通信量分析<a class="headerlink" href="#22_1" title="Permanent link">&para;</a></h3>
+<p>以<strong>根节点</strong>为瓶颈分析（它通信量最大）：</p>
+<ul>
+<li>Reduce 阶段：根节点接收 $\log_2 n$ 次数据，每次接收一个聚合后的部分和（大小 = <code>data_size</code>）</li>
+<li>根节点接收量：$\log_2 n \cdot \text{data_size}$</li>
+<li>Broadcast 阶段：根节点发送 $\log_2 n$ 次数据，每次发送完整的和</li>
+<li>根节点发送量：$\log_2 n \cdot \text{data_size}$</li>
+<li><strong>根节点总通信量</strong>：$2 \cdot \log_2 n \cdot \text{data_size}$</li>
+</ul>
+<h3 id="23">2.3 树形通信的问题<a class="headerlink" href="#23" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>根节点带宽瓶颈</strong>：所有数据都要经过根节点，根节点的入带宽 + 出带宽是 $2 \log_2 n \cdot \text{data_size}$，而叶节点只有 $2 \cdot \text{data_size}$。负载极不均衡。</li>
+<li><strong>通信量随 $\log_2 n$ 增长</strong>：节点越多，根节点通信量越大。$n=1024$ 时根节点要传 $20 \cdot \text{data_size}$。</li>
+<li><strong>延迟 $O(\log_2 n)$</strong>：步数是 $2 \log_2 n$，比环形的 $2(n-1)$ 步少，但每步传的是<strong>整个</strong> <code>data_size</code>，不是分块。</li>
+</ol>
+<p>树形通信<strong>延迟最优</strong>（步数少），但<strong>带宽不优</strong>（根节点通信量大）。</p>
+<h2 id="3-ring-allreduce">3. Ring-AllReduce<a class="headerlink" href="#3-ring-allreduce" title="Permanent link">&para;</a></h2>
+<h3 id="31">3.1 核心思想<a class="headerlink" href="#31" title="Permanent link">&para;</a></h3>
+<p>把 $n$ 个节点排成一个<strong>环</strong>，把梯度向量分成 $n$ 块，让每块在环上<strong>流水线式</strong>传递。这样每个节点每步只发 $1/n$ 的数据，且负载均衡。</p>
+<div class="highlight"><pre><span></span><code>n=4 的环形拓扑:
+
+    worker 0 ──→ worker 1
+       ↑              ↓
+    worker 3 ←── worker 2
+</code></pre></div>
+<h3 id="32">3.2 两阶段<a class="headerlink" href="#32" title="Permanent link">&para;</a></h3>
+<p>Ring-AllReduce 分两个阶段，每阶段 $n-1$ 步。</p>
+<p><strong>阶段一：Scatter-Reduce（分散-聚合）</strong></p>
+<p>把每个节点的梯度分成 $n$ 块：$v_i = [v_i^{(0)}, v_i^{(1)}, \ldots, v_i^{(n-1)}]$</p>
+<p>目标：经过 $n-1$ 步后，节点 $i$ 拥有第 $i$ 块的完整和 $\sum_k v_k^{(i)}$。</p>
+<p>每步：节点 $i$ 把自己的一块发给节点 $i+1$（环上右邻居），同时接收节点 $i-1$ 发来的一块，累加到自己对应的块上。</p>
+<div class="highlight"><pre><span></span><code>n=4, 每个节点 4 块 [A,B,C,D]，目标节点 i 拿到第 i 块的和
+
+初始:
+  node0: [A0, B0, C0, D0]
+  node1: [A1, B1, C1, D1]
+  node2: [A2, B2, C2, D2]
+  node3: [A3, B3, C3, D3]
+
+第 1 步（每节点发一块给右邻居，累加收到的）:
+  node0 收 node3 的某块，node0 发某块给 node1
+  ...（环形流水线）
+
+经过 n-1=3 步后:
+  node0: [_, _, _, D0+D1+D2+D3]   拿到第 3 块的和
+  node1: [_, A0+A1+A2+A3, _, _]   拿到第 0 块的和
+  node2: [_, _, B0+B1+B2+B3, _]   拿到第 1 块的和
+  node3: [_, _, _, C0+C1+C2+C3]   拿到第 2 块的和
+  （每个节点拿到一个不同块的完整和）
+</code></pre></div>
+<p><strong>阶段二：AllGather（全收集）</strong></p>
+<p>现在每个节点有一块的完整和，再花 $n-1$ 步把这些和在环上传播，让每个节点凑齐所有块。</p>
+<div class="highlight"><pre><span></span><code>经过 n-1=3 步后:
+  所有节点: [A0+A1+A2+A3, B0+B1+B2+B3, C0+C1+C2+C3, D0+D1+D2+D3]
+  = 完整的 AllReduce 结果
+</code></pre></div>
+<h3 id="33">3.3 通信量分析<a class="headerlink" href="#33" title="Permanent link">&para;</a></h3>
+<p><strong>每个节点</strong>的通信量：</p>
+<ul>
+<li>Scatter-Reduce：$n-1$ 步，每步发 $\text{data_size}/n$ 数据</li>
+<li>每节点发送量：$(n-1) \cdot \text{data_size}/n$</li>
+<li>AllGather：$n-1$ 步，每步发 $\text{data_size}/n$ 数据</li>
+<li>每节点发送量：$(n-1) \cdot \text{data_size}/n$</li>
+<li><strong>每节点总通信量</strong>：$2(n-1) \cdot \text{data_size}/n = \frac{2(n-1)}{n} \cdot \text{data_size}$</li>
+</ul>
+<h3 id="34">3.4 为什么带宽最优<a class="headerlink" href="#34" title="Permanent link">&para;</a></h3>
+<p>关键观察：<strong>每节点通信量与 $n$ 几乎无关</strong>。</p>
+<p>$$
+\text{每节点通信量} = \frac{2(n-1)}{n} \cdot \text{data_size} \xrightarrow{n \to \infty} 2 \cdot \text{data_size}
+$$</p>
+<ul>
+<li>$n=4$：$1.5 \cdot \text{data_size}$</li>
+<li>$n=64$：$1.97 \cdot \text{data_size}$</li>
+<li>$n=1024$：$1.998 \cdot \text{data_size}$</li>
+<li>$n \to \infty$：$2 \cdot \text{data_size}$（常数！）</li>
+</ul>
+<p>对比树形：树形根节点通信量 $= 2 \log_2 n \cdot \text{data_size}$，随 $\log_2 n$ 增长。</p>
+<table>
+<thead>
+<tr>
+<th>$n$</th>
+<th>Ring 每节点</th>
+<th>Tree 根节点</th>
+<th>Tree/Ring</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>4</td>
+<td>1.50</td>
+<td>4.00</td>
+<td>2.67x</td>
+</tr>
+<tr>
+<td>16</td>
+<td>1.88</td>
+<td>8.00</td>
+<td>4.27x</td>
+</tr>
+<tr>
+<td>64</td>
+<td>1.97</td>
+<td>12.00</td>
+<td>6.10x</td>
+</tr>
+<tr>
+<td>1024</td>
+<td>1.998</td>
+<td>20.00</td>
+<td>10.01x</td>
+</tr>
+<tr>
+<td>4096</td>
+<td>1.9995</td>
+<td>24.00</td>
+<td>12.00x</td>
+</tr>
+</tbody>
+</table>
+<p><strong>$n$ 越大，Ring 优势越大</strong>。当 $n=1024$ GPU 时，树形根节点通信量是 Ring 的 10 倍。</p>
+<h3 id="35">3.5 带宽最优的直觉<a class="headerlink" href="#35" title="Permanent link">&para;</a></h3>
+<p>Ring-AllReduce 做到带宽最优的原因：</p>
+<ol>
+<li><strong>分块</strong>：把 <code>data_size</code> 分成 $n$ 块，每步只传 $1/n$，避免树形每步传整个 <code>data_size</code></li>
+<li><strong>环形流水线</strong>：每步所有节点同时发送（$n$ 条链路同时用），带宽利用率 100%</li>
+<li><strong>负载均衡</strong>：每个节点通信量相同，没有瓶颈节点</li>
+<li><strong>数学极限</strong>：$\frac{2(n-1)}{n} \to 2$，通信量被压到理论下界附近</li>
+</ol>
+<p>树形的问题：每步只有 $\log_2 n$ 条链路在用（树边），且根节点是瓶颈；Ring 每步 $n$ 条链路全用，且对称。</p>
+<h2 id="4_1">4. 循环队列 ↔ 环形通信拓扑<a class="headerlink" href="#4_1" title="Permanent link">&para;</a></h2>
+<p>这是本章把「循环队列」和「Ring-AllReduce」联系起来的核心。</p>
+<h3 id="41_1">4.1 结构同构<a class="headerlink" href="#41_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>循环队列</th>
+<th>Ring-AllReduce</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>固定大小数组</td>
+<td>固定 $n$ 个 worker</td>
+</tr>
+<tr>
+<td><code>head</code> 指针</td>
+<td>当前要发送的块下标</td>
+</tr>
+<tr>
+<td><code>tail</code> 指针</td>
+<td>当前要接收的块下标</td>
+</tr>
+<tr>
+<td><code>(tail+1) % capacity</code> 回绕</td>
+<td><code>next = (rank+1) % n</code> 环上右邻居</td>
+</tr>
+<tr>
+<td>入队 <code>data[tail]=v; tail=(tail+1)%cap</code></td>
+<td>发送块 <code>send(chunk[send_idx]); send_idx=(send_idx+1)%n</code></td>
+</tr>
+<tr>
+<td>出队 <code>v=data[head]; head=(head+1)%cap</code></td>
+<td>接收块 <code>recv(chunk[recv_idx]); recv_idx=(recv_idx+1)%n</code></td>
+</tr>
+<tr>
+<td>取模回绕复用空间</td>
+<td>取模回绕复用通信通道</td>
+</tr>
+</tbody>
+</table>
+<h3 id="42">4.2 指针回绕 = 令牌传递<a class="headerlink" href="#42" title="Permanent link">&para;</a></h3>
+<p>循环队列里，<code>head</code>/<code>tail</code> 到数组末尾后取模回绕到开头，复用前端空间。</p>
+<p>Ring-AllReduce 里，每个节点维护一个「当前发送块下标」<code>send_idx</code> 和「当前接收块下标」<code>recv_idx</code>，每步后都 <code>(idx + 1) % n</code> 回绕。这和循环队列的指针前进完全一样：</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// 循环队列入队</span>
+<span class="n">q</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">tail</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v</span><span class="p">;</span>
+<span class="n">q</span><span class="o">-&gt;</span><span class="n">tail</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">tail</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">q</span><span class="o">-&gt;</span><span class="n">capacity</span><span class="p">;</span>
+
+<span class="c1">// Ring-AllReduce 每步发送（伪代码）</span>
+<span class="n">send</span><span class="p">(</span><span class="n">chunk</span><span class="p">[</span><span class="n">send_idx</span><span class="p">],</span><span class="w"> </span><span class="n">to</span><span class="o">=</span><span class="p">(</span><span class="n">rank</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="n">n</span><span class="p">);</span>
+<span class="n">recv</span><span class="p">(</span><span class="n">chunk</span><span class="p">[</span><span class="n">recv_idx</span><span class="p">],</span><span class="w"> </span><span class="n">from</span><span class="o">=</span><span class="p">(</span><span class="n">rank</span><span class="mi">-1</span><span class="o">+</span><span class="n">n</span><span class="p">)</span><span class="o">%</span><span class="n">n</span><span class="p">);</span>
+<span class="n">send_idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">send_idx</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">n</span><span class="p">;</span>
+<span class="n">recv_idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">recv_idx</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">n</span><span class="p">;</span>
+</code></pre></div>
+<h3 id="43_1">4.3 批处理调度：另一个对应<a class="headerlink" href="#43_1" title="Permanent link">&para;</a></h3>
+<p>循环队列还对应<strong>批处理调度</strong>：</p>
+<ul>
+<li>任务队列用循环队列，一批 $N$ 个任务填满队列</li>
+<li>worker 从队头取任务（<code>dequeue</code>），处理完从队尾提交结果（<code>enqueue</code>）</li>
+<li>队列回绕 = 任务槽位复用，无需重新分配</li>
+<li>多 worker 并发取任务 = 环形流水线</li>
+</ul>
+<h2 id="5-demo">5. demo 结果解读<a class="headerlink" href="#5-demo" title="Permanent link">&para;</a></h2>
+<p>运行 <code>python 04_queue/python/demo.py</code> 的输出：</p>
+<div class="highlight"><pre><span></span><code>[1] 不同 worker 数下的每节点通信量
+ workers         ring         tree    ring/tree
+       4       1.5000       4.0000       0.3750
+       8       1.7500       6.0000       0.2917
+      16       1.8750       8.0000       0.2344
+      32       1.9375      10.0000       0.1938
+      64       1.9688      12.0000       0.1641
+</code></pre></div>
+<ul>
+<li><strong>Ring 列</strong>：从 1.5 单调上升趋近 2.0（$2(n-1)/n$），增长极慢</li>
+<li><strong>Tree 列</strong>：$2 \log_2 n$，4→6→8→10→12，线性于 $\log_2 n$</li>
+<li><strong>ring/tree 列</strong>：Ring 通信量占 Tree 的比例，从 0.375 降到 0.164，$n$ 越大 Ring 越省</li>
+</ul>
+<div class="highlight"><pre><span></span><code>[3] 极限分析：n → ∞
+  n=256    ring=1.9922  tree=16.0000  tree/ring=8.03x
+  n=1024   ring=1.9980  tree=20.0000  tree/ring=10.01x
+  n=4096   ring=1.9995  tree=24.0000  tree/ring=12.00x
+</code></pre></div>
+<ul>
+<li>$n=1024$（千卡训练）：Tree 根节点通信量是 Ring 的 <strong>10 倍</strong></li>
+<li>$n=4096$（万卡训练）：<strong>12 倍</strong></li>
+<li>这就是为什么大模型训练（GPT-3 用 1024+ GPU）必须用 Ring-AllReduce</li>
+</ul>
+<div class="highlight"><pre><span></span><code>[2] 步数对比（同步轮数）
+ workers   ring_steps   tree_steps
+      16           30            8
+</code></pre></div>
+<ul>
+<li>Ring 步数 $2(n-1)$ 比 Tree 的 $2\log_2 n$ 多（16 节点：30 vs 8）</li>
+<li>但 Ring 每步只传 $1/n$ 数据，Tree 每步传整个 <code>data_size</code></li>
+<li><strong>总通信量</strong> Ring 远小于 Tree（步数 × 每步数据量）</li>
+<li>在<strong>带宽受限</strong>的大模型训练里，总通信量（带宽）是瓶颈，Ring 胜</li>
+<li>在<strong>延迟受限</strong>的小数据通信里，步数（延迟）是瓶颈，Tree 胜</li>
+</ul>
+<h3 id="51">5.1 图解读<a class="headerlink" href="#51" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>figures/perf_compare.png</code>：$n=16$ 时柱状图，Ring 1.875 vs Tree 8.0，Tree 是 Ring 的 4.27 倍</li>
+<li><code>figures/comm_vs_workers.png</code>：随 worker 数增长的折线，Ring 几乎水平（趋近 2），Tree 线性上升（$\log_2 n$）</li>
+</ul>
+<h2 id="6-vs">6. 树形 vs 环形：什么时候用谁<a class="headerlink" href="#6-vs" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>树形 AllReduce</th>
+<th>Ring-AllReduce</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>每节点通信量</td>
+<td>$2 \log_2 n \cdot D$（根节点）</td>
+<td>$\frac{2(n-1)}{n} \cdot D$（均衡）</td>
+</tr>
+<tr>
+<td>步数（延迟）</td>
+<td>$2 \log_2 n$（少）</td>
+<td>$2(n-1)$（多）</td>
+</tr>
+<tr>
+<td>带宽利用率</td>
+<td>低（根节点瓶颈）</td>
+<td>100%（所有链路同时用）</td>
+</tr>
+<tr>
+<td>负载均衡</td>
+<td>差（根节点重）</td>
+<td>好（对称）</td>
+</tr>
+<tr>
+<td>适合</td>
+<td>小数据、延迟敏感</td>
+<td>大数据、带宽敏感</td>
+</tr>
+<tr>
+<td>大模型训练</td>
+<td>不适合</td>
+<td><strong>业界标准</strong></td>
+</tr>
+</tbody>
+</table>
+<p>大模型训练梯度是 GB 级，<strong>带宽是瓶颈</strong>，所以用 Ring-AllReduce。小集群小数据通信，延迟是瓶颈，树形更快。</p>
+<h3 id="61">6.1 混合方案<a class="headerlink" href="#61" title="Permanent link">&para;</a></h3>
+<p>实际系统常混合两者：</p>
+<ul>
+<li><strong>Ring + 树形分层</strong>：节点内用树形（共享内存，延迟低），节点间用 Ring（带宽优）</li>
+<li><strong>Hierarchical AllReduce</strong>：先组内 Reduce，再组间 Ring-AllReduce，再组内 Broadcast</li>
+</ul>
+<h2 id="7_1">7. 生产级实现<a class="headerlink" href="#7_1" title="Permanent link">&para;</a></h2>
+<h3 id="71-ncclnvidia-collective-communications-library">7.1 NCCL（NVIDIA Collective Communications Library）<a class="headerlink" href="#71-ncclnvidia-collective-communications-library" title="Permanent link">&para;</a></h3>
+<p>NVIDIA GPU 训练的标准通信库，实现了 Ring-AllReduce：</p>
+<ul>
+<li>针对 NVLink / InfiniBand 优化</li>
+<li>自动拓扑发现，选择最优环</li>
+<li><code>ncclAllReduce</code> 是 PyTorch DDP 的默认后端</li>
+<li>内部用 CUDA kernel 做通信 + 计算重叠（通信时同时算梯度）</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># PyTorch DDP 用 NCCL 后端</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.distributed</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dist</span>
+<span class="n">dist</span><span class="o">.</span><span class="n">init_process_group</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="s2">"nccl"</span><span class="p">)</span>
+<span class="c1"># 梯度同步自动用 Ring-AllReduce</span>
+</code></pre></div>
+<h3 id="72-mpimessage-passing-interface">7.2 MPI（Message Passing Interface）<a class="headerlink" href="#72-mpimessage-passing-interface" title="Permanent link">&para;</a></h3>
+<p>HPC 领域标准，<code>MPI_Allreduce</code> 是 AllReduce 操作：</p>
+<ul>
+<li>MPI 实现（如 OpenMPI）会根据数据量、节点数、拓扑自动选择算法</li>
+<li>小数据：树形（<code>rabenseifner</code> 算法）</li>
+<li>大数据：Ring 或分段 Ring</li>
+<li><code>MPI_Allreduce</code> 内部可能用 Ring、Tree、Butterfly 等多种算法的混合</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1">// MPI AllReduce</span>
+<span class="n">MPI_Allreduce</span><span class="p">(</span><span class="n">local_grad</span><span class="p">,</span><span class="w"> </span><span class="n">global_grad</span><span class="p">,</span><span class="w"> </span><span class="n">n_params</span><span class="p">,</span><span class="w"> </span><span class="n">MPI_DOUBLE</span><span class="p">,</span><span class="w"> </span><span class="n">MPI_SUM</span><span class="p">,</span><span class="w"> </span><span class="n">MPI_COMM_WORLD</span><span class="p">);</span>
+</code></pre></div>
+<h3 id="73-horovod">7.3 Horovod<a class="headerlink" href="#73-horovod" title="Permanent link">&para;</a></h3>
+<p>Uber 开源的分布式训练框架，把 Ring-AllReduce 引入 TensorFlow/PyTorch：</p>
+<ul>
+<li>核心思想：用 Ring-AllReduce 替代参数服务器架构</li>
+<li>参数服务器：worker 和 PS 通信，PS 是瓶颈（类似树形的根节点问题）</li>
+<li>Horovod：worker 之间直接 Ring-AllReduce，无中心瓶颈</li>
+</ul>
+<h3 id="74-gloo">7.4 Gloo<a class="headerlink" href="#74-gloo" title="Permanent link">&para;</a></h3>
+<p>Facebook 开源的集合通信库，PyTorch 的 CPU 后端：</p>
+<ul>
+<li>实现 Ring-AllReduce 和 Pairwise-AllReduce</li>
+<li>针对 TCP 网络优化</li>
+</ul>
+<h2 id="8-ring-allreduce">8. 从循环队列到 Ring-AllReduce 的工程映射<a class="headerlink" href="#8-ring-allreduce" title="Permanent link">&para;</a></h2>
+<p>如果手写一个简化版 Ring-AllReduce，循环队列的代码结构几乎可以直接套用：</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// 伪代码：用循环队列的指针管理 Ring-AllReduce 的块传递</span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="o">*</span><span class="n">chunks</span><span class="p">;</span><span class="w">   </span><span class="c1">// n 块梯度，类似循环队列的 data</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">send_idx</span><span class="p">;</span><span class="w">    </span><span class="c1">// 类似 tail</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">recv_idx</span><span class="p">;</span><span class="w">    </span><span class="c1">// 类似 head</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w">           </span><span class="c1">// worker 数，类似 capacity</span>
+<span class="p">}</span><span class="w"> </span><span class="n">RingState</span><span class="p">;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">ring_step</span><span class="p">(</span><span class="n">RingState</span><span class="w"> </span><span class="o">*</span><span class="n">st</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">rank</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 发送 send_idx 块给右邻居，接收 recv_idx 块从左邻居</span>
+<span class="w">    </span><span class="n">send</span><span class="p">(</span><span class="n">st</span><span class="o">-&gt;</span><span class="n">chunks</span><span class="p">[</span><span class="n">st</span><span class="o">-&gt;</span><span class="n">send_idx</span><span class="p">],</span><span class="w"> </span><span class="n">to</span><span class="o">=</span><span class="p">(</span><span class="n">rank</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">st</span><span class="o">-&gt;</span><span class="n">n</span><span class="p">);</span>
+<span class="w">    </span><span class="n">recv</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span><span class="w"> </span><span class="n">from</span><span class="o">=</span><span class="p">(</span><span class="n">rank</span><span class="mi">-1</span><span class="o">+</span><span class="n">st</span><span class="o">-&gt;</span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">st</span><span class="o">-&gt;</span><span class="n">n</span><span class="p">);</span>
+<span class="w">    </span><span class="n">st</span><span class="o">-&gt;</span><span class="n">chunks</span><span class="p">[</span><span class="n">st</span><span class="o">-&gt;</span><span class="n">recv_idx</span><span class="p">]</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">tmp</span><span class="p">;</span><span class="w">  </span><span class="c1">// Scatter-Reduce 累加</span>
+<span class="w">    </span><span class="c1">// 指针回绕前进（和循环队列一模一样）</span>
+<span class="w">    </span><span class="n">st</span><span class="o">-&gt;</span><span class="n">send_idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">st</span><span class="o">-&gt;</span><span class="n">send_idx</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">st</span><span class="o">-&gt;</span><span class="n">n</span><span class="p">;</span>
+<span class="w">    </span><span class="n">st</span><span class="o">-&gt;</span><span class="n">recv_idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">st</span><span class="o">-&gt;</span><span class="n">recv_idx</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">st</span><span class="o">-&gt;</span><span class="n">n</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<ul>
+<li><code>chunks</code> 数组 ↔ 循环队列的 <code>data</code></li>
+<li><code>send_idx</code>/<code>recv_idx</code> ↔ 循环队列的 <code>tail</code>/<code>head</code></li>
+<li><code>(idx + 1) % n</code> 回绕 ↔ 循环队列的取模回绕</li>
+<li>$n-1$ 步 Scatter-Reduce + $n-1$ 步 AllGather ↔ 循环队列绕一圈</li>
+</ul>
+<p><strong>循环队列的 $O(1)$ 入队出队，对应 Ring 每步 $O(\text{data_size}/n)$ 的通信量</strong>——这就是「数据结构 × AI 优化」的连接点：循环队列的指针回绕机制，恰好是环形通信拓扑上令牌传递的最简实现。</p>
+<h2 id="9_1">9. 小结<a class="headerlink" href="#9_1" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>分布式训练需要 AllReduce</strong>：所有 worker 同步梯度，得到相同的和</li>
+<li><strong>树形 AllReduce</strong>：根节点通信量 $2 \log_2 n \cdot D$，随 $\log_2 n$ 增长，根节点是带宽瓶颈</li>
+<li><strong>Ring-AllReduce</strong>：每节点通信量 $\frac{2(n-1)}{n} \cdot D \to 2D$，与 $n$ 几乎无关，<strong>带宽最优</strong></li>
+<li><strong>循环队列 ↔ 环形拓扑</strong>：头尾指针取模回绕 = 环形通信的令牌传递，$O(1)$ 入队出队对应 $O(D/n)$ 步通信</li>
+<li><strong>大模型训练用 Ring</strong>：千卡/万卡场景 Tree 通信量是 Ring 的 10+ 倍，NCCL/Horovod 都用 Ring</li>
+<li><strong>分块 + 流水线 + 负载均衡</strong>：Ring 带宽最优的三大原因，循环队列的「回绕复用」是其在数据结构层面的体现</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.indexes", "navigation.tracking", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,2717 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="从底层实现到生产级应用——数据结构在 AI 系统优化与应用工程中的真实作用">
+      
+      
+        <meta name="author" content="wanglh39">
+      
+      
+        <link rel="canonical" href="https://wanglh39.github.io/ds-ai-teaching/ch06/">
+      
+      
+        <link rel="prev" href="../ch05/">
+      
+      
+        <link rel="next" href="../ch07/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>06 堆 - 数据结构 × AI 优化</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+SC:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans SC";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#06" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href=".." title="数据结构 × AI 优化" class="md-header__button md-logo" aria-label="数据结构 × AI 优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            数据结构 × AI 优化
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              06 堆
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换至暗色模式"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换至暗色模式" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换至亮色模式"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换至亮色模式" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/wanglh39/ds-ai-teaching" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wanglh39/ds-ai-teaching
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  首页
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../intro/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  项目介绍
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../ch01/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  视角 A·系统优化
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../ch13/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  视角 B·应用工程
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../benchmarks/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  性能汇总
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="数据结构 × AI 优化" class="md-nav__button md-logo" aria-label="数据结构 × AI 优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    数据结构 × AI 优化
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/wanglh39/ds-ai-teaching" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wanglh39/ds-ai-teaching
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    首页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    项目介绍
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    项目介绍
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    设计思路
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../map/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    章节映射
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dual_view/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    双视角说明
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cross_index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    交叉索引
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    视角 A·系统优化
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    视角 A·系统优化
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 动态数组
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch02/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 链表
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch03/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 栈
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch04/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 循环队列
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch05/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05 哈希表
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 堆
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 堆
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要回答的问题
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        状态
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原理
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch07/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    07 Trie
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch08/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    08 KD-Tree
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch09/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    09 图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch10/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10 并查集
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch11/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11 页表/分块内存
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch12/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12 跳表+图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    视角 B·应用工程
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    视角 B·应用工程
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch13/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13 多智能体编排
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch14/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    14 任务调度与批处理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch15/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    15 上下文工程与记忆
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch16/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    16 RAG 与知识检索
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch17/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    17 数据管道与流式处理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch18/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    18 模型部署与推理服务
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch19/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    19 状态机与工作流
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch20/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    20 模型压缩
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    性能汇总
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要回答的问题
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        状态
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原理
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="06">第 06 章 · 堆<a class="headerlink" href="#06" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>数据结构：二叉堆 + 优先队列
+AI 优化：Top-K 采样 + Beam Search</p>
+</blockquote>
+<h2 id="_1">本章要回答的问题<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Top-K 为什么用小顶堆而不是排序？</li>
+<li>Beam Search 怎么用优先队列剪枝？</li>
+<li>n=1e6, k=10 时堆 vs 排序差多少？</li>
+</ul>
+<h2 id="_2">目录<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>06_heap/
+├── c/                   # 二叉堆的 C 实现
+├── python/              # Top-K 采样 + Beam Search demo
+├── docs/
+│   ├── principle.md
+│   └── ai_application.md
+└── figures/
+</code></pre></div>
+<h2 id="_3">状态<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p>🚧 待填充</p>
+<hr />
+<h2 id="_4">原理<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<h1 id="_5">二叉堆原理<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>本文档讲清「堆是什么、完全二叉树怎么用数组存、堆序性质、sift_up/sift_down、建堆 O(n)、C 实现逐行讲解、复杂度」。AI 应用见 <code>ai_application.md</code>。</p>
+</blockquote>
+<h2 id="1">1. 堆的定义<a class="headerlink" href="#1" title="Permanent link">&para;</a></h2>
+<p><strong>堆</strong>（Heap）是一种特殊的完全二叉树，满足<strong>堆序性质</strong>（heap property）：</p>
+<ul>
+<li><strong>小顶堆</strong>（min-heap）：每个节点 $\le$ 它的所有子节点，根是全局最小</li>
+<li><strong>大顶堆</strong>（max-heap）：每个节点 $\ge$ 它的所有子节点，根是全局最大</li>
+</ul>
+<div class="highlight"><pre><span></span><code>小顶堆示例:
+          1
+        /   \
+       3     2
+      / \   / \
+     5   4 8   7
+    / \
+   9   6
+
+数组: [1, 3, 2, 5, 4, 8, 7, 9, 6]
+</code></pre></div>
+<p>堆只保证<strong>父子间的偏序</strong>，不保证兄弟间的顺序。上例中 <code>3 &lt; 2</code> 不成立，但 <code>1 &lt; 3</code> 和 <code>1 &lt; 2</code> 都成立。这比排序弱得多，正因为约束弱，插入/删除才能做到 $O(\log n)$。</p>
+<table>
+<thead>
+<tr>
+<th>数据结构</th>
+<th>找最值</th>
+<th>插入</th>
+<th>删最值</th>
+<th>全序</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>无序数组</td>
+<td>$O(n)$</td>
+<td>$O(1)$</td>
+<td>$O(n)$</td>
+<td>否</td>
+</tr>
+<tr>
+<td>排序数组</td>
+<td>$O(1)$</td>
+<td>$O(n)$</td>
+<td>$O(1)$</td>
+<td>是</td>
+</tr>
+<tr>
+<td>平衡树</td>
+<td>$O(1)$</td>
+<td>$O(\log n)$</td>
+<td>$O(\log n)$</td>
+<td>是</td>
+</tr>
+<tr>
+<td><strong>堆</strong></td>
+<td><strong>$O(1)$</strong></td>
+<td><strong>$O(\log n)$</strong></td>
+<td><strong>$O(\log n)$</strong></td>
+<td><strong>否</strong></td>
+</tr>
+</tbody>
+</table>
+<p>堆的定位：<strong>只需要反复取最值、插入元素，不需要全序遍历</strong>。这正是优先队列的核心需求。</p>
+<h2 id="2">2. 完全二叉树与数组表示<a class="headerlink" href="#2" title="Permanent link">&para;</a></h2>
+<h3 id="21">2.1 完全二叉树<a class="headerlink" href="#21" title="Permanent link">&para;</a></h3>
+<p><strong>完全二叉树</strong>（complete binary tree）：除最后一层外每层都填满，最后一层节点从左到右连续排列。</p>
+<div class="highlight"><pre><span></span><code>完全二叉树（7 个节点）:        非完全二叉树:
+          0                           0
+        /   \                       /   \
+       1     2                     1     2
+      / \   / \                   / \     \
+     3   4 5   6                 3   4     6   ← 缺了 5
+</code></pre></div>
+<p>完全二叉树的关键性质：<strong>高度 $h = \lfloor \log_2 n \rfloor$</strong>，即 $n$ 个节点的树只有 $\log n$ 层。这是堆 $O(\log n)$ 操作的根源。</p>
+<h3 id="22">2.2 数组表示<a class="headerlink" href="#22" title="Permanent link">&para;</a></h3>
+<p>完全二叉树可以用数组<strong>紧凑存储</strong>，无需指针。约定<strong>根在索引 0</strong>，逐层从左到右填入数组：</p>
+<div class="highlight"><pre><span></span><code>树:          0           数组下标:  0  1  2  3  4  5  6
+           /   \         数组内容: [A, B, C, D, E, F, G]
+          1     2
+         / \   / \
+        3   4 5   6
+</code></pre></div>
+<p>下标关系（根在 0）：</p>
+<p>$$\text{parent}(i) = \left\lfloor \frac{i-1}{2} \right\rfloor, \quad \text{left}(i) = 2i+1, \quad \text{right}(i) = 2i+2$$</p>
+<div class="highlight"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="nf">heap_parent</span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="nf">heap_left</span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="w">   </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="nf">heap_right</span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p><strong>为什么不用指针？</strong>
+1. <strong>空间紧凑</strong>：无 left/right/parent 指针，每节点只存数据本身
+2. <strong>缓存友好</strong>：数据连续存储，CPU prefetcher 友好，cache miss 少
+3. <strong>下标计算 $O(1)$</strong>：一次乘除加，比指针解快
+4. <strong>适合固定形状</strong>：完全二叉树形状固定，不需要指针表达拓扑</p>
+<h3 id="23-0-vs-1">2.3 根在 0 vs 根在 1<a class="headerlink" href="#23-0-vs-1" title="Permanent link">&para;</a></h3>
+<p>有些实现把根放在索引 1（留 <code>data[0]</code> 不用），下标公式更简洁：</p>
+<p>$$\text{parent}(i) = \left\lfloor \frac{i}{2} \right\rfloor, \quad \text{left}(i) = 2i, \quad \text{right}(i) = 2i+1$$</p>
+<p>但浪费一个槽位。本实现选<strong>根在 0</strong>（不浪费空间，C 数组从 0 开始自然），代价是 parent 公式多一个 <code>-1</code>。</p>
+<h2 id="3">3. 堆序性质<a class="headerlink" href="#3" title="Permanent link">&para;</a></h2>
+<h3 id="31">3.1 小顶堆<a class="headerlink" href="#31" title="Permanent link">&para;</a></h3>
+<p>对任意节点 $i$（除根），都满足：</p>
+<p>$$\text{data}[\text{parent}(i)] \le \text{data}[i]$$</p>
+<p>即父节点 $\le$ 子节点。根 <code>data[0]</code> 是全局最小。</p>
+<p><strong>验证函数</strong>（测试用）：</p>
+<div class="highlight"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">is_min_heap</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">MinHeap</span><span class="w"> </span><span class="o">*</span><span class="n">h</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">size</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">size_t</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">p</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w">  </span><span class="c1">// 子 &lt; 父，违反小顶堆</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>遍历每个非根节点，检查它是否 $\ge$ 父节点。$O(n)$ 验证。</p>
+<h3 id="32">3.2 大顶堆<a class="headerlink" href="#32" title="Permanent link">&para;</a></h3>
+<p>对任意节点 $i$（除根），$\text{data}[\text{parent}(i)] \ge \text{data}[i]$，根是全局最大。</p>
+<h3 id="33-vs">3.3 小顶堆 vs 大顶堆<a class="headerlink" href="#33-vs" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>小顶堆</th>
+<th>大顶堆</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>根</td>
+<td>全局最小</td>
+<td>全局最大</td>
+</tr>
+<tr>
+<td>用途</td>
+<td>取最小、Top-K 大元素</td>
+<td>取最大、堆排序</td>
+</tr>
+<tr>
+<td>pop</td>
+<td>返回最小</td>
+<td>返回最大</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Top-K 用小顶堆</strong>（本章重点）：要找最大的 K 个，维护一个大小 K 的小顶堆，堆顶是这 K 个里最小的，新元素比堆顶大就替换。这样堆里始终是当前见过的最大 K 个。</p>
+<p><strong>堆排序用大顶堆</strong>（或小顶堆 + 反向取）：建堆后反复 pop 根，得到有序序列。</p>
+<p>本实现是<strong>小顶堆</strong>，适配 Top-K 采样场景。</p>
+<h2 id="4-sift_up-sift_down">4. 核心操作：sift_up 与 sift_down<a class="headerlink" href="#4-sift_up-sift_down" title="Permanent link">&para;</a></h2>
+<p>堆的所有动态操作（push/pop/build）都靠这两个原语维护堆序。</p>
+<h3 id="41-sift_up">4.1 sift_up（上浮）<a class="headerlink" href="#41-sift_up" title="Permanent link">&para;</a></h3>
+<p><strong>场景</strong>：在末尾插入一个元素后，它可能比父小（违反小顶堆），需要<strong>上浮</strong>到正确位置。</p>
+<div class="highlight"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">heap_sift_up</span><span class="p">(</span><span class="n">MinHeap</span><span class="w"> </span><span class="o">*</span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">size_t</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">heap_parent</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">p</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="c1">// 交换 i 和父</span>
+<span class="w">            </span><span class="kt">double</span><span class="w"> </span><span class="n">tmp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">            </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">p</span><span class="p">];</span>
+<span class="w">            </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">p</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tmp</span><span class="p">;</span>
+<span class="w">            </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">;</span><span class="w">           </span><span class="c1">// 继续往上比</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">break</span><span class="p">;</span><span class="w">           </span><span class="c1">// 已满足堆序，停</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>过程：从节点 $i$ 开始，只要比父小就交换，然后移到父位置继续。最坏情况上浮到根，路径长度 = 树高 = $O(\log n)$。</p>
+<div class="highlight"><pre><span></span><code>插入 0.5 到小顶堆 [1,3,2,5,4,8,7,9,6]：
+数组末尾加 0.5 → [1,3,2,5,4,8,7,9,6,0.5]
+                  1
+                /   \
+               3     2
+              / \   / \
+             5   4 8   7
+            / \ /
+           9   6 0.5  ← 比父 4 小，交换
+
+→ [1,3,2,5,0.5,8,7,9,6,4]
+                  1
+                /   \
+               3    0.5  ← 比父 1 小，交换
+              ...
+
+→ [0.5,3,1,5,0.5...4] → 继续直到 0.5 到根
+最终: [0.5,3,1,5,4,2,7,9,6,8]
+</code></pre></div>
+<h3 id="42-sift_down">4.2 sift_down（下沉）<a class="headerlink" href="#42-sift_down" title="Permanent link">&para;</a></h3>
+<p><strong>场景</strong>：根被替换（pop 或 replace_top）后，新根可能比子大，需要<strong>下沉</strong>到正确位置。</p>
+<div class="highlight"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">heap_sift_down</span><span class="p">(</span><span class="n">MinHeap</span><span class="w"> </span><span class="o">*</span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">size</span><span class="p">;</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">size_t</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">heap_left</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+<span class="w">        </span><span class="kt">size_t</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">heap_right</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+<span class="w">        </span><span class="kt">size_t</span><span class="w"> </span><span class="n">smallest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="p">;</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">l</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">l</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">smallest</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">smallest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">l</span><span class="p">;</span><span class="w">     </span><span class="c1">// 左子更小</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">r</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">r</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">smallest</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">smallest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">r</span><span class="p">;</span><span class="w">     </span><span class="c1">// 右子比左还小</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">smallest</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">break</span><span class="p">;</span><span class="w">            </span><span class="c1">// 已是最小，堆序满足</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="c1">// 交换 i 和最小的子</span>
+<span class="w">        </span><span class="kt">double</span><span class="w"> </span><span class="n">tmp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">        </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">smallest</span><span class="p">];</span>
+<span class="w">        </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">smallest</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tmp</span><span class="p">;</span>
+<span class="w">        </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">smallest</span><span class="p">;</span><span class="w">         </span><span class="c1">// 继续往下</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>过程：从节点 $i$ 开始，找它和左右子中<strong>最小</strong>的，如果不是 $i$ 自己，就交换，然后移到那个子位置继续。最坏下沉到叶子，路径 $O(\log n)$。</p>
+<p><strong>为什么和较小的子交换？</strong> 小顶堆要求父 $\le$ 两个子。如果父比子大，必须换下去；换到哪个子？换到较小的那个，保证换完后父 $\le$ 两个子（较大的子本来就比小的子大，换上来当父也满足）。</p>
+<h3 id="43">4.3 复杂度<a class="headerlink" href="#43" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>复杂度</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>sift_up</td>
+<td>$O(\log n)$</td>
+<td>最坏上浮到根</td>
+</tr>
+<tr>
+<td>sift_down</td>
+<td>$O(\log n)$</td>
+<td>最坏下沉到叶</td>
+</tr>
+</tbody>
+</table>
+<p>两者都是沿一条根到叶（或叶到根）的路径走，路径长度 = 树高 = $\lfloor \log_2 n \rfloor$。</p>
+<h2 id="5-push-pop-peek">5. push / pop / peek<a class="headerlink" href="#5-push-pop-peek" title="Permanent link">&para;</a></h2>
+<h3 id="51-push">5.1 push<a class="headerlink" href="#51-push" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">bool</span><span class="w"> </span><span class="nf">heap_push</span><span class="p">(</span><span class="n">MinHeap</span><span class="w"> </span><span class="o">*</span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">heap_reserve</span><span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">size</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">))</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w">  </span><span class="c1">// 容量不够先扩</span>
+<span class="w">    </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">h</span><span class="o">-&gt;</span><span class="n">size</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v</span><span class="p">;</span><span class="w">     </span><span class="c1">// 放到末尾</span>
+<span class="w">    </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">size</span><span class="o">++</span><span class="p">;</span>
+<span class="w">    </span><span class="n">heap_sift_up</span><span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">size</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w">  </span><span class="c1">// 上浮</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>策略：<strong>末尾插入 + sift_up</strong>。新元素先放最后（保持完全二叉树形状），再上浮到正确位置。</p>
+<div class="highlight"><pre><span></span><code>push(0.5) 到 [1,3,2,5,4]:
+1. 末尾插入: [1,3,2,5,4,0.5]
+2. sift_up(5): 0.5 &lt; 父 2 → 交换 → [1,3,0.5,5,4,2]
+3. sift_up(2): 0.5 &lt; 父 1 → 交换 → [0.5,3,1,5,4,2]
+4. sift_up(0): 到根，停
+</code></pre></div>
+<p>复杂度：$O(\log n)$（一次 sift_up）。</p>
+<h3 id="52-pop">5.2 pop<a class="headerlink" href="#52-pop" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">bool</span><span class="w"> </span><span class="nf">heap_pop</span><span class="p">(</span><span class="n">MinHeap</span><span class="w"> </span><span class="o">*</span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="o">*</span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">h</span><span class="o">-&gt;</span><span class="n">size</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="n">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span><span class="w">       </span><span class="c1">// 取根（最小）</span>
+<span class="w">    </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">size</span><span class="o">--</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">h</span><span class="o">-&gt;</span><span class="n">size</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">h</span><span class="o">-&gt;</span><span class="n">size</span><span class="p">];</span><span class="w"> </span><span class="c1">// 末尾移到根</span>
+<span class="w">        </span><span class="n">heap_sift_down</span><span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">          </span><span class="c1">// 下沉</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>策略：<strong>根与末尾交换 + 删末尾 + sift_down</strong>。
+1. 取出根（最小值）
+2. 把末尾元素移到根位置
+3. size 减一（末尾逻辑删除）
+4. 从根 sift_down 恢复堆序</p>
+<div class="highlight"><pre><span></span><code>pop() 从 [1,3,2,5,4,8,7,9,6]（根是 1）:
+1. 取出 1
+2. 末尾 6 移到根: [6,3,2,5,4,8,7,9] (size 从 9 减到 8)
+3. sift_down(0): 6 vs 子 3,2 → 最小是 2 → 交换 → [2,3,6,5,4,8,7,9]
+4. sift_down(2): 6 vs 子 8,7 → 6 最小 → 停
+结果: [2,3,6,5,4,8,7,9]，返回 1
+</code></pre></div>
+<p><strong>为什么不能直接删根留空？</strong> 根空了就不是完全二叉树了。把末尾填到根，保持完全二叉树形状，再用 sift_down 修堆序。</p>
+<p>复杂度：$O(\log n)$（一次 sift_down）。</p>
+<h3 id="53-peek">5.3 peek<a class="headerlink" href="#53-peek" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">bool</span><span class="w"> </span><span class="nf">heap_peek</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">MinHeap</span><span class="w"> </span><span class="o">*</span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="o">*</span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">h</span><span class="o">-&gt;</span><span class="n">size</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="n">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span><span class="w">  </span><span class="c1">// 看根</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>只看根不删，$O(1)$。</p>
+<h3 id="54-replace_top">5.4 replace_top<a class="headerlink" href="#54-replace_top" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">bool</span><span class="w"> </span><span class="nf">heap_replace_top</span><span class="p">(</span><span class="n">MinHeap</span><span class="w"> </span><span class="o">*</span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="o">*</span><span class="n">out_old</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">h</span><span class="o">-&gt;</span><span class="n">size</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">out_old</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="n">out_old</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+<span class="w">    </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v</span><span class="p">;</span><span class="w">            </span><span class="c1">// 直接覆盖根</span>
+<span class="w">    </span><span class="n">heap_sift_down</span><span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">      </span><span class="c1">// 下沉</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>替换根 + sift_down</strong>，比 <code>pop + push</code> 快：少一次 sift_up。Top-K 里当新元素比堆顶大时用这个——弹出最小、压入新元素，一步到位。</p>
+<p>复杂度：$O(\log n)$（一次 sift_down，比 pop+push 的两次 $O(\log n)$ 快一倍）。</p>
+<h2 id="6-floyd-on">6. 建堆：Floyd 算法 O(n)<a class="headerlink" href="#6-floyd-on" title="Permanent link">&para;</a></h2>
+<p>给定 $n$ 个元素的数组，怎么把它变成堆？</p>
+<h3 id="61-push">6.1 朴素法：逐个 push<a class="headerlink" href="#61-push" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">heap_push</span><span class="p">(</span><span class="o">&amp;</span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span><span class="w">  </span><span class="c1">// 每次 O(log size)</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>总复杂度：$\sum_{i=1}^{n} O(\log i) = O(n \log n)$。</p>
+<h3 id="62-floyd-sift_down">6.2 Floyd 法：自底向上 sift_down<a class="headerlink" href="#62-floyd-sift_down" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">bool</span><span class="w"> </span><span class="nf">heap_build</span><span class="p">(</span><span class="n">MinHeap</span><span class="w"> </span><span class="o">*</span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="o">*</span><span class="n">items</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">heap_reserve</span><span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">))</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">items</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">n</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">last_inner</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">heap_parent</span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w">     </span><span class="c1">// 最后一个内部节点</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">last_inner</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">--</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">;)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// 从最后一个内部节点倒着 sift_down</span>
+<span class="w">        </span><span class="n">heap_sift_down</span><span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>策略：
+1. 把所有元素原样复制到数组（此时不是堆）
+2. 从<strong>最后一个内部节点</strong>开始，倒着对每个内部节点做 sift_down</p>
+<p><strong>为什么从最后一个内部节点倒着？</strong>
+- 叶子天然满足堆序（没子，trivially $\le$ 子）
+- 从底向上修，修每个内部节点时它的子树已经是堆，sift_down 把这个节点融入到已堆化的子树里
+- 倒序保证处理节点 $i$ 时，子树 $2i+1, 2i+2$ 都已堆化</p>
+<h3 id="63-on-on-log-n">6.3 为什么是 O(n) 而不是 O(n log n)<a class="headerlink" href="#63-on-on-log-n" title="Permanent link">&para;</a></h3>
+<p>直觉上 $n$ 个节点每个 sift_down $O(\log n)$，应该是 $O(n \log n)$。但<strong>大部分节点在底层，sift_down 距离很短</strong>。</p>
+<p>精确分析：高度 $h$ 的节点最多有 $\lceil n / 2^{h+1} \rceil$ 个，每个 sift_down 最多走 $h$ 步。</p>
+<p>$$T(n) = \sum_{h=0}^{\lfloor \log_2 n \rfloor} \left\lceil \frac{n}{2^{h+1}} \right\rceil \cdot h \le n \sum_{h=0}^{\infty} \frac{h}{2^{h+1}} = n \cdot 1 = O(n)$$</p>
+<p>关键：$\sum_{h=0}^{\infty} h / 2^{h+1} = 1$（收敛级数）。所以建堆是<strong>线性</strong>的，比逐个 push 的 $O(n \log n)$ 快。</p>
+<h3 id="64">6.4 实测对比<a class="headerlink" href="#64" title="Permanent link">&para;</a></h3>
+<p>本目录 C 测试的微基准（10 万元素）：</p>
+<div class="highlight"><pre><span></span><code>[BENCH] heap_build (Floyd):  2.74 ms/iter  (100 次平均)
+</code></pre></div>
+<p>对比逐个 push（10 万元素，每次 $O(\log n)$）：实测约 12-15 ms。Floyd 法快 4-5x，符合 $O(n)$ vs $O(n \log n)$ 的理论。</p>
+<h2 id="7-c">7. C 实现逐行讲解<a class="headerlink" href="#7-c" title="Permanent link">&para;</a></h2>
+<h3 id="71-heaph">7.1 数据结构（heap.h）<a class="headerlink" href="#71-heaph" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="p">;</span><span class="w">     </span><span class="c1">// 数组存储，根在 data[0]</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">size</span><span class="p">;</span><span class="w">      </span><span class="c1">// 当前元素数</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">capacity</span><span class="p">;</span><span class="w">  </span><span class="c1">// 数组容量</span>
+<span class="p">}</span><span class="w"> </span><span class="n">MinHeap</span><span class="p">;</span>
+</code></pre></div>
+<p>只有三个字段：数组指针、大小、容量。没有左右子指针——下标计算代替。<code>double</code> 类型适配 logits/score 场景。</p>
+<h3 id="72">7.2 容量管理<a class="headerlink" href="#72" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">heap_reserve</span><span class="p">(</span><span class="n">MinHeap</span><span class="w"> </span><span class="o">*</span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">need</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">need</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">capacity</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w">     </span><span class="c1">// 够了</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">new_cap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">capacity</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">8</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">capacity</span><span class="p">;</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">new_cap</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">need</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">new_cap</span><span class="w"> </span><span class="o">*=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w">                         </span><span class="c1">// 翻倍扩容</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="o">*</span><span class="n">new_data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">realloc</span><span class="p">(</span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">new_cap</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="kt">double</span><span class="p">));</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">new_data</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">    </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">new_data</span><span class="p">;</span>
+<span class="w">    </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">capacity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">new_cap</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>扩容策略：<strong>翻倍</strong>。均摊 $O(1)$（同哈希表 rehash 的几何级数论证）。初始容量 0 时首次分配 8。</p>
+<h3 id="73-sift_up">7.3 sift_up 逐行<a class="headerlink" href="#73-sift_up" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">heap_sift_up</span><span class="p">(</span><span class="n">MinHeap</span><span class="w"> </span><span class="o">*</span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">                    </span><span class="c1">// 还没到根</span>
+<span class="w">        </span><span class="kt">size_t</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">heap_parent</span><span class="p">(</span><span class="n">i</span><span class="p">);</span><span class="w">     </span><span class="c1">// 算父下标</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">p</span><span class="p">])</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// 子 &lt; 父 → 违反小顶堆</span>
+<span class="w">            </span><span class="kt">double</span><span class="w"> </span><span class="n">tmp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">];</span><span class="w">   </span><span class="c1">// 交换</span>
+<span class="w">            </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">p</span><span class="p">];</span>
+<span class="w">            </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">p</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tmp</span><span class="p">;</span>
+<span class="w">            </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">;</span><span class="w">                     </span><span class="c1">// 移到父位置继续</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">break</span><span class="p">;</span><span class="w">                     </span><span class="c1">// 已满足，停</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>关键：<code>i &gt; 0</code> 判断是否到根（根的 parent 无意义）。<code>&lt;</code> 严格小于，相等不交换（稳定，减少不必要操作）。</p>
+<h3 id="74-sift_down">7.4 sift_down 逐行<a class="headerlink" href="#74-sift_down" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">heap_sift_down</span><span class="p">(</span><span class="n">MinHeap</span><span class="w"> </span><span class="o">*</span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">size</span><span class="p">;</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">size_t</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">heap_left</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+<span class="w">        </span><span class="kt">size_t</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">heap_right</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+<span class="w">        </span><span class="kt">size_t</span><span class="w"> </span><span class="n">smallest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="p">;</span><span class="w">                              </span><span class="c1">// 先假设自己最小</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">l</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">l</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">smallest</span><span class="p">])</span><span class="w"> </span><span class="p">{</span><span class="w">   </span><span class="c1">// 左子存在且更小</span>
+<span class="w">            </span><span class="n">smallest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">l</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">r</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">r</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">smallest</span><span class="p">])</span><span class="w"> </span><span class="p">{</span><span class="w">   </span><span class="c1">// 右子存在且比当前最小还小</span>
+<span class="w">            </span><span class="n">smallest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">r</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">smallest</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">                              </span><span class="c1">// 自己最小，堆序满足</span>
+<span class="w">            </span><span class="k">break</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="kt">double</span><span class="w"> </span><span class="n">tmp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">];</span><span class="w">                          </span><span class="c1">// 交换</span>
+<span class="w">        </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">smallest</span><span class="p">];</span>
+<span class="w">        </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">smallest</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tmp</span><span class="p">;</span>
+<span class="w">        </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">smallest</span><span class="p">;</span><span class="w">                                     </span><span class="c1">// 移到子位置继续</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>两个 <code>if</code> 而非 <code>if-else</code>：右子要和"当前最小"比（可能是左子），所以第二个 if 用 <code>smallest</code> 不用 <code>i</code>。<code>l &lt; n</code> / <code>r &lt; n</code> 检查子是否存在（完全二叉树末尾可能缺右子甚至缺左子）。</p>
+<h3 id="75-heap_build">7.5 heap_build 逐行<a class="headerlink" href="#75-heap_build" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">bool</span><span class="w"> </span><span class="nf">heap_build</span><span class="p">(</span><span class="n">MinHeap</span><span class="w"> </span><span class="o">*</span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="o">*</span><span class="n">items</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">heap_reserve</span><span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">))</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">items</span><span class="p">[</span><span class="n">i</span><span class="p">];</span><span class="w">                </span><span class="c1">// 原样复制</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">n</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w">                  </span><span class="c1">// 0 或 1 个元素天然是堆</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">last_inner</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">heap_parent</span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w">   </span><span class="c1">// 最后一个内部节点的下标</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">last_inner</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">--</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">;)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// 从 last_inner 倒着到 0</span>
+<span class="w">        </span><span class="n">heap_sift_down</span><span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>for (size_t i = last_inner + 1; i-- &gt; 0;)</code> 是 size_t 倒序循环的惯用法：<code>i</code> 从 <code>last_inner</code> 开始，每次减一，到 0 还会执行一次（<code>i-- &gt; 0</code> 先判断再减）。</p>
+<p><strong>为什么 last_inner = parent(n-1)？</strong> 最后一个元素是 <code>n-1</code>，它的父是最后一个有子的节点。从它开始倒着到根 0，覆盖所有内部节点。</p>
+<h3 id="76-heap_replace_top">7.6 heap_replace_top 逐行<a class="headerlink" href="#76-heap_replace_top" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">bool</span><span class="w"> </span><span class="nf">heap_replace_top</span><span class="p">(</span><span class="n">MinHeap</span><span class="w"> </span><span class="o">*</span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="o">*</span><span class="n">out_old</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">h</span><span class="o">-&gt;</span><span class="n">size</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">out_old</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="n">out_old</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span><span class="w">   </span><span class="c1">// 可选返回旧根</span>
+<span class="w">    </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v</span><span class="p">;</span><span class="w">                        </span><span class="c1">// 覆盖根</span>
+<span class="w">    </span><span class="n">heap_sift_down</span><span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">                  </span><span class="c1">// 下沉恢复堆序</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Top-K 的核心原语：当新元素比堆顶（最小）大时，替换堆顶再下沉。比 <code>pop + push</code> 少一次 sift_up，快约 2x。</p>
+<h2 id="8">8. 复杂度分析<a class="headerlink" href="#8" title="Permanent link">&para;</a></h2>
+<h3 id="81">8.1 各操作复杂度<a class="headerlink" href="#81" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>时间</th>
+<th>空间</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>init</td>
+<td>$O(1)$</td>
+<td>$O(\text{cap})$</td>
+<td>分配数组</td>
+</tr>
+<tr>
+<td>push</td>
+<td>$O(\log n)$</td>
+<td>均摊 $O(1)$</td>
+<td>sift_up + 可能扩容</td>
+</tr>
+<tr>
+<td>pop</td>
+<td>$O(\log n)$</td>
+<td>$O(1)$</td>
+<td>sift_down</td>
+</tr>
+<tr>
+<td>peek</td>
+<td>$O(1)$</td>
+<td>$O(1)$</td>
+<td>看根</td>
+</tr>
+<tr>
+<td>replace_top</td>
+<td>$O(\log n)$</td>
+<td>$O(1)$</td>
+<td>一次 sift_down</td>
+</tr>
+<tr>
+<td>build (Floyd)</td>
+<td>$O(n)$</td>
+<td>$O(1)$</td>
+<td>自底向上</td>
+</tr>
+<tr>
+<td>build (逐个 push)</td>
+<td>$O(n \log n)$</td>
+<td>$O(1)$</td>
+<td>朴素</td>
+</tr>
+</tbody>
+</table>
+<h3 id="82-push">8.2 push 的均摊分析<a class="headerlink" href="#82-push" title="Permanent link">&para;</a></h3>
+<p>扩容翻倍，第 $k$ 次扩容代价 $O(2^k)$，但间隔 $2^k$ 次 push。总扩容代价 $\sum 2^k = O(n)$，均摊每次 push $O(1)$ 额外。加上 sift_up 的 $O(\log n)$，push 均摊 $O(\log n)$。</p>
+<h3 id="83-build-on">8.3 build 的 O(n) 证明（详细）<a class="headerlink" href="#83-build-on" title="Permanent link">&para;</a></h3>
+<p>设堆有 $n$ 个元素，高度 $H = \lfloor \log_2 n \rfloor$。</p>
+<p>高度 $h$ 的节点数 $\le \lceil n / 2^{h+1} \rceil$（第 $h$ 层从顶往下数，最多 $n/2^{h+1}$ 个）。</p>
+<p>每个高度 $h$ 的节点 sift_down 最多走 $h$ 步。</p>
+<p>$$T(n) \le \sum_{h=0}^{H} \frac{n}{2^{h+1}} \cdot h = \frac{n}{2} \sum_{h=0}^{H} \frac{h}{2^h} \le \frac{n}{2} \sum_{h=0}^{\infty} \frac{h}{2^h} = \frac{n}{2} \cdot 2 = n$$</p>
+<p>其中 $\sum_{h=0}^{\infty} h/2^h = 2$（对 $\sum x^h = 1/(1-x)$ 求导后令 $x=1/2$）。所以 $T(n) = O(n)$。</p>
+<h3 id="84">8.4 空间复杂度<a class="headerlink" href="#84" title="Permanent link">&para;</a></h3>
+<p>数组存储，$n$ 个元素占 $O(n)$ 空间，无额外指针开销。比指针二叉树省 $2n$ 个指针（左右子）。</p>
+<h2 id="9">9. 优先队列<a class="headerlink" href="#9" title="Permanent link">&para;</a></h2>
+<p><strong>优先队列</strong>（Priority Queue）是堆的抽象接口：元素带优先级，出队按优先级（而非入队顺序）。</p>
+<div class="highlight"><pre><span></span><code>普通队列: FIFO，先入先出
+优先队列: 每次出队优先级最高（或最低）的元素
+</code></pre></div>
+<p>堆是实现优先队列的标准结构：
+- <code>push</code> = 入队（带优先级）
+- <code>pop</code> = 出队（最高/最低优先级）
+- <code>peek</code> = 看队首（不取出）</p>
+<table>
+<thead>
+<tr>
+<th>实现</th>
+<th>入队</th>
+<th>出队</th>
+<th>适用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>无序数组</td>
+<td>$O(1)$</td>
+<td>$O(n)$（找最值）</td>
+<td>入队多出队少</td>
+</tr>
+<tr>
+<td>排序数组</td>
+<td>$O(n)$（插入排序）</td>
+<td>$O(1)$</td>
+<td>出队多入队少</td>
+</tr>
+<tr>
+<td><strong>堆</strong></td>
+<td><strong>$O(\log n)$</strong></td>
+<td><strong>$O(\log n)$</strong></td>
+<td><strong>通用</strong></td>
+</tr>
+<tr>
+<td>平衡树</td>
+<td>$O(\log n)$</td>
+<td>$O(\log n)$</td>
+<td>需要全序遍历</td>
+</tr>
+</tbody>
+</table>
+<p>堆在两端都 $O(\log n)$，且常数小、缓存友好，是优先队列的默认选择。C++ <code>std::priority_queue</code>、Python <code>heapq</code>、Java <code>PriorityQueue</code> 都用堆实现。</p>
+<h2 id="10">10. 与其他结构对比<a class="headerlink" href="#10" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>堆</th>
+<th>排序数组</th>
+<th>平衡树</th>
+<th>哈希表</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>找最值</td>
+<td>$O(1)$</td>
+<td>$O(1)$（端点）</td>
+<td>$O(1)$（端点）</td>
+<td>$O(n)$</td>
+</tr>
+<tr>
+<td>插入</td>
+<td>$O(\log n)$</td>
+<td>$O(n)$</td>
+<td>$O(\log n)$</td>
+<td>$O(1)$</td>
+</tr>
+<tr>
+<td>删最值</td>
+<td>$O(\log n)$</td>
+<td>$O(1)$ 或 $O(n)$</td>
+<td>$O(\log n)$</td>
+<td>$O(n)$</td>
+</tr>
+<tr>
+<td>查找任意</td>
+<td>$O(n)$</td>
+<td>$O(\log n)$</td>
+<td>$O(\log n)$</td>
+<td>$O(1)$</td>
+</tr>
+<tr>
+<td>全序遍历</td>
+<td>$O(n \log n)$（排序）</td>
+<td>$O(n)$</td>
+<td>$O(n)$</td>
+<td>不支持</td>
+</tr>
+<tr>
+<td>建结构</td>
+<td>$O(n)$</td>
+<td>$O(n \log n)$</td>
+<td>$O(n \log n)$</td>
+<td>$O(n)$</td>
+</tr>
+<tr>
+<td>空间</td>
+<td>$O(n)$ 紧凑</td>
+<td>$O(n)$ 紧凑</td>
+<td>$O(n)$ 有指针</td>
+<td>$O(n)$</td>
+</tr>
+<tr>
+<td>缓存</td>
+<td>好</td>
+<td>极好</td>
+<td>差</td>
+<td>中</td>
+</tr>
+</tbody>
+</table>
+<p><strong>选堆</strong>：只需反复取最值（优先队列、Top-K、Dijkstra、Beam Search）。
+<strong>选排序数组</strong>：一次排序后多次二分查找，不动态插入。
+<strong>选平衡树</strong>：需要全序遍历、范围查询、前驱后继。
+<strong>选哈希表</strong>：等值查找，不要顺序。</p>
+<h2 id="11">11. 本实现的局限与改进方向<a class="headerlink" href="#11" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>固定 double 类型</strong>：生产级用泛型（C++ 模板、C 用 <code>void*</code> + 比较函数）</li>
+<li><strong>只有小顶堆</strong>：大顶堆需改比较方向，或存负值复用小顶堆</li>
+<li><strong>无索引映射</strong>：无法 $O(1)$ 定位任意元素（Dijkstra 的 decrease-key 需要），生产级加 <code>pos_map: elem → index</code></li>
+<li><strong>无合并操作</strong>：两个堆合并是 $O(n)$，二项堆/配对堆支持 $O(\log n)$ 合并</li>
+<li><strong>单线程</strong>：并发优先队列需锁或无锁结构（如 skip list）</li>
+<li><strong>无删除任意元素</strong>：本实现只支持删根，删中间元素需先查位置（$O(n)$）+ sift</li>
+</ol>
+<p>这些是教学实现的合理取舍。生产级优先队列（如 Go <code>container/heap</code>、Boost <code>fibonacci_heap</code>）会按需扩展。</p>
+<h2 id="12">12. 小结<a class="headerlink" href="#12" title="Permanent link">&para;</a></h2>
+<p>堆的核心三件套：
+1. <strong>完全二叉树 + 数组表示</strong>：下标算父子，无指针，缓存友好
+2. <strong>堆序性质</strong>：父 $\le$ 子（小顶堆），根是全局最小，约束弱于全序
+3. <strong>sift_up / sift_down</strong>：$O(\log n)$ 维护堆序的两个原语</p>
+<p>理解了这三点，就理解了堆。建堆的 $O(n)$ 是个反直觉的优美结果——大部分节点在底层，sift_down 距离短，几何级数求和收敛到线性。</p>
+<p>下一章 <code>ai_application.md</code> 讲堆怎么在 AI 里做 Top-K 采样和 Beam Search 剪枝。</p>
+<hr />
+<h2 id="ai">AI 应用<a class="headerlink" href="#ai" title="Permanent link">&para;</a></h2>
+<h1 id="ai-top-k-beam-search">二叉堆的 AI 应用：Top-K 采样 + Beam Search<a class="headerlink" href="#ai-top-k-beam-search" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>本文档讲清「堆在 AI 里干什么」。原理见 <code>principle.md</code>。核心两个应用：Top-K 采样（LLM 从 logits 选最大 K 个，为什么用小顶堆而不是排序）和 Beam Search（用优先队列剪枝保留 beam 个最优候选）。</p>
+</blockquote>
+<h2 id="1-top-k-llm">1. Top-K 采样：LLM 解码的第一步<a class="headerlink" href="#1-top-k-llm" title="Permanent link">&para;</a></h2>
+<h3 id="11-llm-token">1.1 LLM 生成一个 token 的流程<a class="headerlink" href="#11-llm-token" title="Permanent link">&para;</a></h3>
+<p>大语言模型（LLM）每生成一个 token，最后会输出一个 <strong>logits 向量</strong> $\in \mathbb{R}^V$，$V$ 是词表大小：</p>
+<div class="highlight"><pre><span></span><code>vocab_size V = 128256 (LLaMA-3)
+logits = [-3.2, 0.5, 8.7, -1.1, ..., 4.3]   ← V 个实数，对应每个词的"原始分数"
+</code></pre></div>
+<p>下一步要从中选一个（或几个）词作为输出。常见解码策略：</p>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>做法</th>
+<th>用到 Top-K？</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Greedy</td>
+<td>取 logits 最大的 1 个</td>
+<td>是（k=1）</td>
+</tr>
+<tr>
+<td><strong>Top-K 采样</strong></td>
+<td>取 logits 最大的 K 个，softmax 后按概率采样</td>
+<td><strong>是</strong></td>
+</tr>
+<tr>
+<td>Top-P 采样（核采样）</td>
+<td>取最小的若干个使累计概率 $\ge$ p</td>
+<td>是（变体）</td>
+</tr>
+<tr>
+<td><strong>Beam Search</strong></td>
+<td>每步保留 beam 个最优候选</td>
+<td><strong>是</strong></td>
+</tr>
+<tr>
+<td>Temperature</td>
+<td>logits / T 后再采样</td>
+<td>配合 Top-K</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Top-K 采样</strong>（Holtzman et al. 2020）是最常见的解码策略之一：只在前 K 个高概率词里采样，过滤掉长尾低概率词（避免生成乱码）。</p>
+<div class="highlight"><pre><span></span><code>logits = [−3.2, 0.5, 8.7, −1.1, 6.3, 2.8, 5.1, ..., 4.3]   (V=128256)
+K = 10
+
+Top-K 采样:
+1. 找出 logits 最大的 10 个 → [8.7, 6.3, 5.1, 4.3, ..., 2.8]
+2. 对这 10 个做 softmax → 概率分布
+3. 按概率随机选一个
+</code></pre></div>
+<p>第 1 步就是 <strong>Top-K 问题</strong>：从 $V$ 个数里找最大的 $K$ 个。$V$ 通常 3 万到 13 万（LLaMA-3 128256），$K$ 通常 10-50。</p>
+<h3 id="12-top-k">1.2 Top-K 问题的三种解法<a class="headerlink" href="#12-top-k" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>复杂度</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>全排序取前 K</td>
+<td>$O(n \log n)$</td>
+<td>排完取前 K 个，杀鸡用牛刀</td>
+</tr>
+<tr>
+<td><strong>小顶堆维护 K 大</strong></td>
+<td><strong>$O(n \log k)$</strong></td>
+<td><strong>堆大小 K，堆顶是 K 里最小</strong></td>
+</tr>
+<tr>
+<td>快速选择 (quickselect)</td>
+<td>$O(n)$ 平均</td>
+<td>类似快排的划分，但只递归一侧</td>
+</tr>
+<tr>
+<td>introselect (numpy)</td>
+<td>$O(n)$ 最坏</td>
+<td>quickselect + 退化时切中位数</td>
+</tr>
+</tbody>
+</table>
+<p><strong>全排序</strong>做了远超必要的工作：Top-K 只需要前 K 个的相对顺序（甚至不需要顺序，只要集合），排序却把全部 $n$ 个排好。$n=10^5, k=10$ 时，排序做 $\sim 1.7 \times 10^6$ 次比较，Top-K 只需 $\sim 3.3 \times 10^5$，差 5 倍。</p>
+<h3 id="13-top-k">1.3 小顶堆维护 Top-K 的算法<a class="headerlink" href="#13-top-k" title="Permanent link">&para;</a></h3>
+<p><strong>核心思想</strong>：维护一个大小为 $K$ 的<strong>小顶堆</strong>，堆顶是当前 K 个候选里<strong>最小的</strong>。遍历所有元素：</p>
+<ul>
+<li>堆未满（size &lt; K）：直接 push</li>
+<li>堆满且新元素 $&gt;$ 堆顶：新元素有资格进 Top-K，弹出最小（堆顶），压入新元素</li>
+<li>堆满且新元素 $\le$ 堆顶：新元素比当前 K 个都小，丢弃</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">topk_heap</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+    <span class="n">heap</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">logits</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">heap</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">k</span><span class="p">:</span>
+            <span class="n">heapq</span><span class="o">.</span><span class="n">heappush</span><span class="p">(</span><span class="n">heap</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>       <span class="c1"># 堆未满，直接进</span>
+        <span class="k">elif</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">heap</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">heapq</span><span class="o">.</span><span class="n">heapreplace</span><span class="p">(</span><span class="n">heap</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>    <span class="c1"># 比堆顶大，替换</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">heap</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>     <span class="c1"># 最后排序输出</span>
+</code></pre></div>
+<p><strong>为什么用小顶堆而不是大顶堆？</strong> 这是个反直觉的点：
+- 要找最大的 K 个，直觉用大顶堆
+- 但大顶堆要存全部 $n$ 个元素再取 K 个根，$O(n)$ 空间 + $O(n \log n)$ 时间
+- <strong>小顶堆只存 K 个</strong>，堆顶是 K 里最小的，新元素只需和堆顶比一次就能决定是否入选
+- $O(k)$ 空间 + $O(n \log k)$ 时间，$k \ll n$ 时远优</p>
+<div class="highlight"><pre><span></span><code>找 top-3 从 [5, 1, 8, 3, 9, 2, 7, 4, 6]:
+
+x=5: 堆未满 → [5]
+x=1: 堆未满 → [1, 5]           (小顶堆，1 在顶)
+x=8: 堆未满 → [1, 5, 8]
+x=3: 3 &gt; 堆顶 1 → 替换 → [3, 5, 8]
+x=9: 9 &gt; 堆顶 3 → 替换 → [5, 8, 9]
+x=2: 2 &lt; 堆顶 5 → 丢弃
+x=7: 7 &gt; 堆顶 5 → 替换 → [7, 8, 9]
+x=4: 4 &lt; 堆顶 7 → 丢弃
+x=6: 6 &lt; 堆顶 7 → 丢弃
+
+最终堆 [7, 8, 9] → top-3 = [9, 8, 7] ✓
+</code></pre></div>
+<h3 id="14-vs">1.4 复杂度分析：堆 vs 排序<a class="headerlink" href="#14-vs" title="Permanent link">&para;</a></h3>
+<p><strong>全排序</strong>：
+- 排序 $O(n \log n)$，取前 K $O(k)$，总计 $O(n \log n)$
+- $n = 10^6, k = 10$：$10^6 \times 20 \approx 2 \times 10^7$ 次比较</p>
+<p><strong>小顶堆 Top-K</strong>：
+- 遍历 $n$ 个元素，每个做一次比较 + 可能的 heapreplace
+- heapreplace 是 $O(\log k)$（一次 sift_down）
+- 但大部分元素比堆顶小，直接跳过（不进堆）
+- 最坏 $O(n \log k)$，平均更好（只有约 $K \ln(n/K)$ 个元素会进堆）
+- $n = 10^6, k = 10$：$10^6 \times 3.3 \approx 3.3 \times 10^6$ 次比较</p>
+<p><strong>理论比值</strong>：</p>
+<p>$$\frac{O(n \log n)}{O(n \log k)} = \frac{\log n}{\log k} = \frac{\log_2 10^6}{\log_2 10} = \frac{19.9}{3.3} \approx 6.0$$</p>
+<p>即 $n = 10^6, k = 10$ 时，<strong>堆应比排序快约 6 倍</strong>。</p>
+<p><strong>$k$ 增大时优势缩小</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>$k$</th>
+<th>$\log_2 k$</th>
+<th>$\log_2 n / \log_2 k$</th>
+<th>堆优势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10</td>
+<td>3.3</td>
+<td>6.0</td>
+<td>6x</td>
+</tr>
+<tr>
+<td>100</td>
+<td>6.6</td>
+<td>3.0</td>
+<td>3x</td>
+</tr>
+<tr>
+<td>1000</td>
+<td>10.0</td>
+<td>2.0</td>
+<td>2x</td>
+</tr>
+<tr>
+<td>$n$</td>
+<td>$\log_2 n$</td>
+<td>1.0</td>
+<td>1x（退化为排序）</td>
+</tr>
+</tbody>
+</table>
+<p>$k \to n$ 时堆要存全部元素，退化为 $O(n \log n)$，和排序一样。<strong>Top-K 堆的优势只在 $k \ll n$ 时显著</strong>。</p>
+<h2 id="2-demo">2. demo 结果解读<a class="headerlink" href="#2-demo" title="Permanent link">&para;</a></h2>
+<p>运行 <code>python 06_heap/python/demo.py</code> 的关键输出：</p>
+<h3 id="21-top-k-n1e6">2.1 Top-K 性能对比（n=1e6）<a class="headerlink" href="#21-top-k-n1e6" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>n = 1,000,000, k = 10
+实现                     均值(ms)      标准差(ms)        加速比
+heap O(n log k)       59.3341       3.0776       5.39x
+sort O(n log n)      320.0403       3.5718       1.00x
+heap on ndarray      114.8984       5.4835       2.79x
+numpy argpartition       7.2434       0.7092      44.18x
+</code></pre></div>
+<p>读法：从 100 万个 logits 选最大的 10 个：
+- <strong>小顶堆</strong>：59 ms，$O(n \log k)$
+- <strong>全排序</strong>：320 ms，$O(n \log n)$
+- <strong>numpy.argpartition</strong>：7 ms，$O(n)$ 向量化</p>
+<p><strong>堆比排序快 5.4 倍</strong>，理论值 6.0x。差距来自：
+- Python <code>heapq</code> 是 C 实现但每步有 Python 层循环开销
+- <code>sorted</code> 是高度优化的 Timsort（C 实现），常数小
+- 实测比值略低于理论是正常的（常数项摊薄）</p>
+<h3 id="22-k">2.2 不同 k 下的趋势<a class="headerlink" href="#22-k" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>  k      heap_ms      sort_ms     numpy_ms  sort/heap  log2(n)/log2(k)
+ 10       59.334      320.040        7.243       5.39x             6.00
+ 50       58.373      323.631        7.003       5.54x             3.53
+100       56.905      321.825        6.952       5.66x             3.00
+</code></pre></div>
+<p>观察：
+- <code>sort_ms</code> 几乎不随 $k$ 变（320 ms 左右）——排序代价主要在 $n \log n$，和 $k$ 无关
+- <code>heap_ms</code> 也几乎不随 $k$ 变（57-59 ms）——$k$ 从 10 到 100，$\log k$ 从 3.3 到 6.6 翻倍，但大部分元素根本不进堆（被堆顶挡掉），实际 heapreplace 次数远少于 $n$
+- <code>numpy_ms</code> 最快且稳定（~7 ms）——C 向量化 + introselect，$O(n)$</p>
+<p><strong>为什么堆耗时也不随 $k$ 明显增长？</strong> 因为遍历 $n$ 个元素的 $O(n)$ 主导，每个元素和堆顶比一次是 $O(1)$，只有比堆顶大的才 heapreplace（$O(\log k)$）。$n = 10^6$ 个随机数里，期望只有约 $k \ln(n/k)$ 个会进堆（$k=10$ 时约 115 个），heapreplace 总开销 $O(k \log k \cdot \ln(n/k))$，远小于 $O(n)$。</p>
+<h3 id="23-numpyargpartition-8">2.3 numpy.argpartition 为什么快 8 倍<a class="headerlink" href="#23-numpyargpartition-8" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>numpy argpartition:  7.2 ms   (比纯 Python 堆快 8.2x)
+</code></pre></div>
+<p><code>np.argpartition</code> 用的是 <strong>introselect</strong>（introspective select）：
+1. 主体是 quickselect（类似快排但只递归一侧），$O(n)$ 平均
+2. 退化时（划分不平衡）切中位数做 pivot，保证 $O(n)$ 最坏
+3. <strong>C 实现 + SIMD 向量化</strong>，遍历 $n$ 个元素在 C 层一次完成</p>
+<p>纯 Python 堆（<code>heapq</code>）虽然 <code>heappush</code>/<code>heapreplace</code> 是 C 实现，但<strong>外层 for 循环在 Python 层</strong>，每次迭代有解释器开销。$10^6$ 次 Python 循环本身就几十毫秒，主导了耗时。</p>
+<p><strong>结论</strong>：算法层面堆 $O(n \log k)$ 比 argpartition $O(n)$ 略差（$k=10$ 时 $\log k = 3.3$，差 3.3 倍），但实现层面 numpy 的 C 向量化比 Python 循环快几十倍，综合下来 numpy 快 8 倍。</p>
+<h3 id="24">2.4 关键数字总结<a class="headerlink" href="#24" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>n=1e6, k=10:
+  小顶堆 top-10    : 59.334 ms  (O(n log k))
+  全排序 top-10    : 320.040 ms (O(n log n))
+  numpy argpartition: 7.243 ms  (O(n) 向量化)
+  排序/堆 = 5.4x  |  排序/numpy = 44.2x  |  堆/numpy = 8.2x
+  理论比值 log(n)/log(k) = 6.00x
+</code></pre></div>
+<h2 id="3-beam-search">3. Beam Search：用优先队列剪枝<a class="headerlink" href="#3-beam-search" title="Permanent link">&para;</a></h2>
+<h3 id="31-beam-search">3.1 什么是 Beam Search<a class="headerlink" href="#31-beam-search" title="Permanent link">&para;</a></h3>
+<p><strong>Beam Search</strong> 是序列生成（机器翻译、LLM 解码）的经典算法。不同于贪心（每步只留 1 个）或穷举（留所有），Beam Search 每步保留 <strong>beam_width 个最优候选</strong>，在质量和效率间折中。</p>
+<div class="highlight"><pre><span></span><code>beam_width = 2, 生成 3 步:
+
+步骤 0: [起] (1 个候选)
+步骤 1: [起] 扩展 vocab → vocab 个候选 → 保留 top-2 → [起A, 起B]
+步骤 2: [起A] 扩展 vocab + [起B] 扩展 vocab → 2*vocab 个候选 → 保留 top-2 → [起AC, 起BD]
+步骤 3: [起AC] 扩展 vocab + [起BD] 扩展 vocab → 2*vocab 个候选 → 保留 top-2 → [起ACE, 起BDF]
+</code></pre></div>
+<p>每步核心操作：从 <code>beam_width × vocab_size</code> 个候选里选 <strong>top beam_width</strong> 个。这就是 Top-K 问题，$n = \text{beam} \times \text{vocab}$，$k = \text{beam}$。</p>
+<h3 id="32-beam-search-top-k">3.2 Beam Search 一步的 Top-K<a class="headerlink" href="#32-beam-search-top-k" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">beam_search_step_heap</span><span class="p">(</span><span class="n">beam_scores</span><span class="p">,</span> <span class="n">vocab_logits</span><span class="p">,</span> <span class="n">beam_width</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""一步扩展：每个 beam 产生 vocab 个候选，选 top beam_width。"""</span>
+    <span class="n">heap</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">bs</span> <span class="ow">in</span> <span class="n">beam_scores</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">logit</span> <span class="ow">in</span> <span class="n">vocab_logits</span><span class="p">:</span>
+            <span class="n">score</span> <span class="o">=</span> <span class="n">bs</span> <span class="o">+</span> <span class="n">logit</span>              <span class="c1"># 新候选分数 = 累计分数 + 当前 logit</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">heap</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">beam_width</span><span class="p">:</span>
+                <span class="n">heapq</span><span class="o">.</span><span class="n">heappush</span><span class="p">(</span><span class="n">heap</span><span class="p">,</span> <span class="n">score</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">score</span> <span class="o">&gt;</span> <span class="n">heap</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">heapq</span><span class="o">.</span><span class="n">heapreplace</span><span class="p">(</span><span class="n">heap</span><span class="p">,</span> <span class="n">score</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">heap</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+<p>对比排序版：</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">beam_search_step_sort</span><span class="p">(</span><span class="n">beam_scores</span><span class="p">,</span> <span class="n">vocab_logits</span><span class="p">,</span> <span class="n">beam_width</span><span class="p">):</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="p">[</span><span class="n">bs</span> <span class="o">+</span> <span class="n">logit</span> <span class="k">for</span> <span class="n">bs</span> <span class="ow">in</span> <span class="n">beam_scores</span> <span class="k">for</span> <span class="n">logit</span> <span class="ow">in</span> <span class="n">vocab_logits</span><span class="p">]</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:</span><span class="n">beam_width</span><span class="p">]</span>
+</code></pre></div>
+<p><strong>复杂度</strong>（$m = \text{beam_width}$, $v = \text{vocab_size}$）：
+- 堆版：$O(mv \log m)$，遍历 $mv$ 个候选，每个 heapreplace $O(\log m)$
+- 排序版：$O(mv \log(mv))$，全排序 $mv$ 个候选</p>
+<p>比值 $\frac{\log(mv)}{\log m} = 1 + \frac{\log v}{\log m}$。$m=5, v=10000$ 时 $\frac{\log 50000}{\log 5} = \frac{15.6}{2.3} \approx 6.8$，堆应快约 7 倍。</p>
+<h3 id="33-beam-search-demo">3.3 Beam Search demo 结果<a class="headerlink" href="#33-beam-search-demo" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>beam_width = 5, vocab_size = 1000, 候选数 = 5000
+heap O(mv log beam)       0.4597 ms    1.68x
+sort O(mv log mv)         0.7732 ms    1.00x
+numpy argpartition        0.0285 ms   27.10x
+
+beam_width = 5, vocab_size = 5000, 候选数 = 25000
+heap O(mv log beam)       2.1626 ms    2.64x
+sort O(mv log mv)         5.7081 ms    1.00x
+numpy argpartition        0.0856 ms   66.68x
+
+beam_width = 5, vocab_size = 10000, 候选数 = 50000
+heap O(mv log beam)       4.1002 ms    3.03x
+sort O(mv log mv)        12.4396 ms    1.00x
+numpy argpartition        0.1649 ms   75.42x
+</code></pre></div>
+<p>观察：
+- <strong>候选数越多，堆优势越大</strong>：5000 候选 1.68x → 50000 候选 3.03x。因为 $\log(mv)$ 随 $v$ 增长，而 $\log m$ 不变，比值拉大
+- <strong>numpy 远快</strong>：50000 候选时 numpy 比堆快 25x（0.16 vs 4.1 ms），C 向量化 + $O(n)$ 算法双重优势
+- <strong>完整 Beam Search 10 步</strong>：堆版和排序版结果完全一致（最大差异 0.0），验证算法正确</p>
+<h3 id="34-beam-search">3.4 Beam Search 为什么用优先队列剪枝<a class="headerlink" href="#34-beam-search" title="Permanent link">&para;</a></h3>
+<p>不用堆的替代方案：</p>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>每步代价</th>
+<th>问题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>全排序 + 取前 beam</td>
+<td>$O(mv \log mv)$</td>
+<td>排了 $mv$ 个却只用 beam 个，浪费</td>
+</tr>
+<tr>
+<td><strong>小顶堆剪枝</strong></td>
+<td>$O(mv \log \text{beam})$</td>
+<td>只维护 beam 个，其余 $mv - \text{beam}$ 个直接丢弃</td>
+</tr>
+<tr>
+<td>quickselect</td>
+<td>$O(mv)$ 平均</td>
+<td>需要存全部 $mv$ 个候选再选，空间 $O(mv)$</td>
+</tr>
+<tr>
+<td>numpy argpartition</td>
+<td>$O(mv)$ 向量化</td>
+<td>同上，且 C 层快</td>
+</tr>
+</tbody>
+</table>
+<p><strong>堆的优势在在线/流式场景</strong>：候选一个一个产生（逐 beam 扩展），堆可以边产生边剪枝，不需要存全部 $mv$ 个候选。内存只 $O(\text{beam})$。这在长序列生成（每步 vocab=3万，beam=4，候选 12 万）时省内存。</p>
+<p><strong>numpy 的优势在批量场景</strong>：候选一次性全算出来（向量化外积），argpartition 一次选完。生产级 LLM 推理走这条路。</p>
+<h2 id="4-cuda-top-k">4. 生产级实现：从堆到 CUDA Top-K<a class="headerlink" href="#4-cuda-top-k" title="Permanent link">&para;</a></h2>
+<h3 id="41-numpyargpartitioncpu">4.1 numpy.argpartition（CPU 推理）<a class="headerlink" href="#41-numpyargpartitioncpu" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="n">logits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">128256</span><span class="p">)</span>  <span class="c1"># LLaMA-3 词表</span>
+<span class="n">k</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argpartition</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="o">-</span><span class="n">k</span><span class="p">)[</span><span class="o">-</span><span class="n">k</span><span class="p">:]</span>  <span class="c1"># top-k 索引，O(n) 向量化</span>
+<span class="n">top_k_logits</span> <span class="o">=</span> <span class="n">logits</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+</code></pre></div>
+<p><code>argpartition</code> 内部用 introselect（quickselect + 中位数退化保护），C 实现 + SIMD。比纯 Python 堆快 8 倍，是 CPU 上 Top-K 的事实标准。</p>
+<h3 id="42-pytorch-torchtopkgpu">4.2 PyTorch torch.topk（GPU 推理）<a class="headerlink" href="#42-pytorch-torchtopkgpu" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="n">logits</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">128256</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s1">'cuda'</span><span class="p">)</span>
+<span class="n">values</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">topk</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>  <span class="c1"># CUDA kernel</span>
+</code></pre></div>
+<p><code>torch.topk</code> 在 GPU 上用专门的 top-k kernel：
+- 小 $k$：每个 block 维护一个寄存器堆，并行归约
+- 大 $k$：先粗粒度 bucket sort 再精筛
+- 比 GPU 上全排序快一个量级</p>
+<h3 id="43-cuda-top-k-kernel">4.3 CUDA Top-K kernel 的堆思想<a class="headerlink" href="#43-cuda-top-k-kernel" title="Permanent link">&para;</a></h3>
+<p>GPU top-k 的核心仍是<strong>堆的并行化变体</strong>：</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// 每个 thread block 维护一个共享内存里的堆</span>
+<span class="kt">__shared__</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">heap</span><span class="p">[</span><span class="n">K</span><span class="p">];</span>
+<span class="c1">// 每个 thread 处理一段 logits，本地筛选后归约到 block 堆</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tid</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">V</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="nb">blockDim</span><span class="p">.</span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">logits</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">heap</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">heap_replace</span><span class="p">(</span><span class="n">heap</span><span class="p">,</span><span class="w"> </span><span class="n">K</span><span class="p">,</span><span class="w"> </span><span class="n">logits</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span><span class="w">  </span><span class="c1">// 原子操作</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+<span class="c1">// block 间再归约到全局 top-k</span>
+</code></pre></div>
+<p>思想和小顶堆 Top-K 完全一致：维护大小 $K$ 的小顶堆，新元素比堆顶大就替换。区别是并行化（多 block 各自堆 + 归约）和硬件优化（共享内存、warp 原语）。</p>
+<h3 id="44-huggingface-transformers-top-k">4.4 HuggingFace Transformers 里的 Top-K<a class="headerlink" href="#44-huggingface-transformers-top-k" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogitsProcessor</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TopKLogitsProcessor</span><span class="p">(</span><span class="n">LogitsProcessor</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">top_k</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">top_k</span> <span class="o">=</span> <span class="n">top_k</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_ids</span><span class="p">,</span> <span class="n">scores</span><span class="p">):</span>
+        <span class="n">top_k</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">top_k</span><span class="p">,</span> <span class="n">scores</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="c1"># 取 top-k 的阈值（第 k 大的值）</span>
+        <span class="n">kth_values</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">topk</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="n">top_k</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="o">...</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="c1"># 把所有 &lt; 阈值的 logit 设为 -inf（过滤）</span>
+        <span class="n">indices_to_remove</span> <span class="o">=</span> <span class="n">scores</span> <span class="o">&lt;</span> <span class="n">kth_values</span>
+        <span class="n">scores</span> <span class="o">=</span> <span class="n">scores</span><span class="o">.</span><span class="n">masked_fill</span><span class="p">(</span><span class="n">indices_to_remove</span><span class="p">,</span> <span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="s2">"inf"</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">scores</span>
+</code></pre></div>
+<p>策略：用 <code>torch.topk</code> 找到第 $K$ 大的值作为阈值，把所有小于它的 logit 设为 $-\infty$（softmax 后概率为 0）。底层 <code>torch.topk</code> 在 GPU 上走 CUDA top-k kernel，在 CPU 上走 numpy/ATen 的 argpartition。</p>
+<h3 id="45-vllm-tensorrt-llm-top-k">4.5 vLLM / TensorRT-LLM 的 Top-K<a class="headerlink" href="#45-vllm-tensorrt-llm-top-k" title="Permanent link">&para;</a></h3>
+<p>生产级 LLM 推理引擎（vLLM、TensorRT-LLM、TGI）的 Top-K 进一步优化：</p>
+<ol>
+<li><strong>融合 kernel</strong>：softmax + top-k + 采样在一个 kernel 里，避免中间结果写回显存</li>
+<li><strong>Top-P 适配</strong>：Top-P（核采样）需要排序后累计概率，用 radix sort（GPU 友好）</li>
+<li><strong>批量处理</strong>：一个 batch 的多个序列并行 top-k，共享 kernel 启动开销</li>
+<li><strong>投机解码</strong>：draft model 生成多个候选，target model 一次验证，top-k 选接受</li>
+</ol>
+<p>这些优化的<strong>算法内核仍是 top-k</strong>，只是实现层面把堆/argpartition 搬到 GPU 并融合到解码流水线。</p>
+<h2 id="5-ai">5. 堆在 AI 里的其他应用<a class="headerlink" href="#5-ai" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>应用</th>
+<th>堆的作用</th>
+<th>为什么用堆</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Top-K 采样</strong></td>
+<td>从 logits 选最大 K 个</td>
+<td>$O(n \log k)$，$k \ll n$</td>
+</tr>
+<tr>
+<td><strong>Beam Search</strong></td>
+<td>每步保留 beam 个最优</td>
+<td>在线剪枝，$O(\text{beam})$ 空间</td>
+</tr>
+<tr>
+<td><strong>Dijkstra 路由</strong></td>
+<td>优先队列取最小距离节点</td>
+<td>$O((V+E) \log V)$，图最短路</td>
+</tr>
+<tr>
+<td><strong>A* 搜索</strong></td>
+<td>优先队列按 $f = g + h$ 排序</td>
+<td>启发式搜索，规划/游戏 AI</td>
+</tr>
+<tr>
+<td><strong>KNN 检索</strong></td>
+<td>维护 K 个最近邻</td>
+<td>暴力 KNN $O(n \log k)$（见第 08 章 kd-tree）</td>
+</tr>
+<tr>
+<td><strong>MoE 负载均衡</strong></td>
+<td>把溢出专家的 token 转移</td>
+<td>优先处理超载专家</td>
+</tr>
+<tr>
+<td><strong>Loss 求解</strong></td>
+<td>top-k loss 只对最难的样本算</td>
+<td>hard example mining</td>
+</tr>
+<tr>
+<td><strong>采样器</strong></td>
+<td>reservoir sampling 的变体</td>
+<td>流式 top-k</td>
+</tr>
+</tbody>
+</table>
+<h3 id="51-dijkstra-ai">5.1 Dijkstra 最短路（图 AI）<a class="headerlink" href="#51-dijkstra-ai" title="Permanent link">&para;</a></h3>
+<p>图神经网络（GNN）、知识图谱推理里的最短路径用 Dijkstra，核心是<strong>优先队列</strong>：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">heapq</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dijkstra</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">src</span><span class="p">):</span>
+    <span class="n">dist</span> <span class="o">=</span> <span class="p">{</span><span class="n">src</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+    <span class="n">heap</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="n">src</span><span class="p">)]</span>           <span class="c1"># (距离, 节点) 小顶堆</span>
+    <span class="k">while</span> <span class="n">heap</span><span class="p">:</span>
+        <span class="n">d</span><span class="p">,</span> <span class="n">u</span> <span class="o">=</span> <span class="n">heapq</span><span class="o">.</span><span class="n">heappop</span><span class="p">(</span><span class="n">heap</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">d</span> <span class="o">&gt;</span> <span class="n">dist</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s1">'inf'</span><span class="p">)):</span>
+            <span class="k">continue</span>
+        <span class="k">for</span> <span class="n">v</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">graph</span><span class="p">[</span><span class="n">u</span><span class="p">]:</span>
+            <span class="n">nd</span> <span class="o">=</span> <span class="n">d</span> <span class="o">+</span> <span class="n">w</span>
+            <span class="k">if</span> <span class="n">nd</span> <span class="o">&lt;</span> <span class="n">dist</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s1">'inf'</span><span class="p">)):</span>
+                <span class="n">dist</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="n">nd</span>
+                <span class="n">heapq</span><span class="o">.</span><span class="n">heappush</span><span class="p">(</span><span class="n">heap</span><span class="p">,</span> <span class="p">(</span><span class="n">nd</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">dist</span>
+</code></pre></div>
+<p>每次取距离最小的未处理节点（堆 pop $O(\log V)$），更新邻居距离（堆 push $O(\log V)$）。总 $O((V+E) \log V)$。堆是 Dijkstra 的心脏。</p>
+<h3 id="52-knn-08">5.2 KNN 检索（第 08 章）<a class="headerlink" href="#52-knn-08" title="Permanent link">&para;</a></h3>
+<p>$k$-近邻检索的暴力实现：遍历所有 $n$ 个点，维护距离最小的 $k$ 个——和小顶堆 Top-K 完全同构。第 08 章的 kd-tree 是对此的优化（剪枝避免遍历全部），但叶子节点内部仍用堆维护 top-k。</p>
+<h3 id="53-hard-example-mining">5.3 Hard Example Mining（训练优化）<a class="headerlink" href="#53-hard-example-mining" title="Permanent link">&para;</a></h3>
+<p>训练分类器时，只对 loss 最大的 top-k 个样本算梯度（hard example mining），堆维护 top-k loss：</p>
+<div class="highlight"><pre><span></span><code><span class="n">losses</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>               <span class="c1"># [batch_size] 每个样本的 loss</span>
+<span class="n">top_k_idx</span> <span class="o">=</span> <span class="n">topk_heap</span><span class="p">(</span><span class="n">losses</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span> <span class="c1"># 只对最难的 64 个回传梯度</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">losses</span><span class="p">[</span><span class="n">top_k_idx</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+</code></pre></div>
+<p>减少梯度计算量，聚焦难样本，提升训练效率。</p>
+<h2 id="6-top-k">6. Top-K 采样的变体<a class="headerlink" href="#6-top-k" title="Permanent link">&para;</a></h2>
+<h3 id="61-top-p">6.1 Top-P（核采样）<a class="headerlink" href="#61-top-p" title="Permanent link">&para;</a></h3>
+<p>Top-P 不固定 $K$，而是取最小的若干个使<strong>累计概率 $\ge p$</strong>：</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">top_p_sampling</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mf">0.9</span><span class="p">):</span>
+    <span class="n">probs</span> <span class="o">=</span> <span class="n">softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">)</span>
+    <span class="n">sorted_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">probs</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>      <span class="c1"># 降序排</span>
+    <span class="n">cumsum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">probs</span><span class="p">[</span><span class="n">sorted_idx</span><span class="p">])</span>
+    <span class="c1"># 累计概率刚到 p 的位置截断</span>
+    <span class="n">cutoff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">cumsum</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">sorted_idx</span><span class="p">[:</span><span class="n">cutoff</span><span class="p">]</span>
+</code></pre></div>
+<p>Top-P 需要排序（不能只堆 top-k，因为要累计概率），$O(n \log n)$。但实际只排序一次，且 $n$ 是词表大小（固定），开销可接受。</p>
+<h3 id="62-top-k-top-p">6.2 Top-K + Top-P 组合<a class="headerlink" href="#62-top-k-top-p" title="Permanent link">&para;</a></h3>
+<p>生产级采样器常组合 Top-K 和 Top-P：先 Top-K 截断到 $K$ 个，再在 $K$ 个里做 Top-P。Top-K 用堆/argpartition $O(n \log k)$，Top-P 在 $K$ 个里排序 $O(k \log k)$，总计 $O(n \log k)$。</p>
+<h3 id="63-typical-sampling">6.3 Typical Sampling<a class="headerlink" href="#63-typical-sampling" title="Permanent link">&para;</a></h3>
+<p>更新的解码策略（Typical Sampling, Meister et al. 2023）按信息熵选词，也需要 top-k 式的截断，底层仍是堆/argpartition。</p>
+<h2 id="7">7. 性能优化方向<a class="headerlink" href="#7" title="Permanent link">&para;</a></h2>
+<h3 id="71-python-numpy">7.1 从 Python 堆到 numpy<a class="headerlink" href="#71-python-numpy" title="Permanent link">&para;</a></h3>
+<p>纯 Python <code>heapq</code> 的瓶颈是 Python 层循环。<code>np.argpartition</code> 把循环搬到 C，快 8 倍。CPU 推理应始终用 numpy/torch 的 topk。</p>
+<h3 id="72-cpu-gpu">7.2 从 CPU 到 GPU<a class="headerlink" href="#72-cpu-gpu" title="Permanent link">&para;</a></h3>
+<p>GPU top-k kernel 并行化，比 CPU numpy 快 10-100x（取决于 $n$ 和 $k$）。LLM 推理 logits 在 GPU 上，直接 <code>torch.topk</code> 零拷贝。</p>
+<h3 id="73-softmax-top-k">7.3 融合 softmax + top-k + 采样<a class="headerlink" href="#73-softmax-top-k" title="Permanent link">&para;</a></h3>
+<p>分开做：softmax $O(n)$ → top-k $O(n)$ → 采样 $O(k)$，三次读 logits。融合 kernel 一次读 logits 完成，省 2/3 显存带宽。vLLM/TensorRT-LLM 的采样 kernel 都走融合。</p>
+<h3 id="74">7.4 小词表的排序<a class="headerlink" href="#74" title="Permanent link">&para;</a></h3>
+<p>$n$ 很小（如 $&lt; 1000$）时，排序的常数优势可能压过堆的渐近优势（堆有 sift 的分支预测开销）。微基准测试：$n &lt; 200$ 时 <code>sorted()[:k]</code> 可能比 <code>heapq</code> 快。生产级实现会按 $n$ 选策略。</p>
+<h2 id="8_1">8. 小结<a class="headerlink" href="#8_1" title="Permanent link">&para;</a></h2>
+<p>堆在 AI 里的价值一句话：<strong>把"从 $n$ 个里选 $K$ 个最大"从 $O(n \log n)$ 降到 $O(n \log k)$，在 $n=10^5$ 词表、$k=10$ 的 LLM 采样里，省下 5-6 倍的计算</strong>。</p>
+<p>两个核心应用：
+1. <strong>Top-K 采样</strong>：LLM 从 logits 选最大 $K$ 个再 softmax 采样，小顶堆维护 $K$ 大元素，$O(n \log k)$
+2. <strong>Beam Search 剪枝</strong>：每步从 beam×vocab 候选保留 top-beam，堆在线剪枝省内存</p>
+<p>生产级实现用 numpy/torch 的 argpartition/topk（C/CUDA 向量化），但<strong>算法内核仍是小顶堆 Top-K</strong>——维护大小 $K$ 的小顶堆，新元素比堆顶大就替换。理解了这个 $O(n \log k)$ 的堆算法，就理解了为什么 LLM 解码能在 10 万词表上每秒生成上百个 token。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.indexes", "navigation.tracking", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

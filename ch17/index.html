@@ -1,0 +1,2854 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="从底层实现到生产级应用——数据结构在 AI 系统优化与应用工程中的真实作用">
+      
+      
+        <meta name="author" content="wanglh39">
+      
+      
+        <link rel="canonical" href="https://wanglh39.github.io/ds-ai-teaching/ch17/">
+      
+      
+        <link rel="prev" href="../ch16/">
+      
+      
+        <link rel="next" href="../ch18/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>17 数据管道与流式处理 - 数据结构 × AI 优化</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+SC:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans SC";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#17" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href=".." title="数据结构 × AI 优化" class="md-header__button md-logo" aria-label="数据结构 × AI 优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            数据结构 × AI 优化
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              17 数据管道与流式处理
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换至暗色模式"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换至暗色模式" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换至亮色模式"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换至亮色模式" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/wanglh39/ds-ai-teaching" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wanglh39/ds-ai-teaching
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  首页
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../intro/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  项目介绍
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../ch01/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  视角 A·系统优化
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../ch13/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  视角 B·应用工程
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../benchmarks/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  性能汇总
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="数据结构 × AI 优化" class="md-nav__button md-logo" aria-label="数据结构 × AI 优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    数据结构 × AI 优化
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/wanglh39/ds-ai-teaching" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wanglh39/ds-ai-teaching
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    首页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    项目介绍
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    项目介绍
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    设计思路
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../map/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    章节映射
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dual_view/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    双视角说明
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cross_index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    交叉索引
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    视角 A·系统优化
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    视角 A·系统优化
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 动态数组
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch02/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 链表
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch03/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 栈
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch04/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 循环队列
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch05/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05 哈希表
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch06/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 堆
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch07/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    07 Trie
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch08/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    08 KD-Tree
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch09/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    09 图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch10/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10 并查集
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch11/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11 页表/分块内存
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch12/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12 跳表+图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    视角 B·应用工程
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    视角 B·应用工程
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch13/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13 多智能体编排
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch14/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    14 任务调度与批处理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch15/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    15 上下文工程与记忆
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch16/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    16 RAG 与知识检索
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    17 数据管道与流式处理
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    17 数据管道与流式处理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要回答的问题
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        扩展专题定位
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#demo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        demo 概览
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        跑法
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        状态
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原理
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch18/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    18 模型部署与推理服务
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch19/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    19 状态机与工作流
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ch20/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    20 模型压缩
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    性能汇总
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章要回答的问题
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        扩展专题定位
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#demo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        demo 概览
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        跑法
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        状态
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原理
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="17">第 17 章 · 数据管道与流式处理（扩展专题）<a class="headerlink" href="#17" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>AI 场景：AI 训练数据的流式加载、滑动窗口统计、近似去重
+数据结构：队列 + 环形缓冲 + 树状数组（BIT）+ 布隆过滤器（4 种协作）</p>
+</blockquote>
+<h2 id="_1">本章要回答的问题<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>多阶段数据管道用什么数据结构连接？（有界队列 + 背压）</li>
+<li>流式数据如何固定内存保留最近 N 个？（环形缓冲，O(1) 覆盖最老）</li>
+<li>滑动窗口内区间统计如何加速？（树状数组 BIT，O(log n) vs 朴素 O(n)）</li>
+<li>流式数据去重如何省内存？（布隆过滤器，位数组 vs 哈希表）</li>
+<li>4 种数据结构如何协奏完成流式训练管道？</li>
+</ul>
+<h2 id="_2">扩展专题定位<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p>前 12 章是「一个数据结构 → 一个 AI 优化」。第 13 章起是扩展专题：<strong>一个 AI 应用场景 → 多种数据结构协作</strong>。本章展示队列、环形缓冲、树状数组、布隆过滤器如何协作解决 AI 训练数据流式处理的全链路问题。</p>
+<h2 id="_3">目录<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>17_data_pipeline/
+├── python/
+│   └── demo.py              # 数据管道 demo（4 种数据结构协作）
+├── docs/
+│   ├── principle.md         # 4 种数据结构原理 + 协作机制
+│   └── ai_application.md    # 流式处理应用（PyTorch DataLoader / WebDataset / Kafka）
+├── figures/                 # 性能对比图
+└── README.md
+</code></pre></div>
+<h2 id="demo">demo 概览<a class="headerlink" href="#demo" title="Permanent link">&para;</a></h2>
+<p>模拟完整 AI 数据管道，4 种数据结构协作：</p>
+<div class="highlight"><pre><span></span><code>原始样本流
+  ├─→ [PipelineQueue] 多阶段管道：producer → processor → augmenter → batcher
+  ├─→ [RingBuffer]    滑动窗口：保留最近 N 个样本的 loss，O(1) 写入/覆盖
+  ├─→ [BIT]           窗口统计：O(log n) 区间和 / 前缀和
+  └─→ [BloomFilter]   流式去重：O(1) 判重，内存远小于 set
+</code></pre></div>
+<ul>
+<li><code>PipelineQueue</code>：有界队列连接各阶段，满了丢最老的（背压）</li>
+<li><code>RingBuffer</code>：定长数组 + 写指针取模，O(1) 覆盖最老</li>
+<li><code>BIT</code>：树状数组，lowbit 分块前缀和，O(log n) 更新/查询</li>
+<li><code>BloomFilter</code>：双哈希线性组合 + 位数组，可控误判率</li>
+</ul>
+<p>性能对比：
+1. BIT 区间和 vs 朴素累加（O(log n) vs O(n)，加速 ~4.4x）
+2. 布隆去重 vs 集合去重（内存省 58x，Python 中速度 set 占优）
+3. 管道背压 vs 无界缓存（内存峰值 256 vs 7500，固定 vs 增长）
+4. RingBuffer vs list.pop(0)（O(1) vs O(n)，加速 ~20x）</p>
+<h2 id="_4">跑法<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>17_data_pipeline/python/demo.py
+</code></pre></div>
+<h2 id="_5">状态<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<p>已完成：demo + 文档 + 性能对比图，验证通过。</p>
+<hr />
+<h2 id="_6">原理<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<h1 id="17_1">第 17 章 · 数据管道与流式处理 — 数据结构原理<a class="headerlink" href="#17_1" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>本章涉及 4 种数据结构：<strong>队列</strong>、<strong>环形缓冲</strong>、<strong>树状数组（BIT）</strong>、<strong>布隆过滤器</strong>。
+它们在 AI 数据管道中各司其职，协作完成「流式加载 → 窗口保留 → 区间统计 → 去重」的全链路。</p>
+</blockquote>
+<hr />
+<h2 id="1-queue">1. 队列（Queue）— 多阶段管道的连接器<a class="headerlink" href="#1-queue" title="Permanent link">&para;</a></h2>
+<h3 id="11">1.1 基本概念<a class="headerlink" href="#11" title="Permanent link">&para;</a></h3>
+<p>队列是先进先出（FIFO）的线性数据结构：一端入队（push），另一端出队（pop）。
+在数据管道中，队列扮演「阶段间缓冲区」的角色——上游生产者 push，下游消费者 pop。</p>
+<h3 id="12">1.2 有界队列与背压<a class="headerlink" href="#12" title="Permanent link">&para;</a></h3>
+<p>AI 数据管道中，各阶段处理速度不同（读盘快、GPU 训练慢）。如果用无界队列连接，
+上游会不断堆积数据，最终 OOM（内存溢出）。<strong>有界队列</strong>（bounded queue）限制容量，
+满了就触发<strong>背压</strong>（backpressure）：</p>
+<ul>
+<li><strong>阻塞式</strong>：上游 push 满了就等，下游 pop 空了就等（生产级做法，如 Go channel）</li>
+<li><strong>丢弃式</strong>：满了丢最老的（本 demo 做法，适合可丢帧的流式场景）</li>
+<li><strong>拒绝式</strong>：满了就拒绝入队，返回错误（适合需要精确控制的场景）</li>
+</ul>
+<h3 id="13">1.3 多阶段管道<a class="headerlink" href="#13" title="Permanent link">&para;</a></h3>
+<p>AI 训练数据的典型 4 阶段管道：</p>
+<div class="highlight"><pre><span></span><code>producer (读盘)  →  processor (解码/归一化)  →  augmenter (数据增强)  →  batcher (组 batch)
+</code></pre></div>
+<p>每两个阶段之间用一个有界队列连接。这样：</p>
+<ul>
+<li>各阶段<strong>解耦</strong>：上游不用等下游，下游不用等上游</li>
+<li>各阶段可<strong>并行</strong>：多线程/多进程各跑一个阶段，I/O 与 CPU 重叠</li>
+<li>内存<strong>可控</strong>：有界队列限制每阶段的积压量</li>
+</ul>
+<h3 id="14-deque">1.4 实现：deque + 容量上限<a class="headerlink" href="#14-deque" title="Permanent link">&para;</a></h3>
+<p>本 demo 用 <code>collections.deque(maxlen=capacity)</code> 实现有界队列：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">deque</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">PipelineQueue</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">capacity</span><span class="o">=</span><span class="mi">64</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_q</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">maxlen</span><span class="o">=</span><span class="n">capacity</span><span class="p">)</span>  <span class="c1"># 满了自动丢最老的</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">push</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_q</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>  <span class="c1"># 满则 popleft（丢弃式背压）</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_q</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_q</span> <span class="k">else</span> <span class="kc">None</span>
+</code></pre></div>
+<p><code>deque(maxlen=N)</code> 在 CPython 中是 C 实现，push/pop 都是 O(1)，且自动处理容量上限。</p>
+<h3 id="15">1.5 复杂度<a class="headerlink" href="#15" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>复杂度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>push</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>pop</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>size</td>
+<td>O(1)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="16">1.6 生产级实现<a class="headerlink" href="#16" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Python</strong>：<code>queue.Queue</code>（线程安全，阻塞式）、<code>asyncio.Queue</code>（异步）、<code>multiprocessing.Queue</code>（进程间）</li>
+<li><strong>PyTorch</strong>：<code>DataLoader(num_workers=N)</code> 内部用多进程队列连接 worker → 主进程</li>
+<li><strong>Kafka</strong>：分布式消息队列，分区 + 消费者组实现多阶段管道</li>
+<li><strong>tf.data</strong>：<code>Dataset.prefetch(N)</code> 用有界队列实现预取和背压</li>
+</ul>
+<hr />
+<h2 id="2-ring-buffer">2. 环形缓冲（Ring Buffer）— 流式数据的滑动窗口<a class="headerlink" href="#2-ring-buffer" title="Permanent link">&para;</a></h2>
+<h3 id="21">2.1 基本概念<a class="headerlink" href="#21" title="Permanent link">&para;</a></h3>
+<p>环形缓冲是固定大小的数组 + 一个写指针（自增取模）。写入新数据时，指针前移，
+超过容量就绕回数组开头，<strong>覆盖最老的数据</strong>。几何上像环形，故名。</p>
+<h3 id="22-list-deque">2.2 为什么不用 list 或 deque？<a class="headerlink" href="#22-list-deque" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>写入</th>
+<th>覆盖最老</th>
+<th>随机访问</th>
+<th>内存</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>list + pop(0)</code></td>
+<td>O(1) append</td>
+<td>O(n) pop(0) 左移</td>
+<td>O(1)</td>
+<td>动态</td>
+</tr>
+<tr>
+<td><code>deque(maxlen=N)</code></td>
+<td>O(1)</td>
+<td>O(1) 自动丢</td>
+<td>O(1) index</td>
+<td>固定</td>
+</tr>
+<tr>
+<td><code>RingBuffer</code></td>
+<td>O(1)</td>
+<td>O(1) 指针绕回</td>
+<td>O(1)</td>
+<td>固定</td>
+</tr>
+</tbody>
+</table>
+<p><code>deque(maxlen=N)</code> 已经是很好的滑动窗口实现。本 demo 额外实现 <code>RingBuffer</code> 的目的：
+- 展示「环形」的几何直觉（写指针取模）
+- 提供底层数组访问，便于与 BIT 等需要下标的数据结构协作</p>
+<h3 id="23">2.3 实现：定长数组 + 写指针<a class="headerlink" href="#23" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">RingBuffer</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">capacity</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buf</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">capacity</span>  <span class="c1"># 预分配</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write</span> <span class="o">=</span> <span class="mi">0</span>                <span class="c1"># 写指针</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_size</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">push</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buf</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_write</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_write</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cap</span>  <span class="c1"># 取模绕回</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cap</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_size</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">window</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># 按写入顺序返回窗口内所有元素</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cap</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_buf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_size</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_buf</span><span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">_write</span> <span class="o">+</span> <span class="n">i</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cap</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cap</span><span class="p">)]</span>
+</code></pre></div>
+<p>关键点：
+- <strong>预分配定长数组</strong>：不用动态扩容，内存固定
+- <strong>写指针取模</strong>：<code>(write + 1) % cap</code> 实现环形绕回
+- <strong>覆盖最老</strong>：写入位置已存的数据被直接覆盖，无需显式删除</p>
+<h3 id="24-ai">2.4 AI 场景：滑动窗口监控<a class="headerlink" href="#24-ai" title="Permanent link">&para;</a></h3>
+<p>流式训练中，我们常需要「最近 N 步的 loss」「最近 N 个样本的梯度范数」等滑动窗口指标。
+环形缓冲天然适合：每步 push 新值，窗口自动保留最近 N 个。</p>
+<div class="highlight"><pre><span></span><code>步 1: push(0.8) → 窗口 [0.8]
+步 2: push(0.6) → 窗口 [0.8, 0.6]
+...
+步 N+1: push(0.5) → 窗口 [0.6, ..., 0.5]  # 0.8 被覆盖
+</code></pre></div>
+<h3 id="25">2.5 复杂度<a class="headerlink" href="#25" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>复杂度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>push</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>window()</td>
+<td>O(N) 遍历</td>
+</tr>
+<tr>
+<td>latest(k)</td>
+<td>O(k)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="26-demo">2.6 性能对比（demo 实测）<a class="headerlink" href="#26-demo" title="Permanent link">&para;</a></h3>
+<p>n=20000 次写入，cap=8192：</p>
+<table>
+<thead>
+<tr>
+<th>实现</th>
+<th>耗时 (ms)</th>
+<th>加速比</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>list.pop(0) O(n)</td>
+<td>~112</td>
+<td>1.00x</td>
+</tr>
+<tr>
+<td>RingBuffer O(1)</td>
+<td>~5.5</td>
+<td><strong>20.31x</strong></td>
+</tr>
+</tbody>
+</table>
+<p>cap=8192 时，list.pop(0) 每次左移 8192 个元素，O(n) 开销显著；
+RingBuffer 只改指针，O(1) 常数操作。窗口越大，RingBuffer 优势越明显。</p>
+<hr />
+<h2 id="3-binary-indexed-tree-bit">3. 树状数组（Binary Indexed Tree, BIT）— 滑动窗口的区间统计<a class="headerlink" href="#3-binary-indexed-tree-bit" title="Permanent link">&para;</a></h2>
+<h3 id="31">3.1 基本概念<a class="headerlink" href="#31" title="Permanent link">&para;</a></h3>
+<p>树状数组（又称 Fenwick Tree）是一种支持<strong>单点更新</strong>和<strong>前缀和查询</strong>的数据结构，
+两者都是 O(log n)。朴素数组更新 O(1) 但区间和 O(n)；前缀和数组区间和 O(1) 但更新 O(n)。
+BIT 在两者之间取平衡：都是 O(log n)。</p>
+<h3 id="32-lowbit">3.2 核心思想：lowbit 分块<a class="headerlink" href="#32-lowbit" title="Permanent link">&para;</a></h3>
+<p>定义 <code>lowbit(x) = x &amp; -x</code>（x 的最低位 1 对应的值，如 lowbit(6)=2，lowbit(8)=8）。</p>
+<p>BIT 用一个 <code>tree[]</code> 数组，其中 <code>tree[i]</code> 维护原数组区间 <code>[i - lowbit(i) + 1, i]</code> 的和。</p>
+<div class="highlight"><pre><span></span><code>原数组 a:  [a1, a2, a3, a4, a5, a6, a7, a8]
+tree[1] = a1                          (lowbit=1, 区间 [1,1])
+tree[2] = a1 + a2                     (lowbit=2, 区间 [1,2])
+tree[3] = a3                          (lowbit=1, 区间 [3,3])
+tree[4] = a1 + a2 + a3 + a4           (lowbit=4, 区间 [1,4])
+tree[5] = a5                          (lowbit=1, 区间 [5,5])
+tree[6] = a5 + a6                     (lowbit=2, 区间 [5,6])
+tree[7] = a7                          (lowbit=1, 区间 [7,7])
+tree[8] = a1 + a2 + ... + a8          (lowbit=8, 区间 [1,8])
+</code></pre></div>
+<p>每个 <code>tree[i]</code> 管一段，段长 = <code>lowbit(i)</code>。这种分块让更新和查询都只需碰 O(log n) 个节点。</p>
+<h3 id="33">3.3 两个核心操作<a class="headerlink" href="#33" title="Permanent link">&para;</a></h3>
+<p><strong>单点更新 <code>update(i, delta)</code></strong>：把 a[i] 加上 delta，从 i 往上跳更新所有包含 a[i] 的 tree 节点。</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">delta</span><span class="p">):</span>
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tree</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">delta</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="n">i</span> <span class="o">&amp;</span> <span class="o">-</span><span class="n">i</span>  <span class="c1"># lowbit 跳：i → i + lowbit(i)</span>
+</code></pre></div>
+<p>跳跃路径：i=3 → 4 → 8（3 的 lowbit=1，3+1=4；4 的 lowbit=4，4+4=8）。
+每跳一步，区间长度翻倍，总共跳 O(log n) 步。</p>
+<p><strong>前缀和查询 <code>query(i)</code></strong>：求 a[1] + a[2] + ... + a[i]，从 i 往下跳累加 tree 节点。</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tree</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">i</span> <span class="o">-=</span> <span class="n">i</span> <span class="o">&amp;</span> <span class="o">-</span><span class="n">i</span>  <span class="c1"># lowbit 跳：i → i - lowbit(i)</span>
+    <span class="k">return</span> <span class="n">s</span>
+</code></pre></div>
+<p>跳跃路径：i=7 → 6 → 4（7 的 lowbit=1，7-1=6；6 的 lowbit=2，6-2=4；4 的 lowbit=4，4-4=0 停）。
+query(7) = tree[7] + tree[6] + tree[4] = a7 + (a5+a6) + (a1+a2+a3+a4) = a1+...+a7。</p>
+<p><strong>区间和 <code>range_sum(l, r) = query(r) - query(l-1)</code></strong>。</p>
+<h3 id="34">3.4 实现<a class="headerlink" href="#34" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BIT</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n</span> <span class="o">=</span> <span class="n">n</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tree</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># 1-indexed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_arr</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>   <span class="c1"># 原数组副本，支持 set 语义</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">delta</span><span class="p">):</span>       <span class="c1"># a[i] += delta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">delta</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_tree</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">delta</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="n">i</span> <span class="o">&amp;</span> <span class="o">-</span><span class="n">i</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>          <span class="c1"># a[i] = value（覆盖）</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">value</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_arr</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>               <span class="c1"># 前缀和 a[1..i]</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tree</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">i</span> <span class="o">-=</span> <span class="n">i</span> <span class="o">&amp;</span> <span class="o">-</span><span class="n">i</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">range_sum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>        <span class="c1"># 区间和 a[l..r]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">l</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="35-ai">3.5 AI 场景：滑动窗口统计<a class="headerlink" href="#35-ai" title="Permanent link">&para;</a></h3>
+<p>流式训练中需要频繁查询窗口内指标的区间和：</p>
+<ul>
+<li><strong>最近 N 步的 loss 之和</strong>：监控训练趋势（上升 → 过拟合？下降 → 正常）</li>
+<li><strong>最近 N 步的梯度范数之和</strong>：判断是否收敛</li>
+<li><strong>最近 N 个样本的某个特征分位数</strong>：数据分布漂移检测</li>
+</ul>
+<p>朴素做法：每次区间和都 O(n) 累加。窗口大且查询频繁（每步都查）时，总开销 O(n × T)。
+BIT：更新 O(log n)，查询 O(log n)，总开销 O(log n × T)。</p>
+<h3 id="36">3.6 复杂度<a class="headerlink" href="#36" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>朴素数组</th>
+<th>BIT</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>单点更新</td>
+<td>O(1)</td>
+<td>O(log n)</td>
+</tr>
+<tr>
+<td>区间和</td>
+<td>O(n)</td>
+<td><strong>O(log n)</strong></td>
+</tr>
+<tr>
+<td>空间</td>
+<td>O(n)</td>
+<td>O(n)</td>
+</tr>
+</tbody>
+</table>
+<p>BIT 牺牲了更新的常数（O(1) → O(log n)），换取查询的大幅提升（O(n) → O(log n)）。
+适合「更新和查询都频繁」的场景。</p>
+<h3 id="37-demo">3.7 性能对比（demo 实测）<a class="headerlink" href="#37-demo" title="Permanent link">&para;</a></h3>
+<p>n=4096，做 n 次更新 + n 次区间和查询：</p>
+<table>
+<thead>
+<tr>
+<th>实现</th>
+<th>耗时 (ms)</th>
+<th>加速比</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>朴素累加 O(n)</td>
+<td>~68</td>
+<td>1.00x</td>
+</tr>
+<tr>
+<td>BIT O(log n)</td>
+<td>~15</td>
+<td><strong>4.41x</strong></td>
+</tr>
+</tbody>
+</table>
+<p>n=4096 时 BIT 加速 4.41x。n 更大时加速更明显（O(n) vs O(log n) 的差距随 n 增长）。</p>
+<h3 id="38">3.8 与其他区间统计数据结构的对比<a class="headerlink" href="#38" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>数据结构</th>
+<th>单点更新</th>
+<th>区间和</th>
+<th>区间最值</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>朴素数组</td>
+<td>O(1)</td>
+<td>O(n)</td>
+<td>O(n)</td>
+<td>更新多、查询少</td>
+</tr>
+<tr>
+<td>前缀和数组</td>
+<td>O(n)</td>
+<td>O(1)</td>
+<td>—</td>
+<td>查询多、更新少</td>
+</tr>
+<tr>
+<td>BIT</td>
+<td>O(log n)</td>
+<td>O(log n)</td>
+<td>—</td>
+<td>更新和查询都频繁（和）</td>
+</tr>
+<tr>
+<td>线段树</td>
+<td>O(log n)</td>
+<td>O(log n)</td>
+<td>O(log n)</td>
+<td>更新和查询都频繁（和/最值/等）</td>
+</tr>
+</tbody>
+</table>
+<p>BIT 比线段树常数更小、代码更短，但只支持「可减」的运算（和、异或）；线段树更通用。</p>
+<hr />
+<h2 id="4-bloom-filter">4. 布隆过滤器（Bloom Filter）— 流式数据的近似去重<a class="headerlink" href="#4-bloom-filter" title="Permanent link">&para;</a></h2>
+<h3 id="41">4.1 基本概念<a class="headerlink" href="#41" title="Permanent link">&para;</a></h3>
+<p>布隆过滤器是一种<strong>概率型集合</strong>，支持 <code>add(x)</code> 和 <code>contains(x)</code>：</p>
+<ul>
+<li><code>contains(x) = False</code> → x <strong>一定不在</strong>集合中（无假阴性）</li>
+<li><code>contains(x) = True</code> → x <strong>可能在</strong>集合中（有假阳性，即误判）</li>
+</ul>
+<p>用 m 位的位数组 + k 个哈希函数实现。空间 O(m bits)，远小于精确集合的 O(n × key_size)。</p>
+<h3 id="42">4.2 核心思想：多哈希 + 位数组<a class="headerlink" href="#42" title="Permanent link">&para;</a></h3>
+<p><strong>add(x)</strong>：把 k 个哈希位置都置 1。
+<div class="highlight"><pre><span></span><code>h1(x), h2(x), ..., hk(x) → 位置都设为 1
+</code></pre></div></p>
+<p><strong>contains(x)</strong>：检查 k 个位置是否全为 1。
+<div class="highlight"><pre><span></span><code>全为 1 → 可能存在（可能误判）
+有 0  → 一定不存在
+</code></pre></div></p>
+<p><strong>为什么不会漏（无假阴性）</strong>：如果 x 在集合中，add 时把 k 个位置都置 1 了，
+后续检查必然全为 1。</p>
+<p><strong>为什么会误判（有假阳性）</strong>：x 不在集合中，但其他元素的 add 恰好把 x 的 k 个位置都置 1 了。
+概率随集合变大而增加，但可通过参数控制。</p>
+<h3 id="43">4.3 参数选择<a class="headerlink" href="#43" title="Permanent link">&para;</a></h3>
+<p>给定预期元素数 n 和目标误判率 p：</p>
+<div class="highlight"><pre><span></span><code>m = -n × ln(p) / (ln2)²    # 位数
+k = (m / n) × ln2           # 哈希函数个数
+</code></pre></div>
+<p>推导来自使误判率最小的优化。例如 n=10000, p=0.01：
+- m = -10000 × ln(0.01) / (ln2)² ≈ 95850 bits ≈ 12 KB
+- k = (95850 / 10000) × ln2 ≈ 6.6 → 6 个哈希</p>
+<p>对比 set 存 10000 个 int：每个 int 约 28 字节 + 哈希表开销，约 400 KB。
+布隆 12 KB vs set 400 KB，<strong>内存省 33x</strong>。</p>
+<h3 id="44">4.4 双哈希线性组合<a class="headerlink" href="#44" title="Permanent link">&para;</a></h3>
+<p>用 k 个独立哈希函数不现实。实践中用<strong>双哈希线性组合</strong>：</p>
+<div class="highlight"><pre><span></span><code>h_i(x) = (h1(x) + i × h2(x)) mod m,  i = 0, 1, ..., k-1
+</code></pre></div>
+<p>只需两个独立哈希 h1、h2，即可生成 k 个哈希。证明见 Kirsch &amp; Mitzenmüller (2006)。</p>
+<p>本 demo 用 splitmix64 做整数混合哈希（快速且质量好）：</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">_hashes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">key</span> <span class="o">&amp;</span> <span class="mh">0xFFFFFFFFFFFFFFFF</span>
+    <span class="n">h1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mix</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">h2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mix</span><span class="p">(</span><span class="n">x</span> <span class="o">^</span> <span class="mh">0x9E3779B97F4A7C15</span><span class="p">)</span>  <span class="c1"># 黄金分割常数</span>
+    <span class="k">return</span> <span class="p">[(</span><span class="n">h1</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="n">h2</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_k</span><span class="p">)]</span>
+</code></pre></div>
+<h3 id="45">4.5 实现<a class="headerlink" href="#45" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BloomFilter</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_m</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="o">-</span><span class="n">n</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>  <span class="c1"># 位数</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_k</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_m</span> <span class="o">/</span> <span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>             <span class="c1"># 哈希数</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bits</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_m</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span><span class="p">)</span>             <span class="c1"># 位数组</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hashes</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bits</span><span class="p">[</span><span class="n">pos</span> <span class="o">&gt;&gt;</span> <span class="mi">3</span><span class="p">]</span> <span class="o">|=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">pos</span> <span class="o">&amp;</span> <span class="mi">7</span><span class="p">)</span>  <span class="c1"># 置位</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">all</span><span class="p">(</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bits</span><span class="p">[</span><span class="n">pos</span> <span class="o">&gt;&gt;</span> <span class="mi">3</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="p">(</span><span class="n">pos</span> <span class="o">&amp;</span> <span class="mi">7</span><span class="p">))</span> <span class="o">&amp;</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hashes</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="p">)</span>
+</code></pre></div>
+<p>位数组用 <code>bytearray</code>（每字节 8 位），<code>pos &gt;&gt; 3</code> 定位字节，<code>pos &amp; 7</code> 定位位。</p>
+<h3 id="46-ai">4.6 AI 场景：流式数据去重<a class="headerlink" href="#46-ai" title="Permanent link">&para;</a></h3>
+<p>训练数据中常有重复样本（爬虫重复抓取、数据增强重复生成等）。重复样本会：</p>
+<ul>
+<li><strong>污染统计</strong>：loss 被重复样本拉低，高估模型性能</li>
+<li><strong>浪费算力</strong>：重复计算已知样本的梯度</li>
+<li><strong>导致过拟合</strong>：模型对重复样本过拟合</li>
+</ul>
+<p>精确去重用 <code>set</code>：内存 O(n × key_size)，百万级样本时内存压力大。
+布隆去重：内存 O(m bits)，可控误判率。误判的代价是多丢弃少量「看似重复」的新样本，
+对训练影响可控（训练数据本就有冗余）。</p>
+<h3 id="47">4.7 复杂度<a class="headerlink" href="#47" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>set</th>
+<th>布隆</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>add</td>
+<td>O(1) 平均</td>
+<td>O(k) ≈ O(1)</td>
+</tr>
+<tr>
+<td>contains</td>
+<td>O(1) 平均</td>
+<td>O(k) ≈ O(1)</td>
+</tr>
+<tr>
+<td>空间</td>
+<td>O(n × key_size)</td>
+<td><strong>O(m bits)</strong></td>
+</tr>
+<tr>
+<td>准确性</td>
+<td>精确</td>
+<td>可能误判（假阳性）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="48-demo">4.8 性能与内存对比（demo 实测）<a class="headerlink" href="#48-demo" title="Permanent link">&para;</a></h3>
+<p>n=50000 个 int key，插入 + 查询：</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>set</th>
+<th>布隆</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>速度</td>
+<td>7.3 ms</td>
+<td>288 ms</td>
+<td>Python 中 set 是 C 优化，布隆是纯 Python 循环</td>
+</tr>
+<tr>
+<td>内存</td>
+<td>3,497,340 bytes</td>
+<td>59,907 bytes</td>
+<td><strong>布隆是 set 的 1/58</strong></td>
+</tr>
+</tbody>
+</table>
+<p>速度上 Python 层布隆不占优（set 是 C 实现），但内存上布隆优势巨大（58x）。
+在 C/C++/Rust 中，布隆的 k 次哈希 + 位数组操作也是 O(1) 常数，速度可与 set 媲美甚至更快。</p>
+<h3 id="49">4.9 变体<a class="headerlink" href="#49" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Counting Bloom Filter</strong>：每位用计数器（而非 1 位），支持删除</li>
+<li><strong>Cuckoo Filter</strong>：用布谷鸟哈希，支持删除且空间更优</li>
+<li><strong>Scalable Bloom Filter</strong>：动态扩容，无需预知 n</li>
+</ul>
+<hr />
+<h2 id="5">5. 四种数据结构的协作<a class="headerlink" href="#5" title="Permanent link">&para;</a></h2>
+<h3 id="51">5.1 协作流程<a class="headerlink" href="#51" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>原始样本流
+  │
+  ▼
+[PipelineQueue] 多阶段管道：producer → processor → augmenter → batcher
+  │               队列连接各阶段，背压防 OOM
+  ▼
+[RingBuffer]    滑动窗口：保留最近 N 个样本的 loss，O(1) 写入/覆盖
+  │               新数据覆盖最老的，内存固定
+  ▼
+[BIT]           窗口统计：O(log n) 区间和 / 前缀和
+  │               朴素 O(n) 累加 → BIT O(log n)，窗口越大加速越明显
+  ▼
+[BloomFilter]   流式去重：O(1) 判重，内存远小于 set
+  │               代价：可控误判率（假阳性，不漏真新样本）
+  ▼
+batch 输出 → 喂给模型训练
+</code></pre></div>
+<h3 id="52">5.2 各数据结构的角色<a class="headerlink" href="#52" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>数据结构</th>
+<th>角色</th>
+<th>解决的问题</th>
+<th>复杂度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>队列</td>
+<td>管道连接</td>
+<td>阶段间缓冲、背压、并行</td>
+<td>O(1) push/pop</td>
+</tr>
+<tr>
+<td>环形缓冲</td>
+<td>窗口保留</td>
+<td>固定内存保留最近 N 个</td>
+<td>O(1) push</td>
+</tr>
+<tr>
+<td>BIT</td>
+<td>窗口统计</td>
+<td>O(log n) 区间和</td>
+<td>O(log n) update/query</td>
+</tr>
+<tr>
+<td>布隆过滤器</td>
+<td>流式去重</td>
+<td>O(1) 判重，内存省</td>
+<td>O(k) add/contains</td>
+</tr>
+</tbody>
+</table>
+<h3 id="53">5.3 为什么需要协作？<a class="headerlink" href="#53" title="Permanent link">&para;</a></h3>
+<p>单一数据结构无法完成流式数据管道的全部需求：</p>
+<ul>
+<li>只有队列：能连接管道，但无法统计窗口内指标</li>
+<li>只有环形缓冲：能保留窗口，但查区间和要 O(n)</li>
+<li>只有 BIT：能快速查区间和，但无法去重</li>
+<li>只有布隆：能去重，但无法组织多阶段处理</li>
+</ul>
+<p>四种协作：队列管「流」，环形缓冲管「窗」，BIT 管「窗内统计」，布隆管「去重」。
+各司其职，共同支撑流式训练数据管道。</p>
+<h3 id="54">5.4 协作中的数据流<a class="headerlink" href="#54" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>样本进入管道</strong>：producer 生成样本，push 到 q_load</li>
+<li><strong>多阶段处理</strong>：processor → augmenter，各阶段间用队列连接</li>
+<li><strong>窗口更新</strong>：每个有效样本的 loss push 到 RingBuffer，同时更新 BIT 对应槽位</li>
+<li><strong>去重判断</strong>：每个样本的 ID 先查布隆，可能重复则丢弃</li>
+<li><strong>区间统计</strong>：训练过程中随时用 BIT 查询窗口内 loss 之和，O(log n)</li>
+<li><strong>batch 输出</strong>：攒够 batch_size 个样本，输出一个 batch 喂给模型</li>
+</ol>
+<h3 id="55">5.5 生产级协作的例子<a class="headerlink" href="#55" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>PyTorch DataLoader</strong>：多进程队列（队列）+ prefetch buffer（环形缓冲）+ sampler 去重</li>
+<li><strong>WebDataset</strong>：流式管道（队列）+ shard 缓存（环形缓冲）+ key 去重（布隆/集合）</li>
+<li><strong>Kafka Streams</strong>：分区队列（队列）+ 窗口存储（环形缓冲/ RocksDB）+ exactly-once 去重（布隆）</li>
+<li><strong>TensorFlow tf.data</strong>：prefetch（队列）+ sliding window（环形缓冲）+ cache 去重</li>
+</ul>
+<hr />
+<h2 id="6">6. 小结<a class="headerlink" href="#6" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>数据结构</th>
+<th>核心思想</th>
+<th>关键操作</th>
+<th>AI 管道角色</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>队列</td>
+<td>FIFO + 有界背压</td>
+<td>push/pop O(1)</td>
+<td>阶段间连接</td>
+</tr>
+<tr>
+<td>环形缓冲</td>
+<td>定长数组 + 写指针取模</td>
+<td>push O(1) 覆盖最老</td>
+<td>滑动窗口保留</td>
+</tr>
+<tr>
+<td>BIT</td>
+<td>lowbit 分块前缀和</td>
+<td>update/query O(log n)</td>
+<td>窗口区间统计</td>
+</tr>
+<tr>
+<td>布隆过滤器</td>
+<td>多哈希 + 位数组</td>
+<td>add/contains O(k)</td>
+<td>流式去重</td>
+</tr>
+</tbody>
+</table>
+<p>四种数据结构分别解决流式管道的「连接」「保留」「统计」「去重」四个子问题，
+协作完成 AI 训练数据的流式加载与处理。</p>
+<hr />
+<h2 id="ai">AI 应用<a class="headerlink" href="#ai" title="Permanent link">&para;</a></h2>
+<h1 id="17-ai">第 17 章 · 数据管道与流式处理 — AI 应用<a class="headerlink" href="#17-ai" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>AI 场景：训练数据的流式加载、滑动窗口统计、近似去重。
+数据结构：队列 + 环形缓冲 + 树状数组（BIT）+ 布隆过滤器协作。</p>
+</blockquote>
+<hr />
+<h2 id="1-ai">1. AI 训练数据加载的瓶颈<a class="headerlink" href="#1-ai" title="Permanent link">&para;</a></h2>
+<h3 id="11-gpu">1.1 问题：数据加载跟不上 GPU<a class="headerlink" href="#11-gpu" title="Permanent link">&para;</a></h3>
+<p>现代 AI 训练的瓶颈常不在 GPU 计算，而在<strong>数据加载</strong>。GPU 算力每秒可处理数百个 batch，
+但如果数据加载（读盘 → 解码 → 预处理 → 增强）跟不上，GPU 就会空等（idle）。</p>
+<div class="highlight"><pre><span></span><code>理想：  GPU 一直忙 → 利用率 ~100%
+实际：  GPU 算完一个 batch，等数据 → 利用率 50% 甚至更低
+</code></pre></div>
+<p>瓶颈来源：
+- <strong>磁盘 I/O</strong>：高分辨率图像 / 长文本从磁盘读取慢
+- <strong>解码</strong>：JPEG/PNG 解码、tokenization 都是 CPU 密集
+- <strong>预处理</strong>：归一化、resize、裁剪
+- <strong>数据增强</strong>：随机翻转、颜色抖动、mixup 等</p>
+<h3 id="12_1">1.2 解决：多阶段管道 + 并行<a class="headerlink" href="#12_1" title="Permanent link">&para;</a></h3>
+<p>把数据加载拆成多阶段，用队列连接，多线程/多进程并行：</p>
+<div class="highlight"><pre><span></span><code>producer (读盘)  →  processor (解码)  →  augmenter (增强)  →  batcher (组 batch)
+   ↑                    ↑                    ↑                    ↑
+  I/O 密集            CPU 密集             CPU 密集             内存操作
+</code></pre></div>
+<p>各阶段用独立线程/进程跑，I/O 与 CPU 重叠，GPU 不再空等。</p>
+<p>这就是<strong>数据管道</strong>（data pipeline）的核心思想。PyTorch 的 <code>DataLoader(num_workers=N)</code>、
+TensorFlow 的 <code>tf.data.Dataset.prefetch(N)</code> 都是这一模式的实现。</p>
+<h3 id="13_1">1.3 队列在管道中的作用<a class="headerlink" href="#13_1" title="Permanent link">&para;</a></h3>
+<p>队列在管道中扮演<strong>阶段间缓冲区</strong>：</p>
+<ul>
+<li><strong>解耦</strong>：上游不用等下游，下游不用等上游</li>
+<li><strong>并行</strong>：各阶段独立线程，通过队列传递数据</li>
+<li><strong>背压</strong>：有界队列满了上游就等/丢，防止 OOM</li>
+<li><strong>平滑</strong>：吸收各阶段速度波动（突发快/慢）</li>
+</ul>
+<p>没有队列，各阶段只能串行：读一个 → 解码一个 → 增强一个 → 组一个 batch，GPU 空等。
+有了队列，各阶段重叠：读第 100 个时，解码第 99 个，增强第 98 个，GPU 算第 97 个 batch。</p>
+<hr />
+<h2 id="2">2. 流式处理的需求<a class="headerlink" href="#2" title="Permanent link">&para;</a></h2>
+<h3 id="21_1">2.1 为什么需要流式？<a class="headerlink" href="#21_1" title="Permanent link">&para;</a></h3>
+<p>传统批处理（batch processing）：把所有数据加载到内存，再处理。问题：
+- <strong>内存不够</strong>：TB 级数据集无法全装入内存
+- <strong>延迟太高</strong>：等所有数据加载完才开始训练，首个 batch 延迟大
+- <strong>无法在线学习</strong>：在线学习需要数据来了就处理</p>
+<p>流式处理（stream processing）：数据像水流一样，来了就处理，处理完就丢（或归档）。
+- 内存固定：只保留当前窗口的数据
+- 首个 batch 快：数据来了就开始处理
+- 支持在线学习：数据持续流入，模型持续更新</p>
+<h3 id="22">2.2 流式训练的典型场景<a class="headerlink" href="#22" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>大模型预训练</strong>：互联网级语料（数百 TB），无法全装入内存，必须流式</li>
+<li><strong>在线学习</strong>：用户行为数据持续流入，模型实时更新</li>
+<li><strong>增量训练</strong>：新数据来了就接着训练，不用从头来</li>
+<li><strong>强化学习</strong>：环境交互产生的数据流式进入 replay buffer</li>
+</ul>
+<h3 id="23_1">2.3 环形缓冲在流式处理中的角色<a class="headerlink" href="#23_1" title="Permanent link">&para;</a></h3>
+<p>流式处理需要「保留最近 N 个数据」的滑动窗口，环形缓冲天然适合：</p>
+<ul>
+<li><strong>replay buffer</strong>（强化学习）：保留最近 N 个 transition，旧的被覆盖</li>
+<li><strong>loss 监控窗口</strong>：保留最近 N 步的 loss，用于早停、学习率调整</li>
+<li><strong>梯度统计窗口</strong>：保留最近 N 步的梯度范数，用于梯度裁剪阈值自适应</li>
+<li><strong>数据分布监控</strong>：保留最近 N 个样本的某个特征，检测分布漂移</li>
+</ul>
+<p>环形缓冲的优势：
+- <strong>内存固定</strong>：预分配定长数组，不随数据流入增长
+- <strong>O(1) 写入</strong>：写指针取模，覆盖最老，无需移动数据
+- <strong>无需 GC</strong>：覆盖即丢弃，不产生垃圾对象</p>
+<hr />
+<h2 id="3">3. 滑动窗口统计<a class="headerlink" href="#3" title="Permanent link">&para;</a></h2>
+<h3 id="31_1">3.1 为什么需要窗口统计？<a class="headerlink" href="#31_1" title="Permanent link">&para;</a></h3>
+<p>训练过程中，单步的 loss / 梯度波动大（受 batch 内样本影响），不能只看单步。
+需要<strong>窗口内统计</strong>才能判断训练趋势：</p>
+<ul>
+<li><strong>最近 N 步的平均 loss</strong>：判断是否收敛、是否过拟合</li>
+<li><strong>最近 N 步的 loss 之和</strong>：早停判断（连续 N 步 loss 不降则停）</li>
+<li><strong>最近 N 步的梯度范数之和</strong>：梯度裁剪、爆炸检测</li>
+<li><strong>最近 N 步的 learning rate</strong>：调度器决策依据</li>
+<li><strong>最近 N 个样本的特征均值</strong>：数据分布漂移检测</li>
+</ul>
+<h3 id="32-vs-bit">3.2 朴素做法 vs BIT<a class="headerlink" href="#32-vs-bit" title="Permanent link">&para;</a></h3>
+<p><strong>朴素做法</strong>：用 list 存窗口，每次查区间和就遍历累加。</p>
+<div class="highlight"><pre><span></span><code><span class="n">window</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># 最近 N 步的 loss</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">window_sum</span><span class="p">():</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">window</span><span class="p">)</span>  <span class="c1"># O(N)</span>
+</code></pre></div>
+<p>每步训练都查一次窗口和，总开销 O(N × T)，T 是训练步数。N=10000, T=100000 时，10 亿次加法。</p>
+<p><strong>BIT 做法</strong>：用 BIT 维护窗口内 loss，更新和查询都是 O(log N)。</p>
+<div class="highlight"><pre><span></span><code><span class="n">bit</span> <span class="o">=</span> <span class="n">BIT</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">update_step</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">loss</span><span class="p">):</span>
+    <span class="n">bit</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>        <span class="c1"># O(log N)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">window_sum</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">bit</span><span class="o">.</span><span class="n">range_sum</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>  <span class="c1"># O(log N)</span>
+</code></pre></div>
+<p>总开销 O(log N × T)。N=10000, T=100000 时，约 130 万次操作。<strong>快 700x</strong>。</p>
+<h3 id="33-demo">3.3 demo 实测<a class="headerlink" href="#33-demo" title="Permanent link">&para;</a></h3>
+<p>n=4096，做 n 次更新 + n 次区间和查询：</p>
+<table>
+<thead>
+<tr>
+<th>实现</th>
+<th>耗时 (ms)</th>
+<th>加速比</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>朴素累加 O(n)</td>
+<td>~68</td>
+<td>1.00x</td>
+</tr>
+<tr>
+<td>BIT O(log n)</td>
+<td>~15</td>
+<td><strong>4.41x</strong></td>
+</tr>
+</tbody>
+</table>
+<p>n 更大时加速更明显。n=65536 时 BIT 可加速 10x+（O(n) vs O(log n) 的差距随 n 增长）。</p>
+<h3 id="34_1">3.4 窗口滑动的处理<a class="headerlink" href="#34_1" title="Permanent link">&para;</a></h3>
+<p>流式数据中窗口是滑动的：新数据进窗口，老数据出窗口。BIT 处理滑动有两种方式：</p>
+<p><strong>方式 1：环形复用槽位</strong>（本 demo 做法）
+- BIT 有 N 个槽位，对应窗口的 N 个位置
+- 新数据写入槽位 <code>pos = (pos % N) + 1</code>，覆盖最老的
+- 适合「只需窗口内总和」的场景</p>
+<p><strong>方式 2：显式加减</strong>
+- 新数据进窗口：<code>bit.update(new_pos, new_value)</code>
+- 老数据出窗口：<code>bit.update(old_pos, -old_value)</code>（减去老值）
+- 适合「需要精确知道每个位置值」的场景</p>
+<h3 id="35">3.5 其他窗口统计需求<a class="headerlink" href="#35" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>统计需求</th>
+<th>数据结构</th>
+<th>复杂度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>窗口内和</td>
+<td>BIT</td>
+<td>O(log n) update/query</td>
+</tr>
+<tr>
+<td>窗口内最值</td>
+<td>线段树 / 单调队列</td>
+<td>O(log n) / O(1)</td>
+</tr>
+<tr>
+<td>窗口内中位数</td>
+<td>双堆 / 桶</td>
+<td>O(log n)</td>
+</tr>
+<tr>
+<td>窗口内分位数</td>
+<td>顺序统计树</td>
+<td>O(log n)</td>
+</tr>
+<tr>
+<td>窗口内方差</td>
+<td>两个 BIT（和 + 平方和）</td>
+<td>O(log n)</td>
+</tr>
+</tbody>
+</table>
+<p>本 demo 只展示「窗口内和」（BIT），其他需求可类似扩展。</p>
+<hr />
+<h2 id="4">4. 去重的重要性<a class="headerlink" href="#4" title="Permanent link">&para;</a></h2>
+<h3 id="41_1">4.1 训练数据为什么会有重复？<a class="headerlink" href="#41_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>爬虫重复抓取</strong>：同一页面被多次抓取</li>
+<li><strong>数据增强重复</strong>：增强操作可能产生与原数据相同的样本</li>
+<li><strong>多源合并</strong>：多个数据集合并时有重叠</li>
+<li><strong>分布式训练同步</strong>：多 worker 可能读到相同数据（sampler 配置不当）</li>
+<li><strong>人工标注重复</strong>：同一样本被多次标注</li>
+</ul>
+<h3 id="42_1">4.2 重复样本的危害<a class="headerlink" href="#42_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>污染统计</strong>：loss 被重复样本拉低，高估模型性能</li>
+<li>假设 10% 样本重复，loss 会被低估约 10%，模型看似更好但实际泛化更差</li>
+<li><strong>浪费算力</strong>：重复计算已知样本的梯度，GPU 算力浪费</li>
+<li><strong>导致过拟合</strong>：模型对重复样本过拟合，记忆而非泛化</li>
+<li><strong>扭曲分布</strong>：重复样本的类别/特征分布被放大，模型偏向这些样本</li>
+</ul>
+<h3 id="43-vs">4.3 精确去重 vs 近似去重<a class="headerlink" href="#43-vs" title="Permanent link">&para;</a></h3>
+<p><strong>精确去重（set）</strong>：
+- 内存：O(n × key_size)，每个 key 一个哈希表条目 + 元素对象
+- 速度：O(1) 平均（哈希表）
+- 准确性：100% 精确，无误判
+- 问题：百万/亿级 key 时内存压力大</p>
+<p><strong>近似去重（布隆过滤器）</strong>：
+- 内存：O(m bits)，m = -n × ln(p) / (ln2)²，与 key_size 无关
+- 速度：O(k) ≈ O(1)，k 个哈希 + 位数组操作
+- 准确性：可能误判（假阳性），但误判率可控（如 1%）
+- 优势：内存远小于 set，适合大规模流式去重</p>
+<h3 id="44-demo">4.4 demo 实测<a class="headerlink" href="#44-demo" title="Permanent link">&para;</a></h3>
+<p>n=50000 个 int key：</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>set</th>
+<th>布隆</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>速度</td>
+<td>7.3 ms</td>
+<td>288 ms</td>
+<td>Python 中 set 是 C 优化，布隆是纯 Python 循环</td>
+</tr>
+<tr>
+<td>内存</td>
+<td>3,497,340 bytes</td>
+<td>59,907 bytes</td>
+<td><strong>布隆是 set 的 1/58</strong></td>
+</tr>
+</tbody>
+</table>
+<p>速度上 Python 层布隆不占优（set 是 C 实现），但内存上布隆优势巨大（58x）。
+在 C/C++/Rust 中布隆速度也很快（k 次哈希 + 位数组操作都是 O(1) 常数）。</p>
+<h3 id="45_1">4.5 布隆误判的影响<a class="headerlink" href="#45_1" title="Permanent link">&para;</a></h3>
+<p>布隆误判（假阳性）的后果：把一个<strong>新样本误判为重复</strong>，从而丢弃它。
+对训练的影响：</p>
+<ul>
+<li>丢失少量新样本（误判率 1% → 丢 1% 的新样本）</li>
+<li>训练数据本就有冗余（百万级样本中丢 1% 可忽略）</li>
+<li>不会引入错误样本（假阳性只丢不增）</li>
+</ul>
+<p>对比假阴性（漏判重复）：会把重复样本当新样本留下，污染训练。布隆<strong>无假阴性</strong>，
+所以不会漏判重复——这是布隆用于去重的关键优势。</p>
+<h3 id="46-vs-set">4.6 何时用布隆 vs set？<a class="headerlink" href="#46-vs-set" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>推荐</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>小规模（&lt; 10万）</td>
+<td>set</td>
+<td>内存不是问题，精确更好</td>
+</tr>
+<tr>
+<td>大规模（百万+）</td>
+<td>布隆</td>
+<td>内存优势显著，误判可接受</td>
+</tr>
+<tr>
+<td>流式（持续流入）</td>
+<td>布隆</td>
+<td>set 持续增长，布隆固定大小</td>
+</tr>
+<tr>
+<td>需要删除</td>
+<td>set / Counting Bloom</td>
+<td>基本布隆不支持删除</td>
+</tr>
+<tr>
+<td>需要精确</td>
+<td>set</td>
+<td>布隆有误判</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="5-demo">5. demo 结果解读<a class="headerlink" href="#5-demo" title="Permanent link">&para;</a></h2>
+<h3 id="51_1">5.1 管道运行统计<a class="headerlink" href="#51_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>输入样本总数      : 2000
+去重丢弃（真重复）: 557
+布隆误判（假阳性）: 0
+背压丢帧          : 0
+输出 batch 数     : 46
+输出样本数        : 1443
+窗口平均 loss     : 1.5371
+</code></pre></div>
+<ul>
+<li><strong>输入 2000，去重 557</strong>：dup_rate=0.15 注入了 15% 重复，实际去重 557/2000 ≈ 28%
+  （因为重复 ID 的注入方式导致部分 ID 重复多次）</li>
+<li><strong>布隆误判 0</strong>：2000 个样本的布隆（n=2000, p=0.01）误判率极低，实测 0 次</li>
+<li><strong>输出 1443 样本，46 个 batch</strong>：1443 = 2000 - 557（去重后），46 = ceil(1443/32)</li>
+<li><strong>窗口平均 loss 1.5371</strong>：loss 在 [0.1, 3.0] 均匀分布，期望 1.55，实测吻合</li>
+</ul>
+<h3 id="52_1">5.2 性能对比解读<a class="headerlink" href="#52_1" title="Permanent link">&para;</a></h3>
+<p><strong>BIT vs 朴素（4.41x）</strong>：
+- BIT 的 O(log n) 在 n=4096 时约 12 步，朴素 O(n) 要 4096 步
+- 加速比 4.41x 而非理论 341x（4096/12），因为 BIT 的常数更大（每次更新要跳多个节点）
+- n 更大时加速更明显（n=65536 时 BIT 可加速 10x+）</p>
+<p><strong>布隆 vs set（内存 58x）</strong>：
+- set 3.5MB vs 布隆 60KB，布隆内存省 58 倍
+- 速度上布隆慢（Python 层循环 vs set 的 C 实现），在 C/C++ 中布隆速度也快
+- 核心价值是内存，不是速度（在 Python 中）</p>
+<p><strong>管道背压 vs 无界（内存 7500 vs 256）</strong>：
+- 无界 list 内存峰值 7500 items（上游快、下游慢，数据堆积）
+- 有界队列内存峰值 256 items（满了丢老的，固定上限）
+- 代价：有界队列丢帧 7244（丢的是老数据，对训练影响可控）</p>
+<p><strong>RingBuffer vs list.pop(0)（20.31x）</strong>：
+- list.pop(0) 每次左移 8192 个元素，O(n) 开销
+- RingBuffer 只改写指针，O(1) 操作
+- 窗口越大，RingBuffer 优势越明显</p>
+<h3 id="53_1">5.3 协作的意义<a class="headerlink" href="#53_1" title="Permanent link">&para;</a></h3>
+<p>四种数据结构各自解决一个子问题，协作完成流式数据管道：</p>
+<div class="highlight"><pre><span></span><code>队列  → 连接各阶段，背压控制内存
+环形缓冲 → 保留最近 N 个，固定内存
+BIT   → 窗口内 O(log n) 区间和
+布隆   → O(1) 判重，内存远小于 set
+</code></pre></div>
+<p>单一数据结构无法完成：队列不能统计、BIT 不能去重、布隆不能组织管道。
+协作让每种数据结构发挥其优势，共同支撑流式训练。</p>
+<hr />
+<h2 id="6_1">6. 生产级实现<a class="headerlink" href="#6_1" title="Permanent link">&para;</a></h2>
+<h3 id="61-pytorch-dataloader">6.1 PyTorch DataLoader<a class="headerlink" href="#61-pytorch-dataloader" title="Permanent link">&para;</a></h3>
+<p>PyTorch 的 <code>DataLoader</code> 是数据管道的标准实现：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">Dataset</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MyDataset</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="mi">1_000_000</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="c1"># 读盘 → 解码 → 预处理（单样本）</span>
+        <span class="k">return</span> <span class="n">load_sample</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+
+<span class="n">loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span>
+    <span class="n">MyDataset</span><span class="p">(),</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+    <span class="n">num_workers</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>      <span class="c1"># 4 个 worker 进程（多阶段管道）</span>
+    <span class="n">pin_memory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>    <span class="c1"># 锁页内存，加速 GPU 传输</span>
+    <span class="n">prefetch_factor</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>  <span class="c1"># 每个 worker 预取 2 个 batch（有界队列）</span>
+    <span class="n">drop_last</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>     <span class="c1"># 不足 batch_size 丢弃（背压）</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>内部机制：
+- <code>num_workers=4</code>：4 个子进程并行加载数据（多阶段管道的并行）
+- <code>prefetch_factor=2</code>：每个 worker 预取 2 个 batch，用有界队列连接（队列 + 背压）
+- <code>pin_memory=True</code>：预分配锁页内存，加速 CPU → GPU 传输
+- 主进程从 worker 的队列取 batch，喂给 GPU</p>
+<h3 id="62-webdataset">6.2 WebDataset<a class="headerlink" href="#62-webdataset" title="Permanent link">&para;</a></h3>
+<p>WebDataset 用于流式加载大模型训练数据（TB 级）：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">webdataset</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">wds</span>
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">wds</span><span class="o">.</span><span class="n">WebDataset</span><span class="p">(</span><span class="s2">"shards-{000000..000999}.tar"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>       <span class="c1"># 滑动窗口 shuffle（环形缓冲）</span>
+    <span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"torch"</span><span class="p">)</span>     <span class="c1"># 解码</span>
+    <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">augment</span><span class="p">)</span>        <span class="c1"># 数据增强</span>
+    <span class="o">.</span><span class="n">batched</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>         <span class="c1"># 组 batch</span>
+<span class="p">)</span>
+<span class="n">loader</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">num_workers</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</code></pre></div>
+<p>特点：
+- <strong>流式</strong>：tar shard 逐个读，不全装入内存（流式处理）
+- <strong>shuffle 窗口</strong>：用环形缓冲做滑动窗口 shuffle（不能全局 shuffle，只能窗口内）
+- <strong>去重</strong>：可用 key 去重（布隆或集合）
+- <strong>管道</strong>：<code>.shuffle().decode().map().batched()</code> 链式管道</p>
+<h3 id="63-kafka">6.3 Kafka 流式管道<a class="headerlink" href="#63-kafka" title="Permanent link">&para;</a></h3>
+<p>Kafka 用于分布式流式数据管道（如在线学习）：</p>
+<div class="highlight"><pre><span></span><code>数据源 → Kafka topic → 消费者（训练进程）→ 模型更新
+</code></pre></div>
+<ul>
+<li><strong>队列</strong>：Kafka topic 是分布式队列，分区 + 消费者组实现多阶段管道</li>
+<li><strong>窗口</strong>：Kafka Streams 的窗口存储（基于 RocksDB）做滑动窗口统计</li>
+<li><strong>去重</strong>：Kafka 的 exactly-once 语义 + 幂等生产者做消息去重</li>
+<li><strong>背压</strong>：消费者按能力拉取，天然背压</li>
+</ul>
+<h3 id="64-tensorflow-tfdata">6.4 TensorFlow tf.data<a class="headerlink" href="#64-tensorflow-tfdata" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">dataset</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="o">.</span><span class="n">from_tensor_slices</span><span class="p">(</span><span class="n">file_paths</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">interleave</span><span class="p">(</span><span class="n">load_and_decode</span><span class="p">,</span> <span class="n">num_parallel_calls</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>  <span class="c1"># 多阶段并行</span>
+    <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">augment</span><span class="p">,</span> <span class="n">num_parallel_calls</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>                 <span class="c1"># 增强并行</span>
+    <span class="o">.</span><span class="n">prefetch</span><span class="p">(</span><span class="mi">64</span><span class="p">)</span>                                        <span class="c1"># 有界队列预取</span>
+    <span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>                                           <span class="c1"># 组 batch</span>
+<span class="p">)</span>
+</code></pre></div>
+<ul>
+<li><code>interleave</code>：多文件并行加载（多阶段管道）</li>
+<li><code>prefetch(64)</code>：有界队列预取 64 个 batch（队列 + 背压）</li>
+<li><code>shuffle(buffer_size=10000)</code>：滑动窗口 shuffle（环形缓冲）</li>
+</ul>
+<h3 id="65-huggingface-datasets">6.5 HuggingFace Datasets<a class="headerlink" href="#65-huggingface-datasets" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dataset</span>
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">"wikipedia"</span><span class="p">,</span> <span class="s2">"20220301.en"</span><span class="p">,</span> <span class="n">streaming</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># streaming=True → 流式加载，不全装入内存</span>
+
+<span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">:</span>
+    <span class="c1"># 逐个样本处理（流式管道）</span>
+    <span class="o">...</span>
+</code></pre></div>
+<ul>
+<li><code>streaming=True</code>：流式加载，用迭代器逐个产出样本</li>
+<li>不需要把整个数据集装入内存（TB 级数据集也能处理）</li>
+<li>可与 <code>DataLoader</code> 结合做多阶段管道</li>
+</ul>
+<hr />
+<h2 id="7">7. 扩展：更多流式数据结构<a class="headerlink" href="#7" title="Permanent link">&para;</a></h2>
+<h3 id="71">7.1 滑动窗口的更多数据结构<a class="headerlink" href="#71" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>需求</th>
+<th>数据结构</th>
+<th>复杂度</th>
+<th>场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>窗口和</td>
+<td>BIT</td>
+<td>O(log n)</td>
+<td>loss/梯度监控</td>
+</tr>
+<tr>
+<td>窗口最值</td>
+<td>单调队列</td>
+<td>O(1) 均摊</td>
+<td>梯度裁剪阈值</td>
+</tr>
+<tr>
+<td>窗口中位数</td>
+<td>双堆</td>
+<td>O(log n)</td>
+<td>鲁棒统计</td>
+</tr>
+<tr>
+<td>窗口分位数</td>
+<td>顺序统计树</td>
+<td>O(log n)</td>
+<td>分布监控</td>
+</tr>
+<tr>
+<td>窗口 top-k</td>
+<td>容量受限堆</td>
+<td>O(log k)</td>
+<td>热门样本追踪</td>
+</tr>
+</tbody>
+</table>
+<h3 id="72">7.2 去重的更多数据结构<a class="headerlink" href="#72" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>需求</th>
+<th>数据结构</th>
+<th>复杂度</th>
+<th>场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>精确去重</td>
+<td>set / hash table</td>
+<td>O(1)</td>
+<td>小规模</td>
+</tr>
+<tr>
+<td>近似去重</td>
+<td>布隆过滤器</td>
+<td>O(k)</td>
+<td>大规模、可容忍误判</td>
+</tr>
+<tr>
+<td>近似去重 + 删除</td>
+<td>Counting Bloom / Cuckoo Filter</td>
+<td>O(k)</td>
+<td>需要删除</td>
+</tr>
+<tr>
+<td>基数估计</td>
+<td>HyperLogLog</td>
+<td>O(1)</td>
+<td>统计唯一值数量</td>
+</tr>
+<tr>
+<td>精确基数</td>
+<td>set</td>
+<td>O(n)</td>
+<td>小规模</td>
+</tr>
+</tbody>
+</table>
+<h3 id="73">7.3 流式处理的更多模式<a class="headerlink" href="#73" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>窗口聚合</strong>：滑动窗口内做 sum/avg/max/min（BIT / 线段树 / 单调队列）</li>
+<li><strong>流式 join</strong>：两个流按 key join（哈希表 + 窗口）</li>
+<li><strong>流式采样</strong>：蓄水池采样（reservoir sampling），固定内存从流中均匀采样</li>
+<li><strong>流式分位数</strong>：t-digest / GK 算法，固定内存估计流式分位数</li>
+</ul>
+<hr />
+<h2 id="8">8. 小结<a class="headerlink" href="#8" title="Permanent link">&para;</a></h2>
+<p>AI 训练数据的流式处理需要四种数据结构协作：</p>
+<table>
+<thead>
+<tr>
+<th>子问题</th>
+<th>数据结构</th>
+<th>解决方案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>多阶段连接</td>
+<td>队列</td>
+<td>有界队列 + 背压，阶段间缓冲</td>
+</tr>
+<tr>
+<td>窗口保留</td>
+<td>环形缓冲</td>
+<td>定长数组 + 写指针，O(1) 覆盖最老</td>
+</tr>
+<tr>
+<td>窗口统计</td>
+<td>BIT</td>
+<td>lowbit 分块，O(log n) 区间和</td>
+</tr>
+<tr>
+<td>流式去重</td>
+<td>布隆过滤器</td>
+<td>多哈希 + 位数组，O(1) 判重</td>
+</tr>
+</tbody>
+</table>
+<p>生产级实现（PyTorch DataLoader、WebDataset、Kafka、tf.data）都基于类似的数据结构协作。
+理解这些数据结构的原理，才能更好地使用和调优生产级数据管道。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.indexes", "navigation.tracking", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
