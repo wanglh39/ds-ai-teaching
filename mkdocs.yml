@@ -1,0 +1,93 @@
+site_name: 数据结构 × AI 优化
+site_url: https://wanglh39.github.io/ds-ai-teaching/
+site_description: 从底层实现到生产级应用——数据结构在 AI 系统优化与应用工程中的真实作用
+site_author: wanglh39
+
+repo_url: https://github.com/wanglh39/ds-ai-teaching
+repo_name: wanglh39/ds-ai-teaching
+edit_uri: edit/master/docs/
+
+docs_dir: docs
+
+theme:
+  name: material
+  language: zh
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.indexes
+    - navigation.tracking
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: 切换至暗色模式
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: 切换至亮色模式
+  icon:
+    repo: fontawesome/brands/github
+  font:
+    text: Noto Sans SC
+    code: JetBrains Mono
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - footnotes
+  - md_in_html
+  - attr_list
+  - def_list
+  - toc:
+      permalink: true
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.details
+  - pymdownx.snippets:
+      base_path: .
+      check_paths: true
+
+nav:
+  - 首页: index.md
+  - 项目介绍:
+      - 设计思路: intro.md
+      - 章节映射: map.md
+      - 双视角说明: dual_view.md
+      - 交叉索引: cross_index.md
+  - 视角 A·系统优化:
+      - 01 动态数组: ch01.md
+      - 02 链表: ch02.md
+      - 03 栈: ch03.md
+      - 04 循环队列: ch04.md
+      - 05 哈希表: ch05.md
+      - 06 堆: ch06.md
+      - 07 Trie: ch07.md
+      - 08 KD-Tree: ch08.md
+      - 09 图: ch09.md
+      - 10 并查集: ch10.md
+      - 11 页表/分块内存: ch11.md
+      - 12 跳表+图: ch12.md
+  - 视角 B·应用工程:
+      - 13 多智能体编排: ch13.md
+      - 14 任务调度与批处理: ch14.md
+      - 15 上下文工程与记忆: ch15.md
+      - 16 RAG 与知识检索: ch16.md
+      - 17 数据管道与流式处理: ch17.md
+      - 18 模型部署与推理服务: ch18.md
+      - 19 状态机与工作流: ch19.md
+      - 20 模型压缩: ch20.md
+  - 性能汇总: benchmarks.md

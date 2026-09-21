@@ -31,3 +31,5 @@ Thumbs.db
 # 项目临时
 *.tmp
 *.log
+# MkDocs 构建产物
+site/

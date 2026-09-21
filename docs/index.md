@@ -3,8 +3,6 @@
 > 一个把「数据结构」和「AI 系统优化」紧密缝合的教学项目。
 > 不是讲「树→决策树」这种浅层映射，而是讲**数据结构在 AI 优化里到底解决了什么问题、为什么必须用它、性能提升多少**。
 
-📚 **在线文档站**：https://wanglh39.github.io/ds-ai-teaching/ （带全文搜索、暗色模式、章节导航）
-
 ## 项目动机
 
 学数据结构时最常见的困惑：「我知道堆是什么，但工作中哪用得上？」
@@ -19,6 +17,8 @@
 本项目的目标：**每个数据结构都讲清「它是什么 → 怎么实现 → 在哪个 AI 优化里被怎么用 → 性能提升多少」**，让你看到数据结构不是空谈。
 
 ## 章节映射表
+
+### 视角 A·系统优化（01-12 章）
 
 | 章 | 数据结构 | AI 优化应用 | 关键收益 |
 |---|---|---|---|
@@ -35,7 +35,7 @@
 | 11 | **页表/分块内存** | **PagedAttention**（专题） | KV Cache 碎片消除 |
 | 12 | **跳表 + 图** | **HNSW 向量检索**（专题） | 亚线性检索 |
 
-### 扩展篇：数据结构 × AI 应用工程（13-18 章）
+### 视角 B·应用工程（13-20 章）
 
 > 前 12 章聚焦「一个数据结构 → 一个 AI 系统优化」（性能视角）。
 > 扩展篇聚焦「一个 AI 应用场景 → 多种数据结构协作」（架构视角）。
@@ -51,71 +51,6 @@
 | 19 | 状态机与工作流 | 图+栈+队列+树 | ReAct/Plan-Execute/ToT/LangGraph |
 | 20 | 模型压缩 | 稀疏存储+查找表+树+哈希 | 剪枝+量化+蒸馏 |
 
-## 每章结构
-
-```
-NN_xxx/
-├── README.md            # 本章导览
-├── c/                   # C 实现（讲底层内存与指针）
-│   ├── xxx.h
-│   ├── xxx.c
-│   └── test.c
-├── python/              # Python AI 优化 demo（讲上层应用）
-│   └── demo.py
-├── docs/
-│   ├── principle.md     # 数据结构原理（详细）
-│   └── ai_application.md # AI 优化应用（详细）
-└── figures/             # matplotlib 静态图 + GIF
-```
-
-**为什么 C + Python 双轨？**
-- **C**：讲清数据结构的内存布局、指针操作、复杂度细节，不被高级语法遮蔽
-- **Python**：讲清 AI 优化的真实场景，能直接调 numpy/torch 对比性能
-
-## 快速开始
-
-### 环境要求
-
-- **C 侧**：GCC / Clang / MSVC 任一 C99 编译器
-- **Python 侧**：Python ≥ 3.10，用 [uv](https://github.com/astral-sh/uv) 管理环境
-
-### 安装
-
-```bash
-# Python 环境（用 uv）
-uv sync
-
-# 编译某章的 C 代码（以第 01 章为例）
-gcc 01_array/c/dyn_array.c 01_array/c/test.c -o 01_array/c/test
-./01_array/c/test
-```
-
-### 跑某章的 AI demo
-
-```bash
-uv run python 01_array/python/demo.py
-```
-
-## 目录结构
-
-```
-数据结构/
-├── README.md                # 本文件
-├── docs/                    # 总体文档
-│   ├── intro.md             # 项目背景与设计思路
-│   └── map.md               # 数据结构→AI优化映射详表
-├── common/                  # 公用工具
-│   ├── c_utils/             # C 公用头文件
-│   └── py_utils/            # Python 公用工具（基准测试、可视化）
-├── 01_array/                # 第 01 章
-├── ...
-├── 12_hnsw/                 # 第 12 章
-├── 13_multi_agent/          # 扩展：多智能体编排
-├── ...
-├── 18_model_deploy/         # 扩展：模型部署与推理服务
-└── benchmarks/              # 全章节性能对比汇总
-```
-
 ## 阅读顺序建议
 
 1. **入门**：01 数组 → 03 栈 → 04 队列 → 05 哈希表
@@ -124,7 +59,7 @@ uv run python 01_array/python/demo.py
 4. **系统优化专题**：11 PagedAttention → 12 HNSW
 5. **应用工程扩展**：13 多智能体 → 14 任务调度 → 15 上下文工程 → 16 RAG → 17 数据管道 → 18 模型部署 → 19 状态机 → 20 模型压缩
 
-每个专题都自洽，也可按需直读。两个视角的说明见 [docs/dual_view.md](docs/dual_view.md)，交叉索引见 [docs/cross_index.md](docs/cross_index.md)。
+每个专题都自洽，也可按需直读。两个视角的说明见 [双视角说明](dual_view.md)，交叉索引见 [交叉索引](cross_index.md)。
 
 ## 设计原则
 
@@ -133,6 +68,8 @@ uv run python 01_array/python/demo.py
 - **性能对比必有**：每个 AI 优化 demo 都对比「朴素实现 vs 优化实现」
 - **文档详细到能自学**：每章 md 文档目标 1000+ 行，原理推导 + 代码逐行 + 性能分析
 
-## License
+## 仓库地址
 
-MIT
+[GitHub: wanglh39/ds-ai-teaching](https://github.com/wanglh39/ds-ai-teaching) — 包含全部 C 实现、Python demo、性能对比图与源文档。
+
+License: MIT
